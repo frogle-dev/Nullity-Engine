@@ -7,6 +7,9 @@ find_package(OpenGL REQUIRED)
 add_executable(first_opengl 
 src/main.cpp
 lib/glad.c
+src/shader.hpp
+src/vertex.glsl
+src/fragment.glsl
 )
 
 target_link_libraries(first_opengl 
