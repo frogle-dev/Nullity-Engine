@@ -10,7 +10,7 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
-void generateTexture(const char* path, unsigned int &id);
+void generateTexture(const char* path, unsigned int &id, bool RGBA);
 
 
 int main()
@@ -38,8 +38,10 @@ int main()
     }
 
     // rendering stuff
-    unsigned int texture;
-    generateTexture("../images/container.jpg", texture);
+    unsigned int texture1, texture2;
+    generateTexture("../images/container.jpg", texture1, false);
+    stbi_set_flip_vertically_on_load(true);
+    generateTexture("../images/awesomeface.png", texture2, true);
 
     Shader shader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
 
@@ -81,6 +83,11 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0); // unbinding VBO
     glBindVertexArray(0); // unbinding VAO
 
+    // setting texture samplers in frag shader to corresponding texture units
+    shader.use();
+    shader.setInt("texture1", 0);
+    shader.setInt("texture2", 1);
+
     // render loop
     while(!glfwWindowShouldClose(window))
     {
@@ -91,8 +98,11 @@ int main()
 
         shader.use();
 
-        glActiveTexture(GL_TEXTURE0); // activate the texture unit before binding texture, saome gpu do this automatically  but hewre for compatibility
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE0); 
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
@@ -138,21 +148,28 @@ void processInput(GLFWwindow* window)
     }
 }
 
-void generateTexture(const char* path, unsigned int &id)
+void generateTexture(const char* path, unsigned int &id, bool RGBA)
 {
     glGenTextures(1, &id);
     glBindTexture(GL_TEXTURE_2D, id);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
     unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
     if (data)
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        if (RGBA)
+        {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        }
+        else
+        {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        }
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
