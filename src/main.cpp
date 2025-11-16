@@ -104,20 +104,24 @@ int main()
 
         shader.use();
 
-        glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::translate(trans, glm::vec3(0.5f * sin((float)glfwGetTime()), 0.5f * cos((float)glfwGetTime()), 0.0f));
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
-        trans = glm::scale(trans, glm::vec3(0.25f, 0.25f, 0.25f));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-        
         glActiveTexture(GL_TEXTURE0); 
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+
+        int objs = 10;
+        for (int i = 0; i < objs; i++)
+        {
+            glm::mat4 trans = glm::mat4(1.0f);
+            trans = glm::translate(trans, glm::vec3(0.5f * sin((float)glfwGetTime() + (2 * M_PI * i/(float)objs)), 0.5f * cos((float)glfwGetTime() + (2 * M_PI * i/(float)objs)), 0.0f));
+            trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+            trans = glm::scale(trans, glm::vec3(0.25f, 0.25f, 0.25f));
+            glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+    
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
