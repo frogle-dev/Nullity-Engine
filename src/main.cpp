@@ -2,11 +2,15 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../lib/stb_image.h"
 #include <GLFW/glfw3.h>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 #include "shader.hpp"
 
 #include <cmath>
 #include <iostream>
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -88,6 +92,8 @@ int main()
     shader.setInt("texture1", 0);
     shader.setInt("texture2", 1);
 
+    unsigned int transformLoc = glGetUniformLocation(shader.shaderProgramID, "transform");
+
     // render loop
     while(!glfwWindowShouldClose(window))
     {
@@ -98,6 +104,12 @@ int main()
 
         shader.use();
 
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::translate(trans, glm::vec3(0.5f * sin((float)glfwGetTime()), 0.5f * cos((float)glfwGetTime()), 0.0f));
+        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+        trans = glm::scale(trans, glm::vec3(0.25f, 0.25f, 0.25f));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+        
         glActiveTexture(GL_TEXTURE0); 
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
