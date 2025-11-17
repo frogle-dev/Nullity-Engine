@@ -17,6 +17,8 @@ void processInput(GLFWwindow* window);
 void generateTexture(const char* path, unsigned int &id, bool RGBA);
 
 
+float deltaTime = 0.0f;
+
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -142,9 +144,15 @@ int main()
     shader.setInt("texture1", 0);
 
 
+    float lastFrame = 0.0f;
+
     // render loop
     while(!glfwWindowShouldClose(window))
     {
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
@@ -226,7 +234,7 @@ void processInput(GLFWwindow* window)
     }
 
     // cam movement
-    const float cameraSpeed = 0.05f;
+    const float cameraSpeed = 5.0f * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
         cameraPos += cameraSpeed * cameraFront;
