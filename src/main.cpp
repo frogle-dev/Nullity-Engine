@@ -23,7 +23,10 @@ const unsigned int screenWidth = 1280, screenHeight = 720;
 
 float deltaTime = 0.0f;
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 feetPos = glm::vec3(0.0f, 0.0f, 2.0f);
+glm::vec3 feetVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
+const float bodyHeight = 1.0f;
+glm::vec3 cameraPos = glm::vec3(feetPos.x, feetPos.y + bodyHeight, feetPos.z);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -234,6 +237,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     pitch = std::clamp(pitch, -89.0f, 89.0f);
 }
 
+bool grounded = false;
 void processInput(GLFWwindow* window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -262,32 +266,47 @@ void processInput(GLFWwindow* window)
     }
 
     // cam movement
-    const float cameraSpeed = 5.0f * deltaTime;
+    const float cameraSpeed = 5.0f;
     glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
+
+    feetVelocity = glm::vec3(0.0f, feetVelocity.y, 0.0f);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        cameraPos -= cameraSpeed * glm::normalize(glm::cross(cameraRight, cameraUp));
+        feetVelocity -= cameraSpeed * glm::normalize(glm::cross(cameraRight, cameraUp));
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        cameraPos += cameraSpeed * glm::normalize(glm::cross(cameraRight, cameraUp));
+        feetVelocity += cameraSpeed * glm::normalize(glm::cross(cameraRight, cameraUp));
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        cameraPos -= cameraSpeed * cameraRight;
+        feetVelocity -= cameraSpeed * cameraRight;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        cameraPos += cameraSpeed * cameraRight;
+        feetVelocity += cameraSpeed * cameraRight;
     }
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && grounded)
     {
-        cameraPos += cameraSpeed * cameraUp;
+        grounded = false;
+        feetVelocity.y += 1200.0f * deltaTime;
     }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+
+    feetPos += feetVelocity * deltaTime;
+    if (feetPos.y <= 1.0f)
     {
-        cameraPos -= cameraSpeed * cameraUp;
+        grounded = true;
+        feetPos.y = 1.0f;
+        feetVelocity.y = 0.0f;
     }
+    else
+    {
+        grounded = false;
+        feetVelocity.y += -9.81f * 2 * deltaTime;
+    }
+
+    cameraPos = glm::vec3(feetPos.x, feetPos.y + bodyHeight, feetPos.z);
 }
 
 void generateTexture(const char* path, unsigned int &id, bool RGBA)
