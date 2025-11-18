@@ -270,7 +270,7 @@ void processInput(GLFWwindow* window)
     }
 
     bool wireframe = false;
-    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    if(glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
     {
         wireframe = !wireframe;
     }
@@ -286,27 +286,28 @@ void processInput(GLFWwindow* window)
 
     // cam movement
     const float cameraSpeed = 5.0f * deltaTime;
+    glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        cameraPos += cameraSpeed * cameraFront;
+        cameraPos -= cameraSpeed * glm::normalize(glm::cross(cameraRight, cameraUp));
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        cameraPos -= cameraSpeed * cameraFront;
+        cameraPos += cameraSpeed * glm::normalize(glm::cross(cameraRight, cameraUp));
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        cameraPos -= cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
+        cameraPos -= cameraSpeed * cameraRight;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        cameraPos += cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
+        cameraPos += cameraSpeed * cameraRight;
     }
-    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
         cameraPos += cameraSpeed * cameraUp;
     }
-    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     {
         cameraPos -= cameraSpeed * cameraUp;
     }
