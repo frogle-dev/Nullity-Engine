@@ -7,6 +7,8 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "shader.hpp"
+#include "cube.hpp"
+#include "keymap.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -15,7 +17,9 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void processInput(GLFWwindow* window);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+void update(GLFWwindow* window);
 void generateTexture(const char* path, unsigned int &id, bool RGBA);
 
 
@@ -53,6 +57,7 @@ int main()
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetKeyCallback(window, key_callback);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -62,44 +67,21 @@ int main()
         return -1;
     }
 
+    // keybinds
+    bindAction("forward", GLFW_KEY_W);
+    bindAction("backward", GLFW_KEY_S);
+    bindAction("left", GLFW_KEY_A);
+    bindAction("right", GLFW_KEY_D);
+    bindAction("jump", GLFW_KEY_SPACE);
+    bindAction("focus", GLFW_KEY_ESCAPE);
+    bindAction("wireframe", GLFW_KEY_C);
+
+
     // rendering stuff
     unsigned int texture1;
     generateTexture("../images/dirt.png", texture1, false);
 
     Shader shader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
-
-    
-    float vertices_cube[] = {
-        -0.5f, -0.5f, 0.5f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, 0.5f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, 0.5f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f, 0.0f,
-         0.5f,  0.5f, 0.5f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, 0.0f
-    };
-    unsigned int indices_cube[] = {
-        //Top
-        2, 6, 7,
-        2, 3, 7,
-        //Bottom
-        0, 4, 5,
-        0, 1, 5,
-        //Left
-        0, 2, 6,
-        0, 4, 6,
-        //Right
-        1, 3, 7,
-        1, 5, 7,
-        //Front
-        0, 2, 3,
-        0, 1, 3,
-        //Back
-        4, 6, 7,
-        4, 5, 7 
-    };
     
 
     unsigned int VAO; //vertex array object
@@ -146,7 +128,7 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        processInput(window);
+        update(window);
 
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
@@ -173,7 +155,7 @@ int main()
         );
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(95.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
 
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
@@ -237,63 +219,79 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     pitch = std::clamp(pitch, -89.0f, 89.0f);
 }
 
-bool grounded = false;
-void processInput(GLFWwindow* window)
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    processKeyEvent(key, action);
+}
+
+
+bool grounded = false;
+bool focus = true;
+bool wireframe = false;
+void update(GLFWwindow* window)
+{
+    // utility
+    if (isActionJustPressed("focus"))
     {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        focus = !focus;
+
+        if (focus)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 
-    if(glfwGetKey(window, GLFW_KEY_SEMICOLON) == GLFW_PRESS)
-    {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
-
-    bool wireframe = false;
-    if(glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+    if (isActionJustPressed("wireframe"))
     {
         wireframe = !wireframe;
+
+        if (wireframe)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        else
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
-    if (wireframe)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    } 
-    else
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
 
-    // cam movement
-    const float cameraSpeed = 5.0f;
+    // movement
+    const float cameraSpeed = 5.0f; 
     glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
+    glm::vec3 moveDir(0.0f);
+    if (isActionPressed("forward"))
+    {
+        moveDir -= glm::normalize(glm::cross(cameraRight, cameraUp));
+    }
+    if (isActionPressed("backward"))
+    {
+        moveDir += glm::normalize(glm::cross(cameraRight, cameraUp));
+    }
+    if (isActionPressed("left"))
+    {
+        moveDir -= cameraRight;
+    }
+    if (isActionPressed("right"))
+    {
+        moveDir += cameraRight;
+    }
 
-    feetVelocity = glm::vec3(0.0f, feetVelocity.y, 0.0f);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if (glm::length(moveDir) > 0.0f)
     {
-        feetVelocity -= cameraSpeed * glm::normalize(glm::cross(cameraRight, cameraUp));
-    }
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    {
-        feetVelocity += cameraSpeed * glm::normalize(glm::cross(cameraRight, cameraUp));
-    }
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    {
-        feetVelocity -= cameraSpeed * cameraRight;
-    }
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    {
-        feetVelocity += cameraSpeed * cameraRight;
+        moveDir = glm::normalize(moveDir);
+        feetPos += moveDir * cameraSpeed * deltaTime; 
     }
 
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && grounded)
+    
+    const float jumpSpeed = 7.0f; 
+    if (isActionPressed("jump") && grounded)
     {
         grounded = false;
-        feetVelocity.y += 1200.0f * deltaTime;
+        feetVelocity.y = jumpSpeed;
     }
 
-    feetPos += feetVelocity * deltaTime;
+    const float gravity = -9.81f * 2.0f; 
+    feetVelocity.y += gravity * deltaTime;
+
+    feetPos.y += feetVelocity.y * deltaTime;
+
     if (feetPos.y <= 1.0f)
     {
         grounded = true;
@@ -303,10 +301,11 @@ void processInput(GLFWwindow* window)
     else
     {
         grounded = false;
-        feetVelocity.y += -9.81f * 2 * deltaTime;
     }
 
     cameraPos = glm::vec3(feetPos.x, feetPos.y + bodyHeight, feetPos.z);
+
+    keysRefresh();
 }
 
 void generateTexture(const char* path, unsigned int &id, bool RGBA)

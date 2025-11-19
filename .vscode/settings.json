@@ -54,6 +54,10 @@
         "typeinfo": "cpp",
         "variant": "cpp",
         "fstream": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "codecvt": "cpp",
+        "cstring": "cpp",
+        "ratio": "cpp",
+        "iomanip": "cpp"
     }
 }
