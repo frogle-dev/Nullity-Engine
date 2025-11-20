@@ -21,11 +21,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void update(GLFWwindow* window);
 void generateTexture(const char* path, unsigned int &id, bool RGBA);
+void setVertAttributes();
+void setLightSourceVertAttribs();
 
 
 const unsigned int screenWidth = 1280, screenHeight = 720;
 
 float deltaTime = 0.0f;
+int fps;
+float msPerFrame;
 
 glm::vec3 feetPos = glm::vec3(0.0f, 0.0f, 2.0f);
 glm::vec3 feetVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -81,12 +85,15 @@ int main()
     unsigned int texture1;
     generateTexture("../images/dirt.png", texture1, false);
 
-    Shader shader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
-    
+    Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
+    Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_fragment.glsl");
+
 
     unsigned int VAO; //vertex array object
     glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+
+    unsigned int lightVAO;
+    glGenVertexArrays(1, &lightVAO);
     
     unsigned int VBO; // vertex byffer object
     glGenBuffers(1, &VBO);
@@ -97,16 +104,14 @@ int main()
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_cube), indices_cube, GL_STATIC_DRAW);
+    
+    glBindVertexArray(VAO);
+    setVertAttributes();
 
-    // position vertex attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // color vertex attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // texture vertex attribute
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));   
-    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBindVertexArray(lightVAO);
+    setLightSourceVertAttribs();
 
     glBindBuffer(GL_ARRAY_BUFFER, 0); // unbinding VBO
     glBindVertexArray(0); // unbinding VAO
@@ -115,8 +120,14 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
     // setting texture samplers in frag shader to corresponding texture units
-    shader.use();
-    shader.setInt("cubemap", 0);
+    objectShader.use();
+    objectShader.setInt("cubemap", 0);
+
+    // light stuff
+    glm::vec3 lightColor(0.96f, 0.86f, 0.219f);
+    objectShader.setVec3("lightColor", lightColor);
+
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 
     float lastFrame = 0.0f;
@@ -133,48 +144,59 @@ int main()
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
 
-        shader.use();
 
         glActiveTexture(GL_TEXTURE0); 
         glBindTexture(GL_TEXTURE_2D, texture1);
-
+        
         glBindVertexArray(VAO);
-
-
+        
+        
         glm::vec3 direction;
         direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         direction.y = sin(glm::radians(pitch));
         direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
         cameraFront = glm::normalize(direction);
-
+        
         glm::mat4 view = glm::mat4(1.0f);
         view = glm::lookAt(
             cameraPos,
             cameraPos + cameraFront,
             cameraUp
         );
-
+        
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
+        
+        objectShader.use();
+        objectShader.setMat4("view", view);
+        objectShader.setMat4("projection", projection);
 
-        shader.setMat4("view", view);
-        shader.setMat4("projection", projection);
-
+        glm::mat4 model = glm::mat4(1.0f);
         for (unsigned int x = 0; x < 16; x++)
         {
-            for (unsigned int y = 0; y < 100; y++)
+            for (unsigned int y = 0; y < 16; y++)
             {
                 for (unsigned int z = 0; z < 16; z++)
                 {
-                    glm::mat4 model = glm::mat4(1.0f);
+                    model = glm::mat4(1.0f);
                     model = glm::translate(model, glm::vec3(1.0f * x, -1.0f * y, -1.0f * z));
 
-                    shader.setMat4("model", model);
+                    objectShader.setMat4("model", model);
 
                     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
                 }
             }
         }
+        
+        lightSourceShader.use();
+        lightSourceShader.setMat4("projection", projection);
+        lightSourceShader.setMat4("view", view);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        lightSourceShader.setMat4("model", model);
+
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -183,7 +205,7 @@ int main()
     // end of process life
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    shader.deleteProgram();
+    objectShader.deleteProgram();
 
     glfwTerminate();
     return 0;
@@ -230,6 +252,12 @@ bool focus = true;
 bool wireframe = false;
 void update(GLFWwindow* window)
 {
+    // fps
+    msPerFrame = deltaTime * 1000;
+    fps = 1000 / msPerFrame;
+    std::cout << msPerFrame << ", " << fps << std::endl;
+
+
     // utility
     if (isActionJustPressed("focus"))
     {
@@ -256,6 +284,7 @@ void update(GLFWwindow* window)
     const float cameraSpeed = 5.0f; 
     glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
     glm::vec3 moveDir(0.0f);
+    feetVelocity = glm::vec3(0.0f, feetVelocity.y, 0.0f);
     if (isActionPressed("forward"))
     {
         moveDir -= glm::normalize(glm::cross(cameraRight, cameraUp));
@@ -276,7 +305,8 @@ void update(GLFWwindow* window)
     if (glm::length(moveDir) > 0.0f)
     {
         moveDir = glm::normalize(moveDir);
-        feetPos += moveDir * cameraSpeed * deltaTime; 
+        feetVelocity.x = moveDir.x * cameraSpeed; 
+        feetVelocity.z = moveDir.z * cameraSpeed;
     }
 
     
@@ -290,7 +320,7 @@ void update(GLFWwindow* window)
     const float gravity = -9.81f * 2.0f; 
     feetVelocity.y += gravity * deltaTime;
 
-    feetPos.y += feetVelocity.y * deltaTime;
+    feetPos += feetVelocity * deltaTime;
 
     if (feetPos.y <= 1.0f)
     {
@@ -343,4 +373,24 @@ void generateTexture(const char* path, unsigned int &id, bool RGBA)
         std::cout << "Failed to load texture" << std::endl;
     }
     stbi_image_free(data);
+}
+
+void setVertAttributes()
+{
+    // position vertex attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // color vertex attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    // texture vertex attribute
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));   
+    glEnableVertexAttribArray(2);
+}
+
+void setLightSourceVertAttribs()
+{
+    // position vertex attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 }
