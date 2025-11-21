@@ -100,16 +100,16 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), vertices_cube, GL_STATIC_DRAW);
 
-    unsigned int EBO; // element buffer object
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_cube), indices_cube, GL_STATIC_DRAW);
+    // unsigned int EBO; // element buffer object
+    // glGenBuffers(1, &EBO);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_cube), indices_cube, GL_STATIC_DRAW);
     
     glBindVertexArray(VAO);
     setVertAttributes();
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBindVertexArray(lightVAO);
     setLightSourceVertAttribs();
 
@@ -124,7 +124,7 @@ int main()
     objectShader.setInt("cubemap", 0);
 
     // light stuff
-    glm::vec3 lightColor(0.96f, 0.86f, 0.219f);
+    glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
     objectShader.setVec3("lightColor", lightColor);
 
     glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
@@ -144,13 +144,13 @@ int main()
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
 
-
         glActiveTexture(GL_TEXTURE0); 
         glBindTexture(GL_TEXTURE_2D, texture1);
+
+        // lighting
+        objectShader.setVec3("lightPos", lightPos);
         
-        glBindVertexArray(VAO);
-        
-        
+        // view
         glm::vec3 direction;
         direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         direction.y = sin(glm::radians(pitch));
@@ -183,7 +183,8 @@ int main()
 
                     objectShader.setMat4("model", model);
 
-                    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+                    glBindVertexArray(VAO);
+                    glDrawArrays(GL_TRIANGLES, 0, 36);
                 }
             }
         }
@@ -195,7 +196,8 @@ int main()
         model = glm::translate(model, lightPos);
         lightSourceShader.setMat4("model", model);
 
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(lightVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
         glfwSwapBuffers(window);
@@ -378,19 +380,22 @@ void generateTexture(const char* path, unsigned int &id, bool RGBA)
 void setVertAttributes()
 {
     // position vertex attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     // color vertex attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
     // texture vertex attribute
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));   
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(6 * sizeof(float)));   
     glEnableVertexAttribArray(2);
+    // normals vertex attribute
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)(9 * sizeof(float)));   
+    glEnableVertexAttribArray(3);
 }
 
 void setLightSourceVertAttribs()
 {
     // position vertex attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 }
