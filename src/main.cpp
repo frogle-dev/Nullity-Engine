@@ -86,7 +86,7 @@ int main()
     generateTexture("../images/gold_ore_stone.png", texture1, false);
     unsigned int specularMap;
     generateTexture("../images/gold_ore_stone_specular.png", specularMap, true);
-
+    
     Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
     Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_fragment.glsl");
 
@@ -128,6 +128,8 @@ int main()
 
     objectShader.setInt("material.diffuse", 0); // tex unit 0
     objectShader.setInt("material.specular", 1); // tex unit 1
+    objectShader.setInt("material.emission", 2); // tex unit 2
+    objectShader.setFloat("material.emissionStrength", 0.0f);
     objectShader.setVec3("material.specular", glm::vec3(0.2f));
     objectShader.setFloat("material.shininess", 32.0f);
 
@@ -135,9 +137,14 @@ int main()
     objectShader.setVec3("light.diffuse",  glm::vec3(1.0f));
     objectShader.setVec3("light.specular", glm::vec3(1.0f));
 
+    glActiveTexture(GL_TEXTURE0); 
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture1);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, specularMap);
 
-    float lastFrame = 0.0f;
+
     // render loop
+    float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
@@ -148,11 +155,6 @@ int main()
 
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
-
-        glActiveTexture(GL_TEXTURE0); 
-        glBindTexture(GL_TEXTURE_CUBE_MAP, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, specularMap);
 
         
         // view
@@ -270,7 +272,6 @@ void update(GLFWwindow* window)
     msPerFrame = deltaTime * 1000;
     fps = 1000 / msPerFrame;
     std::cout << msPerFrame << ", " << fps << std::endl;
-
 
     // utility
     if (isActionJustPressed("focus"))
