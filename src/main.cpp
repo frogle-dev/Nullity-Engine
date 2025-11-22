@@ -84,6 +84,8 @@ int main()
     // rendering stuff
     unsigned int texture1;
     generateTexture("../images/gold_ore_stone.png", texture1, false);
+    unsigned int specularMap;
+    generateTexture("../images/gold_ore_stone_specular.png", specularMap, true);
 
     Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
     Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_fragment.glsl");
@@ -124,9 +126,8 @@ int main()
     objectShader.use();
     objectShader.setInt("cubemap", 0);
 
-    // light stuff
-    objectShader.setVec3("material.ambient", glm::vec3(1.0f));
-    objectShader.setVec3("material.diffuse", glm::vec3(1.0f));
+    objectShader.setInt("material.diffuse", 0); // tex unit 0
+    objectShader.setInt("material.specular", 1); // tex unit 1
     objectShader.setVec3("material.specular", glm::vec3(0.2f));
     objectShader.setFloat("material.shininess", 32.0f);
 
@@ -149,7 +150,9 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
 
         glActiveTexture(GL_TEXTURE0); 
-        glBindTexture(GL_TEXTURE_2D, texture1);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, specularMap);
 
         
         // view
@@ -174,7 +177,7 @@ int main()
         objectShader.setMat4("projection", projection);
         
         // lighting
-        glm::vec3 lightPos(sin((float)glfwGetTime()), 5.0f, cos((float)glfwGetTime()));
+        glm::vec3 lightPos(0.0f, 5.0f, 0.0f);
         objectShader.setVec3("light.pos", lightPos);
 
         objectShader.setVec3("viewPos", cameraPos);
@@ -361,28 +364,35 @@ void generateTexture(const char* path, unsigned int &id, bool RGBA)
 
     int width, height, nrChannels;
     unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
-    if (data)
+    if (!data)
     {
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, width, height, 0,
-            GL_RGB, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGB, width, height, 0,
-            GL_RGB, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, width, height, 0,
-            GL_RGB, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGB, width, height, 0,
-            GL_RGB, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, width, height, 0,
-            GL_RGB, GL_UNSIGNED_BYTE, data);
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGB, width, height, 0,
-            GL_RGB, GL_UNSIGNED_BYTE, data);
+        std::cout << "Failed to load texture" << std::endl;
+        stbi_image_free(data);
+        return;
+    }
 
-        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    if (RGBA)
+    {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     }
     else
     {
-        std::cout << "Failed to load texture" << std::endl;
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
     }
+
+    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    
     stbi_image_free(data);
 }
 
