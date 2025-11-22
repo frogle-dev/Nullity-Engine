@@ -177,7 +177,7 @@ int main()
         objectShader.setMat4("projection", projection);
         
         // lighting
-        glm::vec3 lightPos(0.0f, 5.0f, 0.0f);
+        glm::vec3 lightPos(sin((float)glfwGetTime()) * 5, 5.0f, cos((float)glfwGetTime()) * 5);
         objectShader.setVec3("light.pos", lightPos);
 
         objectShader.setVec3("viewPos", cameraPos);
