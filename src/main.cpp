@@ -83,7 +83,7 @@ int main()
 
     // rendering stuff
     unsigned int texture1;
-    generateTexture("../images/dirt.png", texture1, false);
+    generateTexture("../images/gold_ore_stone.png", texture1, false);
 
     Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
     Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_fragment.glsl");
@@ -125,8 +125,14 @@ int main()
     objectShader.setInt("cubemap", 0);
 
     // light stuff
-    glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-    objectShader.setVec3("lightColor", lightColor);
+    objectShader.setVec3("material.ambient", glm::vec3(1.0f));
+    objectShader.setVec3("material.diffuse", glm::vec3(1.0f));
+    objectShader.setVec3("material.specular", glm::vec3(0.2f));
+    objectShader.setFloat("material.shininess", 32.0f);
+
+    objectShader.setVec3("light.ambient",  glm::vec3(0.2f));
+    objectShader.setVec3("light.diffuse",  glm::vec3(1.0f));
+    objectShader.setVec3("light.specular", glm::vec3(1.0f));
 
 
     float lastFrame = 0.0f;
@@ -161,7 +167,7 @@ int main()
         );
         
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(90.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(85.0f), 1280.0f / 720.0f, 0.1f, 100.0f);
         
         objectShader.use();
         objectShader.setMat4("view", view);
@@ -169,7 +175,7 @@ int main()
         
         // lighting
         glm::vec3 lightPos(sin((float)glfwGetTime()), 5.0f, cos((float)glfwGetTime()));
-        objectShader.setVec3("lightPos", lightPos);
+        objectShader.setVec3("light.pos", lightPos);
 
         objectShader.setVec3("viewPos", cameraPos);
 
