@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <random>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -30,6 +29,9 @@ void update(GLFWwindow* window);
 const unsigned int initWidth = 1280, initHeight = 720;
 unsigned int viewWidth = initWidth, viewHeight = initHeight;
 
+GLuint FBO; // frame buffer object
+GLuint RBO; // rendering buffer object
+unsigned int framebuffer_tex;
 
 float deltaTime = 0.0f;
 int fps;
@@ -43,7 +45,6 @@ glm::vec3 feetVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 const float bodyHeight = 1.0f;
 
 
-
 int main()
 {
     // initialization
@@ -55,12 +56,23 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetKeyCallback(window, key_callback);
 
+    // imgui init
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init();
+    ImGui_ImplOpenGL3_Init("#version 460");
+
+    auto& style = ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
+    const ImVec4 bgColor = ImVec4(0.1, 0.1, 0.1, 0.5);
+    colors[ImGuiCol_WindowBg] = bgColor;
+    colors[ImGuiCol_ChildBg] = bgColor;
+    colors[ImGuiCol_TitleBg] = bgColor;
 
     // keybinds
     mapKey("forward", GLFW_KEY_W);
@@ -70,8 +82,6 @@ int main()
     mapKey("jump", GLFW_KEY_SPACE);
     mapKey("focus", GLFW_KEY_ESCAPE);
     mapKey("wireframe", GLFW_KEY_C);
-    readConfigKeymaps();
-
 
     // rendering stuff
     unsigned int texture1;
@@ -125,19 +135,20 @@ int main()
     objectShader.setVec3("material.specular", glm::vec3(0.2f));
     objectShader.setFloat("material.shininess", 32.0f);
 
-    objectShader.setVec3("light.ambient",  glm::vec3(0.2f));
-    objectShader.setVec3("light.diffuse",  glm::vec3(1.0f));
-    objectShader.setVec3("light.specular", glm::vec3(1.0f));
-
     glActiveTexture(GL_TEXTURE0); 
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture1);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_CUBE_MAP, specularMap);
 
 
-    std::random_device rand_dev;
-    std::mt19937 generator(rand_dev());
-    std::uniform_int_distribution<int> randr(0, 10);
+    float gui_lightPos[3] = {0.0f, 5.0f, 0.0f};
+    glm::vec3 lightPos;
+    float gui_lightAmbient[3] = {0.2f, 0.2f, 0.2f};
+    glm::vec3 lightAmbient;
+    float gui_lightDiffuse[3] = {1.0f, 1.0f, 1.0f};
+    glm::vec3 lightDiffuse;
+    float gui_lightSpecular[3] = {1.0f, 1.0f, 1.0f};
+    glm::vec3 lightSpecular;
 
     // render loop
     float lastFrame = 0.0f;
@@ -151,9 +162,36 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
+        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
+        bool infoActive = true;
+        ImGui::Begin("Info", &infoActive, ImGuiWindowFlags_None);
+        ImGui::Text("ms per frame: %f", msPerFrame);
+        ImGui::Text("fps: %i", fps);
+        
+        ImGui::Separator();
+        ImGui::Text("Keybinds");
+        ImGui::BeginChild("Keybinds");
+        ImGui::EndChild();
+        ImGui::End();
+        
+        bool inspectorActive = true;
+        ImGui::Begin("Inspector", &inspectorActive, ImGuiWindowFlags_None);
+        ImGui::Text("Object: ");
+        ImGui::Text("Light");
 
+        ImGui::Separator();
+        ImGui::Text("Transform");
+        ImGui::DragFloat3("Pos", gui_lightPos, 0.05f);
+
+        ImGui::Separator();
+        ImGui::Text("Light properties");
+        ImGui::ColorEdit3("Ambient color", gui_lightAmbient);
+        ImGui::ColorEdit3("Diffuse color", gui_lightDiffuse);
+        ImGui::ColorEdit3("Specular color", gui_lightSpecular);
+        ImGui::End();
+        
+        // game loop stuff
         update(window);
 
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
@@ -170,8 +208,15 @@ int main()
         
         
         // lighting
-        glm::vec3 lightPos(sin((float)glfwGetTime()) * 5, 5.0f, cos((float)glfwGetTime()) * 5);
+        lightPos = glm::vec3(gui_lightPos[0], gui_lightPos[1], gui_lightPos[2]);
         objectShader.setVec3("light.pos", lightPos);
+
+        lightAmbient = glm::vec3(gui_lightAmbient[0], gui_lightAmbient[1], gui_lightAmbient[2]);
+        lightDiffuse = glm::vec3(gui_lightDiffuse[0], gui_lightDiffuse[1], gui_lightDiffuse[2]);
+        lightSpecular = glm::vec3(gui_lightSpecular[0], gui_lightSpecular[1], gui_lightSpecular[2]);
+        objectShader.setVec3("light.ambient",  lightAmbient);
+        objectShader.setVec3("light.diffuse",  lightDiffuse);
+        objectShader.setVec3("light.specular", lightSpecular);
 
         objectShader.setVec3("viewPos", camera.position);
 
@@ -351,13 +396,15 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         firstMouse = false;
     } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
 
+    if (focus)
+    {
+        float xOffset = xpos - lastMouseX;
+        float yOffset = lastMouseY - ypos;
+        lastMouseX = xpos;
+        lastMouseY = ypos;
     
-    float xOffset = xpos - lastMouseX;
-    float yOffset = lastMouseY - ypos;
-    lastMouseX = xpos;
-    lastMouseY = ypos;
-
-    camera.ProcessMouseMovement(xOffset, yOffset);
+        camera.ProcessMouseMovement(xOffset, yOffset);
+    }
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

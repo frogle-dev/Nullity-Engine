@@ -78,9 +78,17 @@ void processKeyEvent(int key, int action)
     }
 }
 
-void readConfigKeymaps()
+void getConfigKeymaps()
 {
     std::ifstream keymapJson("../game_config/keymaps.json");
 
     nlohmann::json data = nlohmann::json::parse(keymapJson);
 }
+
+void setConfigKeymaps()
+{
+    std::ifstream keymapJson("../game_config/keymaps.json");
+
+    nlohmann::json data = nlohmann::json::parse(keymapJson);
+}
+
