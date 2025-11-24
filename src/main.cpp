@@ -74,14 +74,11 @@ int main()
     colors[ImGuiCol_ChildBg] = bgColor;
     colors[ImGuiCol_TitleBg] = bgColor;
 
-    // keybinds
-    mapKey("forward", GLFW_KEY_W);
-    mapKey("backward", GLFW_KEY_S);
-    mapKey("left", GLFW_KEY_A);
-    mapKey("right", GLFW_KEY_D);
-    mapKey("jump", GLFW_KEY_SPACE);
-    mapKey("focus", GLFW_KEY_ESCAPE);
-    mapKey("wireframe", GLFW_KEY_C);
+    
+    // setup keybinds from json file
+    std::string cur_actionName;
+    int cur_keycode;
+    reloadConfigKeymaps();
 
     // rendering stuff
     unsigned int texture1;
@@ -164,14 +161,41 @@ int main()
         ImGui::NewFrame();
         ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
 
+        ImGui::ShowDemoWindow();
+
         bool infoActive = true;
         ImGui::Begin("Info", &infoActive, ImGuiWindowFlags_None);
         ImGui::Text("ms per frame: %f", msPerFrame);
         ImGui::Text("fps: %i", fps);
         
         ImGui::Separator();
-        ImGui::Text("Keybinds");
-        ImGui::BeginChild("Keybinds");
+        ImGui::Text("Keymaps");
+        ImGui::BeginChild("Keymaps");
+        const auto& bindings = getConfigKeymaps();
+        for (auto& [actionName, keycodes] : bindings)
+        {
+            std::string name = "Action: " + actionName + " | Key: " + std::to_string(keycodes[0]);
+            if (ImGui::Button(name.c_str()))
+            {
+                cur_actionName = actionName;
+                cur_keycode = keycodes[0];
+                ImGui::OpenPopup("Change Keymap?");
+            }
+        }
+
+        if(ImGui::BeginPopupModal("Change Keymap?"))
+        {
+            ImGui::Text("Changing action: %s", cur_actionName.c_str());
+            ImGui::Text("Press any key: %i", currentKeyPress);
+            if (ImGui::Button("Submit")) 
+            { 
+                setConfigKeymap(cur_actionName, currentKeyPress);
+                reloadConfigKeymaps();
+                ImGui::CloseCurrentPopup(); 
+            }
+            if (ImGui::Button("Cancel")) { ImGui::CloseCurrentPopup(); }
+            ImGui::EndPopup();
+        }
         ImGui::EndChild();
         ImGui::End();
         

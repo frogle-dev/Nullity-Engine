@@ -59,6 +59,10 @@
         "cstring": "cpp",
         "ratio": "cpp",
         "iomanip": "cpp",
-        "print": "cpp"
+        "print": "cpp",
+        "any": "cpp",
+        "forward_list": "cpp",
+        "map": "cpp",
+        "valarray": "cpp"
     }
 }

@@ -19,6 +19,7 @@ struct ActionState
 
 std::unordered_map<std::string, std::vector<int>> bindings;
 std::unordered_map<std::string, ActionState> actions;
+int currentKeyPress;
 
 void keysRefresh() 
 {
@@ -27,11 +28,6 @@ void keysRefresh()
         state.justPressed = false;
         state.released = false;
     }
-}
-
-void mapKey(const std::string& actionName, int key) 
-{
-    bindings[actionName].push_back(key);
 }
 
 
@@ -53,6 +49,8 @@ bool isActionReleased(const std::string& actionName)
 // called by glfw key callback thing
 void processKeyEvent(int key, int action) 
 {
+    currentKeyPress = key;
+
     for (auto& [actionName, keys] : bindings) 
     {
         for (int boundKey : keys)
@@ -78,17 +76,29 @@ void processKeyEvent(int key, int action)
     }
 }
 
-void getConfigKeymaps()
-{
-    std::ifstream keymapJson("../game_config/keymaps.json");
 
-    nlohmann::json data = nlohmann::json::parse(keymapJson);
+std::ifstream keymapJson("../game_config/keymaps.json");
+nlohmann::json data = nlohmann::json::parse(keymapJson);
+// returns all keymaps that have been set from "reloadConfigKeymaps()"
+const auto& getConfigKeymaps()
+{
+    return bindings;
 }
 
-void setConfigKeymaps()
+// reads and loads all keymaps from keymaps.json (run whenever keymaps.json is changed)
+void reloadConfigKeymaps()
 {
-    std::ifstream keymapJson("../game_config/keymaps.json");
-
-    nlohmann::json data = nlohmann::json::parse(keymapJson);
+    for (auto& [actionName, keycode] : data.items())
+    {
+        bindings[actionName].push_back(keycode);
+    }
 }
 
+// sets an already existing mapping to another key, or creates a new one in keymaps.json
+void setConfigKeymap(const std::string& actionName, int keycode)
+{
+    data[actionName] = keycode;
+
+    std::ofstream out("../game_config/keymaps.json");
+    out << data.dump(4);
+}
