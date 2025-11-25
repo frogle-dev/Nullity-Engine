@@ -2,10 +2,19 @@ cmake_minimum_required(VERSION 3.10.0)
 project(first_opengl VERSION 0.1.0 LANGUAGES C CXX)
 cmake_policy(SET CMP0072 NEW) #make sure "new" opengl is used
 
+include(FetchContent)
+FetchContent_Declare(
+    EnTT
+    GIT_REPOSITORY https://github.com/skypjack/entt.git
+    GIT_TAG v3.16.0  # Use latest stable version
+)
+FetchContent_MakeAvailable(EnTT)
+
+
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
-add_library(imgui STATIC
+add_library(imgui
     # main imgui stuff
     lib/imgui/imgui.cpp
     lib/imgui/imgui.h
@@ -38,6 +47,7 @@ src/fragment.glsl
 target_link_libraries(first_opengl 
 glfw
 OpenGL::GL
+EnTT::EnTT
 imgui
 X11
 )

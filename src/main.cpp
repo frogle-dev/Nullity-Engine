@@ -29,10 +29,6 @@ void update(GLFWwindow* window);
 const unsigned int initWidth = 1280, initHeight = 720;
 unsigned int viewWidth = initWidth, viewHeight = initHeight;
 
-GLuint FBO; // frame buffer object
-GLuint RBO; // rendering buffer object
-unsigned int framebuffer_tex;
-
 float deltaTime = 0.0f;
 int fps;
 float msPerFrame;
@@ -130,22 +126,20 @@ int main()
     objectShader.setInt("material.emission", 2); // tex unit 2
     objectShader.setFloat("material.emissionStrength", 0.0f);
     objectShader.setVec3("material.specular", glm::vec3(0.2f));
-    objectShader.setFloat("material.shininess", 32.0f);
+    objectShader.setFloat("material.shininess", 128.0f);
 
     glActiveTexture(GL_TEXTURE0); 
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture1);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_CUBE_MAP, specularMap);
-
-
-    float gui_lightPos[3] = {0.0f, 5.0f, 0.0f};
-    glm::vec3 lightPos;
-    float gui_lightAmbient[3] = {0.2f, 0.2f, 0.2f};
-    glm::vec3 lightAmbient;
-    float gui_lightDiffuse[3] = {1.0f, 1.0f, 1.0f};
-    glm::vec3 lightDiffuse;
-    float gui_lightSpecular[3] = {1.0f, 1.0f, 1.0f};
-    glm::vec3 lightSpecular;
+    
+    glm::vec3 pointLightPos[] = {
+        glm::vec3( 0.7f,  0.2f,  2.0f),
+        glm::vec3( 2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f,  2.0f, -12.0f),
+        glm::vec3( 0.0f,  0.0f, -3.0f)
+    };
+    
 
     // imgui stuff
     bool demoWindow = false;
@@ -257,18 +251,7 @@ int main()
         
         // inspector window for modifying properties of objects
         ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_None);
-        ImGui::Text("Object: ");
-        ImGui::Text("Light");
-
-        ImGui::Separator();
-        ImGui::Text("Transform");
-        ImGui::DragFloat3("Pos", gui_lightPos, 0.05f);
-
-        ImGui::Separator();
-        ImGui::Text("Light properties");
-        ImGui::ColorEdit3("Ambient", gui_lightAmbient);
-        ImGui::ColorEdit3("Diffuse", gui_lightDiffuse);
-        ImGui::ColorEdit3("Specular", gui_lightSpecular);
+        ImGui::Text("Entity: ");
         ImGui::End();
         
 
@@ -289,17 +272,22 @@ int main()
         
         
         // lighting
-        lightPos = glm::vec3(gui_lightPos[0], gui_lightPos[1], gui_lightPos[2]);
-        objectShader.setVec3("light.pos", lightPos);
-
-        lightAmbient = glm::vec3(gui_lightAmbient[0], gui_lightAmbient[1], gui_lightAmbient[2]);
-        lightDiffuse = glm::vec3(gui_lightDiffuse[0], gui_lightDiffuse[1], gui_lightDiffuse[2]);
-        lightSpecular = glm::vec3(gui_lightSpecular[0], gui_lightSpecular[1], gui_lightSpecular[2]);
-        objectShader.setVec3("light.ambient",  lightAmbient);
-        objectShader.setVec3("light.diffuse",  lightDiffuse);
-        objectShader.setVec3("light.specular", lightSpecular);
-
         objectShader.setVec3("viewPos", camera.position);
+
+        // directional light
+        objectShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+        objectShader.setVec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+        objectShader.setVec3("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
+        objectShader.setVec3("dirLight.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+
+        // point light
+        objectShader.setVec3("pointLights[0].position", pointLightPos[0]);
+        objectShader.setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+        objectShader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+        objectShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+        objectShader.setFloat("pointLights[0].constant", 1.0f);
+        objectShader.setFloat("pointLights[0].linear", 0.09f);
+        objectShader.setFloat("pointLights[0].quadratic", 0.032f);
 
         
         glm::mat4 model = glm::mat4(1.0f);
@@ -320,15 +308,19 @@ int main()
             }
         }
         
+        
+        glBindVertexArray(lightVAO);
         lightSourceShader.use();
         lightSourceShader.setMat4("projection", projection);
         lightSourceShader.setMat4("view", view);
+        
+        // drawing all light object cube thingies
         model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
+        model = glm::translate(model, pointLightPos[0]);
         lightSourceShader.setMat4("model", model);
 
-        glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        
 
         // imgui
         ImGui::Render();
