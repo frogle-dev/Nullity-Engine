@@ -274,20 +274,20 @@ int main()
         // lighting
         objectShader.setVec3("viewPos", camera.position);
 
-        // // directional light
-        // objectShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-        // objectShader.setVec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        // objectShader.setVec3("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
-        // objectShader.setVec3("dirLight.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+        // directional light
+        objectShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+        objectShader.setVec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+        objectShader.setVec3("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
+        objectShader.setVec3("dirLight.specular", glm::vec3(0.5f, 0.5f, 0.5f));
 
-        // // point light
-        // objectShader.setVec3("pointLights[0].position", pointLightPos[0]);
-        // objectShader.setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        // objectShader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-        // objectShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-        // objectShader.setFloat("pointLights[0].constant", 1.0f);
-        // objectShader.setFloat("pointLights[0].linear", 0.09f);
-        // objectShader.setFloat("pointLights[0].quadratic", 0.032f);
+        // point light
+        objectShader.setVec3("pointLights[0].position", pointLightPos[0]);
+        objectShader.setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
+        objectShader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+        objectShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+        objectShader.setFloat("pointLights[0].constant", 1.0f);
+        objectShader.setFloat("pointLights[0].linear", 0.09f);
+        objectShader.setFloat("pointLights[0].quadratic", 0.032f);
 
         // spot light
         objectShader.setVec3("spotLight.position", camera.position);
@@ -298,8 +298,8 @@ int main()
         objectShader.setVec3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
         objectShader.setVec3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
         objectShader.setFloat("spotLight.constant", 1.0f);
-        objectShader.setFloat("spotLight.linear", 0.045f);
-        objectShader.setFloat("spotLight.quadratic", 0.0075f);
+        objectShader.setFloat("spotLight.linear", 0.14f);
+        objectShader.setFloat("spotLight.quadratic", 0.07f);
 
         
         glm::mat4 model = glm::mat4(1.0f);
