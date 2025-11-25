@@ -297,6 +297,9 @@ int main()
         objectShader.setVec3("spotLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
         objectShader.setVec3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
         objectShader.setVec3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+        objectShader.setFloat("spotLight.constant", 1.0f);
+        objectShader.setFloat("spotLight.linear", 0.045f);
+        objectShader.setFloat("spotLight.quadratic", 0.0075f);
 
         
         glm::mat4 model = glm::mat4(1.0f);

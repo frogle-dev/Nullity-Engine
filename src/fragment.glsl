@@ -52,6 +52,10 @@ struct SpotLight
     float cutOff;
     float outerCutOff;
 
+    float constant;
+    float linear;
+    float quadratic;
+
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -149,6 +153,13 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     vec3 specular = light.specular * spec * vec3(texture(material.specular, texCoord));
     diffuse *= intensity;
     specular *= intensity;
+
+    // attenuation
+    float distance = length(light.position - fragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+    ambient *= attenuation;
+    diffuse *= attenuation;
+    specular *= attenuation;
 
     return (ambient + diffuse + specular);  
 }
