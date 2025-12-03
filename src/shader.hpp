@@ -91,7 +91,10 @@ public:
     }
     void setInt(const std::string &name, int value) const
     {
-        glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), value);
+        int loc = glGetUniformLocation(shaderProgramID, name.c_str());
+        glUniform1i(loc, value);
+
+        if (loc == -1) std::cout << "(Shader): Error: Uniform not found " << name << std::endl;
     }
     void setIntArray(const std::string &name, int count, int* value) const
     {

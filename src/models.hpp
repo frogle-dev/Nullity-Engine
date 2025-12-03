@@ -62,36 +62,46 @@ public:
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
 
-        // int numDiffuse = 0;
-        // int numSpecular = 0;
-        // int numEmission = 0;
-        std::vector<int> diffuseTexLayers;
-        std::vector<int> specularTexLayers;
-        std::vector<int> emissionTexLayers;
+        int numDiffuse = 0;
+        int numSpecular = 0;
+        int numEmission = 0;
         for (int i = 0; i < textures.size(); i++)
         {
             unsigned int curLayer = textures[i].layer;
+
 
             switch (textures[i].type)
             {
                 case TextureType::DIFFUSE:
                 {
-                    // numDiffuse++;
-                    diffuseTexLayers.push_back(curLayer);
+                    if (numDiffuse == 0)
+                    {
+                        shader.setInt("material.diffuseStartLayer", curLayer); 
+                    }
+                    numDiffuse++;
+                    // diffuseTexLayers.push_back(curLayer);
                     break;
                 }
                 case TextureType::SPECULAR:
                 {
-                    // numSpecular++;
-                    specularTexLayers.push_back(curLayer);
+                    if (numSpecular == 0)
+                    {
+                        shader.setInt("material.specularStartLayer", curLayer); 
+                    }
+                    numSpecular++;
+                    // specularTexLayers.push_back(curLayer);
                     break;
                 }
-                case TextureType::EMISSION:
-                {
-                    // numEmission++;
-                    emissionTexLayers.push_back(curLayer);
-                    break;
-                }
+                // case TextureType::EMISSION:
+                // {
+                //     if (numEmission == 0)
+                //     {
+                //         shader.setInt("material.emissionStartLayer", curLayer); 
+                //     }
+                //     numEmission++;
+                //     // emissionTexLayers.push_back(curLayer);
+                //     break;
+                // }
             }
         }
 
@@ -99,15 +109,13 @@ public:
         // shader.setInt("material.specularTexLayers[" + std::to_string(i) + "]", curLayer);
         // shader.setInt("material.emissionTexLayers[" + std::to_string(i) + "]", curLayer);
 
-        shader.setIntArray("material.diffuseTexLayers", diffuseTexLayers.size(), &diffuseTexLayers[0]);
-        shader.setIntArray("material.specularTexLayers", specularTexLayers.size(), &specularTexLayers[0]);
+        // shader.setIntArray("material.diffuseTexLayers", diffuseTexLayers.size(), &diffuseTexLayers[0]);
+        // shader.setIntArray("material.specularTexLayers", specularTexLayers.size(), &specularTexLayers[0]);
         // shader.setIntArray("material.emissionTexLayers", emissionTexLayers.size(), &emissionTexLayers[0]);
 
-        std::cout << textures.size() << std::endl;
-
-        shader.setInt("diffuseLayerCount", diffuseTexLayers.size());
-        shader.setInt("specularLayerCount", specularTexLayers.size());
-        shader.setInt("emissionLayerCount", emissionTexLayers.size());
+        shader.setInt("material.diffuseLayerCount", numDiffuse);
+        shader.setInt("material.specularLayerCount", numSpecular);
+        // shader.setInt("material.emissionLayerCount", numEmission);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, 0);
