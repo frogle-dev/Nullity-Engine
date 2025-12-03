@@ -43,7 +43,7 @@ public:
     
         glTexStorage3D(GL_TEXTURE_2D_ARRAY,
             mipLevels,
-            GL_RGB8,
+            GL_RGBA8,
             texWidth, texHeight,
             maxTexLayers
         );
@@ -79,7 +79,7 @@ public:
             0, 
             0, 0, nextTexLayer,
             texWidth, texHeight, 1,
-            GL_RGB, GL_UNSIGNED_BYTE,
+            GL_RGBA, GL_UNSIGNED_BYTE,
             data
         );
         
@@ -104,6 +104,8 @@ public:
 
         int width, height, numChannels;
         unsigned char *data = stbi_load((directoryPath + "/" + path).c_str(), &width, &height, &numChannels, 0);
+
+        std::cout << numChannels << std::endl;
         if (!data)
         {
             std::cout << "(Texture Manager): Texture Error: Failed to load texture" << std::endl;
@@ -113,6 +115,7 @@ public:
         if (width != texWidth || height != texHeight)
         {
             std::cout << "(Texture Manager): Texture Error: width and height do not match texture array width and height" << std::endl;
+            return -1;
         }
         
         glActiveTexture(GL_TEXTURE0);
@@ -122,7 +125,7 @@ public:
             0, 
             0, 0, nextTexLayer,
             texWidth, texHeight, 1,
-            GL_RGB, GL_UNSIGNED_BYTE,
+            GL_RGBA, GL_UNSIGNED_BYTE,
             data
         );
         

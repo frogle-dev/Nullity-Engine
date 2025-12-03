@@ -133,7 +133,7 @@ int main()
     objectShader.setFloat("material.shininess", 32.0f);
 
     // model loading
-    Model backpack("../models/backpack/backpack.obj");
+    Model goldOre("../models/Gold_Ore_Block/GoldOre.obj");
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
 
@@ -324,10 +324,11 @@ int main()
         //         }
         //     }
         // }
-
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
         objectShader.setMat4("model", model);
-        backpack.Draw(objectShader);
+        goldOre.Draw(objectShader);
         
         
         glBindVertexArray(lightVAO);
