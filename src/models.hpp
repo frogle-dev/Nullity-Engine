@@ -69,7 +69,6 @@ public:
         {
             unsigned int curLayer = textures[i].layer;
 
-
             switch (textures[i].type)
             {
                 case TextureType::DIFFUSE:
@@ -101,6 +100,7 @@ public:
                 }
             }
         }
+
 
         shader.setInt("material.diffuseLayerCount", numDiffuse);
         shader.setInt("material.specularLayerCount", numSpecular);

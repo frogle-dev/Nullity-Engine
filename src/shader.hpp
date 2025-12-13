@@ -96,9 +96,13 @@ public:
 
         if (loc == -1) std::cout << "(Shader): Error: Uniform not found " << name << std::endl;
     }
-    void setIntArray(const std::string &name, int count, int* value) const
+    void setIVec2(const std::string &name, int value1, int value2) const
     {
-        glUniform1iv(glGetUniformLocation(shaderProgramID, name.c_str()), count, value);
+        int loc = glGetUniformLocation(shaderProgramID, name.c_str());
+
+        if (loc == -1) std::cout << "(Shader): Error: Uniform not found " << name << std::endl;
+
+        glUniform2i(loc, value1, value2);
     }
     void setFloat(const std::string &name, float value) const
     {

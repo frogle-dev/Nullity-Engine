@@ -5,6 +5,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../lib/stb_image.h"
 
+#include "shader.hpp"
+
 #include <iostream>
 
 
@@ -21,6 +23,11 @@ public:
     GLuint GetTexArrayID() const 
     {
         return texArrayID; 
+    }
+
+    auto& GetTexSubTexResArray() const
+    {
+        return subTexRes;
     }
 
     void GenerateTextureArray(int _texWidth, int _texHeight, int _maxTextures)
@@ -78,18 +85,20 @@ public:
             std::cout << "(Texture Manager): Texture Warning: width and height do not match texture array width and height, "
             "texture will still be inserted but will not take up the full resolution." << std::endl;
         }
+
+        subTexRes.push_back(glm::vec2(width, height));
         
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
 
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-            1, 
+            0, 
             0, 0, nextTexLayer,
-            maxTexWidth, maxTexHeight, 1,
+            width, height, 1,
             GL_RGBA, GL_UNSIGNED_BYTE,
             data
         );
-        
+
         stbi_image_free(data);
 
         int texLayerUsed = nextTexLayer; // set to the current layer used for the texture just initalized
@@ -107,11 +116,20 @@ public:
         glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     }
 
+    void SendSubTexResArrayToShader(Shader &shader)
+    {
+        for (int i = 0; i < subTexRes.size(); i++)
+        {
+            shader.setIVec2("subTexRes[" + std::to_string(i) + "]", subTexRes[i].x, subTexRes[i].y);
+        }
+    }
+
 private:
     // private constructor so other instances cant be made
     TextureManager() : texArrayID(0), maxTexWidth(0), maxTexHeight(0), maxTexLayers(0), nextTexLayer(0), mipLevels(0) {}
 
     GLuint texArrayID;
+    std::vector<glm::vec2> subTexRes;
     int maxTexWidth;
     int maxTexHeight;
 
