@@ -2,6 +2,7 @@
 
 #include "../lib/glad.h"
 #include <GLFW/glfw3.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "../lib/stb_image.h"
 
@@ -67,6 +68,7 @@ public:
         int width, height, numChannels;
         unsigned char *data = stbi_load((directoryPath + "/" + path).c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
 
+
         if (!data)
         {
             std::cout << "(Texture Manager): Texture Error: Failed to load texture" << std::endl;
@@ -85,8 +87,7 @@ public:
             "texture will still be inserted but will not take up the full resolution." << std::endl;
         }
 
-        subTexRes.push_back(glm::vec2(width, height));
-        
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
 
@@ -97,6 +98,8 @@ public:
             GL_RGBA, GL_UNSIGNED_BYTE,
             data
         );
+
+        subTexRes.push_back(glm::vec2(width, height));
 
         stbi_image_free(data);
 

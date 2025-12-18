@@ -134,8 +134,8 @@ int main()
     // model loading
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    Model goldOre("../models/Gold_Ore_Block/Gold.obj");
-    Model windfall("../models/Sponza-master/sponza.obj");
+    Model goldOre("../models/Chair_Table/Chair_and_Table_Scene.obj");
+    Model windfall("../models/Windfall/Windfall.obj");
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
     TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
@@ -309,7 +309,10 @@ int main()
         objectShader.setFloat("spotLight.linear", 0.14f);
         objectShader.setFloat("spotLight.quadratic", 0.07f);
 
-        
+
+
+        TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
+        // rendering
         glm::mat4 model = glm::mat4(1.0f);
         // for (unsigned int x = 0; x < 16; x++)
         // {
@@ -330,12 +333,13 @@ int main()
         
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.025f, 0.025f, 0.025f));
+        model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
         objectShader.setMat4("model", model);
         windfall.Draw(objectShader);
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -2.0f, 2.0f));
+        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
         objectShader.setMat4("model", model);
         goldOre.Draw(objectShader);
         

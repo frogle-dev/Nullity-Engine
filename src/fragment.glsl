@@ -79,13 +79,13 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 vec4 sampleTexArraySubtex(int layer)
 {
-    vec2 scale = vec2(subTexRes[layer]) / vec2(4096, 4096); // denominator is the max res of the texture array
-    vec2 adjustedTexCoord = texCoord * scale;
-    vec4 textureColor = texture(texArray, vec3(adjustedTexCoord, float(layer)));
-    if(textureColor.a < 0.5)
-    {
-        discard;
-    }
+    vec2 pixelSubTexCoords = texCoord * subTexRes[layer];
+    vec2 subTexCoords = pixelSubTexCoords / vec2(4096.0, 4096.0);
+    vec4 textureColor = texture(texArray, vec3(subTexCoords, float(layer)));
+    // if(textureColor.a < 0.5)
+    // {
+    //     discard;
+    // }
     return textureColor;
 }
 
@@ -100,7 +100,8 @@ void main()
     vec3 viewDir = normalize(viewPos - fragPos);
 
     // directional lights
-    vec3 result = calcDirLight(dirLight, norm, viewDir);
+    vec3 result = vec3(0.0);
+    result += calcDirLight(dirLight, norm, viewDir);
 
     // point lights
     for (int i = 0; i < NUM_POINT_LIGHTS; i++)
@@ -112,10 +113,13 @@ void main()
 
     // emission
     vec3 emission = vec3(0.0);
-    for (int i = 0; i < material.emissionLayerCount; i++)
+    if (material.emissionLayerCount > 0)
     {
-        // emission += material.emissionStrength * vec3(texture(texArray, vec3(texCoord, float(material.emissionStartLayer + i))));
-        emission += material.emissionStrength * sampleTexArraySubtex(material.emissionStartLayer + i).rgb;
+        for (int i = 0; i < material.emissionLayerCount; i++)
+        {
+            // emission += material.emissionStrength * vec3(texture(texArray, vec3(texCoord, float(material.emissionStartLayer + i))));
+            emission += material.emissionStrength * sampleTexArraySubtex(material.emissionStartLayer + i).rgb;
+        }
     }
     result += emission;
 
@@ -126,10 +130,13 @@ void main()
 vec3 calcAmbient(vec3 lightAmbient)
 {
     vec3 ambient = vec3(0.0);
-    for (int i = 0; i < material.diffuseLayerCount; i++)
+    if (material.diffuseLayerCount > 0)
     {
-        // ambient += lightAmbient * vec3(texture(texArray, vec3(texCoord, float(material.diffuseStartLayer + i))));
-        ambient += lightAmbient * sampleTexArraySubtex(material.diffuseStartLayer + i).rgb;
+        for (int i = 0; i < material.diffuseLayerCount; i++)
+        {
+            // ambient += lightAmbient * vec3(texture(texArray, vec3(texCoord, float(material.diffuseStartLayer + i))));
+            ambient += lightAmbient * sampleTexArraySubtex(material.diffuseStartLayer + i).rgb;
+        }
     }
 
     return ambient;
@@ -137,10 +144,13 @@ vec3 calcAmbient(vec3 lightAmbient)
 vec3 calcDiffuse(vec3 lightDiffuse, float diffuseAmount)
 {
     vec3 diffuse = vec3(0.0);
-    for (int i = 0; i < material.diffuseLayerCount; i++)
+    if (material.diffuseLayerCount > 0)
     {
-        // diffuse += lightDiffuse * diffuseAmount * vec3(texture(texArray, vec3(texCoord, float(material.diffuseStartLayer + i))));
-        diffuse += lightDiffuse * diffuseAmount * sampleTexArraySubtex(material.diffuseStartLayer + i).rgb;
+        for (int i = 0; i < material.diffuseLayerCount; i++)
+        {
+            // diffuse += lightDiffuse * diffuseAmount * vec3(texture(texArray, vec3(texCoord, float(material.diffuseStartLayer + i))));
+            diffuse += lightDiffuse * diffuseAmount * sampleTexArraySubtex(material.diffuseStartLayer + i).rgb;
+        }
     }
 
     return diffuse;
@@ -148,10 +158,13 @@ vec3 calcDiffuse(vec3 lightDiffuse, float diffuseAmount)
 vec3 calcSpecular(vec3 lightSpecular, float specularAmount)
 {
     vec3 specular = vec3(0.0);
-    for (int i = 0; i < material.specularLayerCount; i++)
+    if (material.specularLayerCount > 0)
     {
-        // specular += lightSpecular * specularAmount * vec3(texture(texArray, vec3(texCoord, float(material.specularStartLayer + i))));
-        specular += lightSpecular * specularAmount * sampleTexArraySubtex(material.specularStartLayer + i).rgb;
+        for (int i = 0; i < material.specularLayerCount; i++)
+        {
+            // specular += lightSpecular * specularAmount * vec3(texture(texArray, vec3(texCoord, float(material.specularStartLayer + i))));
+            specular += lightSpecular * specularAmount * sampleTexArraySubtex(material.specularStartLayer + i).rgb;
+        }
     }
 
     return specular;
