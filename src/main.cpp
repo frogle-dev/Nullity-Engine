@@ -215,7 +215,7 @@ int main()
             ImGui::Text("Press a key, then click 'add' or 'change' to assign the currently pressed key to that slot");
             
             ImGui::Separator();
-            ImGui::Text("Press any key: %i", currentKeyPress);
+            ImGui::Text("Press any key: %i", currentScancodePress);
 
             if(ImGui::BeginListBox("Current assigned keycodes"))
             {
@@ -228,7 +228,7 @@ int main()
                     ImGui::PushID(key + i);
                     if (ImGui::Button("Change"))
                     {
-                        setConfigKeymap(cur_actionName, false, currentKeyPress, i);
+                        setConfigKeymap(cur_actionName, false, currentScancodePress, i);
                         reloadConfigKeymaps();
                     }
                     ImGui::SameLine();
@@ -241,7 +241,7 @@ int main()
                 }
                 if(ImGui::Button("Add"))
                 {
-                    setConfigKeymap(cur_actionName, true, currentKeyPress);
+                    setConfigKeymap(cur_actionName, true, currentScancodePress);
                     reloadConfigKeymaps();
                 }
                 ImGui::EndListBox();
@@ -516,5 +516,5 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    processKeyEvent(key, action);
+    processKeyEvent(scancode, action);
 }

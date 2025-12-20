@@ -19,7 +19,7 @@ struct ActionState
 
 std::unordered_map<std::string, std::vector<int>> bindings;
 std::unordered_map<std::string, ActionState> actions;
-int currentKeyPress;
+int currentScancodePress;
 
 void keysRefresh() 
 {
@@ -47,15 +47,15 @@ bool isActionReleased(const std::string& actionName)
 }
 
 // called by glfw key callback thing
-void processKeyEvent(int key, int action) 
+void processKeyEvent(int scancode, int action) 
 {
-    currentKeyPress = key;
+    currentScancodePress = scancode;
 
-    for (auto& [actionName, keys] : bindings) 
+    for (auto& [actionName, scancodes] : bindings) 
     {
-        for (int boundKey : keys)
+        for (int boundScancode : scancodes)
         {
-            if (boundKey == key) 
+            if (boundScancode == currentScancodePress) 
             {
                 auto& state = actions[actionName];
 
@@ -91,7 +91,12 @@ void reloadConfigKeymaps()
     bindings.clear();
     for (auto& [actionName, keycodes] : data.items())
     {
-        bindings[actionName] = (std::vector<int>)keycodes;
+        std::vector<int> scancodes;
+        for (int i : keycodes)
+        {
+            scancodes.push_back(glfwGetKeyScancode(i));
+        }
+        bindings[actionName] = scancodes;
     }
 }
 
