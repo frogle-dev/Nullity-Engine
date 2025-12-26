@@ -116,16 +116,14 @@ int main()
     glEnable(GL_CULL_FACE);
 
     // texture stuff
-    TextureManager::Get().GenerateTextureArray(4096, 4096, 100);
+    objectShader.use();
+    TextureManager::Get().GenerateTextureArray(4096, 4096, 100, objectShader);
     
     GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
 
-    // stbi_set_flip_vertically_on_load(true);
-
-    objectShader.use();
     objectShader.setInt("texArray", 0); // tex array should use tex unit 0
 
     objectShader.setFloat("material.emissionStrength", 1.0f);
@@ -134,7 +132,7 @@ int main()
     // model loading
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    Model goldOre("../models/Chair_Table/Chair_and_Table_Scene.obj");
+    Model placeholder("../models/3DApple002_HQ-1K-JPG/3DApple002_HQ-1K-JPG.obj");
     Model windfall("../models/Windfall/Windfall.obj");
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
@@ -339,9 +337,9 @@ int main()
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -2.0f, 2.0f));
-        model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
+        model = glm::scale(model, glm::vec3(50.0f, 50.0f, 50.0f));
         objectShader.setMat4("model", model);
-        goldOre.Draw(objectShader);
+        placeholder.Draw(objectShader);
         
         
         glBindVertexArray(lightVAO);

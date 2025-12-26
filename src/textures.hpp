@@ -31,11 +31,13 @@ public:
         return subTexRes;
     }
 
-    void GenerateTextureArray(int _texWidth, int _texHeight, int _maxTextures)
+    void GenerateTextureArray(int _texWidth, int _texHeight, int _maxTextures, Shader shader)
     {
         maxTexLayers = _maxTextures;
         maxTexWidth = _texWidth;
         maxTexHeight = _texHeight;
+
+        shader.setVec2("bucketSize", glm::vec2(maxTexWidth, maxTexHeight));
 
         mipLevels = (int)std::floor(std::log2(maxTexWidth)) + 1;
 
@@ -43,18 +45,19 @@ public:
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
     
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, mipLevels - 1);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    
         glTexStorage3D(GL_TEXTURE_2D_ARRAY,
             mipLevels,
             GL_RGBA8,
             maxTexWidth, maxTexHeight,
             maxTexLayers
         );
+        
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, mipLevels - 1);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        // glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
 
     int LoadTexture(std::string path, std::string directoryPath)

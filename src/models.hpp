@@ -37,6 +37,14 @@ struct Texture
     std::string path;
 };
 
+struct Material
+{
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    glm::vec3 ambient;
+    float shininess;
+};
+
 
 class Mesh
 {
@@ -171,7 +179,7 @@ private:
     void LoadModel(std::string path)
     {
         Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs/*  | aiProcess_OptimizeMeshes */ | aiProcess_GenNormals);
+        const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs/*  | aiProcess_OptimizeMeshes */);
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
             std::cout << "(Assimp): Error: " << importer.GetErrorString() << std::endl;
@@ -224,6 +232,7 @@ private:
                 glm::vec2 vector2;
                 vector2.x = mesh->mTextureCoords[0][i].x;
                 vector2.y = mesh->mTextureCoords[0][i].y;
+
                 vertex.texCoords = vector2;
             }
             else
@@ -244,10 +253,11 @@ private:
             }
         }
 
+        
         if (mesh->mMaterialIndex >= 0) // check if mesh contains materials
-        {
+        {        
             aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
- 
+
             std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, TextureType::DIFFUSE);
             textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end()); // insert the entire diffuseMaps vector at the end of texture vector
 
@@ -287,4 +297,25 @@ private:
         }
         return textures;
     }
+
+    // Material LoadMaterial(aiMaterial* mat) 
+    // {
+    //     Material material;
+    //     aiColor3D color(0.f, 0.f, 0.f);
+    //     float shininess;
+        
+    //     mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+    //     material.diffuse = glm::vec3(color.r, color.b, color.g);
+        
+    //     mat->Get(AI_MATKEY_COLOR_AMBIENT, color);
+    //     material.ambient = glm::vec3(color.r, color.b, color.g);
+        
+    //     mat->Get(AI_MATKEY_COLOR_SPECULAR, color);
+    //     material.specular = glm::vec3(color.r, color.b, color.g);
+        
+    //     mat->Get(AI_MATKEY_SHININESS, shininess);
+    //     material.shininess = shininess;
+        
+    //     return material;
+    // }
 };

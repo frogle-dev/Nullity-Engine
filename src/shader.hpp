@@ -120,6 +120,10 @@ public:
     {
         glUniform3f(glGetUniformLocation(shaderProgramID, name.c_str()), value.x, value.y, value.z);
     }
+    void setVec2(const std::string &name, glm::vec2 value) const
+    {
+        glUniform2f(glGetUniformLocation(shaderProgramID, name.c_str()), value.x, value.y);
+    }
 
 private:
     void checkCompileErrors(unsigned int shader, std::string type)
