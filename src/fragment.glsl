@@ -72,10 +72,6 @@ uniform SpotLight spotLight;
 uniform vec3 viewPos;
 
 
-vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
-vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
-vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
-
 vec4 sampleTexArraySubtex(int layer)
 {
     vec2 subSize = subTexRes[layer];
@@ -83,12 +79,24 @@ vec4 sampleTexArraySubtex(int layer)
     vec2 tiled = fract(texCoord) * (subSize / bucketSize);
 
     vec4 textureColor = texture(texArray, vec3(tiled, float(layer)));
-    // if(textureColor.a < 0.5)
-    // {
-    //     discard;
-    // }
+    if(textureColor.a < 0.5)
+    {
+        discard;
+    }
     return textureColor;
 }
+
+float near = 0.1;
+float far = 100.0; 
+float linearizeDepth(float depth)
+{
+    float z = depth * 2.0 - 1.0; // convert depth to normalized device coords
+    return (2.0 * near * far) / (far + near - z * (far - near));
+}
+
+vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
+vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 vec3 calcAmbient(vec3 lightAmbient);
 vec3 calcDiffuse(vec3 lightDiffuse, float diffuseAmount);
@@ -123,15 +131,14 @@ void main()
     }
     result += emission;
 
-    FragColor = vec4(result, 1.0);
-    // if (texCoord.x > 1.0 || texCoord.y > 1.0 || texCoord.y < 0.0 || texCoord.x < 0.0)
-    // {
-    //     FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-    // }
-    // else
-    // {
-    //     FragColor = vec4(0.0, 1.0, 0.24, 1.0);
-    // }
+    //fog
+    float fogDensity = 5;
+    float depth = linearizeDepth(gl_FragCoord.z) / far;
+    float fogDepth = exp(-pow(depth * fogDensity, 2.0));
+    vec3 fogColor = vec3(0.902, 0.902, 0.980);
+    vec3 color = mix(fogColor, result, fogDepth);
+
+    FragColor = vec4(color, 1.0);
 }
 
 
