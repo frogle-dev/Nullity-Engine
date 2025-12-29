@@ -15,13 +15,15 @@
 #include "camera.hpp"
 #include "textures.hpp"
 #include "models.hpp"
+#include "framebuffer.h"
 
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <map>
 
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void window_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -50,7 +52,10 @@ int main()
     if (!init(window, initWidth, initHeight))
         return -1;
     
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    // framebuffer
+    Framebuffer gameFrameBuffer(viewWidth, viewHeight);
+    glfwSetWindowSizeCallback(window, window_size_callback);
+
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetKeyCallback(window, key_callback);
 
@@ -72,20 +77,16 @@ int main()
     colors[ImGuiCol_ChildBg] = bgColor;
     colors[ImGuiCol_TitleBg] = bgColor;
 
-    
     // setup keybinds from json file
     std::string cur_actionName;
     std::vector<int> cur_keycodes;
-    reloadConfigKeymaps();
-
+    reloadConfigKeymaps();    
+    
     
     // rendering and shader stuff
     Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
     Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_fragment.glsl");
 
-
-    // unsigned int VAO; //vertex array object
-    // glGenVertexArrays(1, &VAO);
 
     unsigned int lightVAO;
     glGenVertexArrays(1, &lightVAO);
@@ -95,16 +96,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), vertices_cube, GL_STATIC_DRAW);
 
-    // unsigned int EBO; // element buffer object
-    // glGenBuffers(1, &EBO);
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices_cube), indices_cube, GL_STATIC_DRAW);
-    
-    // glBindVertexArray(VAO);
-    // setVertAttributes();
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBindVertexArray(lightVAO);
     setLightSourceVertAttribs();
 
@@ -114,6 +106,10 @@ int main()
     // enable depth testing and face culling
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+
+    glEnable(GL_BLEND); 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 
     // texture stuff
     objectShader.use();
@@ -132,7 +128,6 @@ int main()
     // model loading
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    Model placeholder("../models/3DApple002_HQ-1K-JPG/3DApple002_HQ-1K-JPG.obj");
     Model windfall("../models/Windfall/Windfall.obj");
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
@@ -151,6 +146,8 @@ int main()
     bool demoWindow = false;
     bool changingKeybind = false;
 
+    gameFrameBuffer.Unbind();
+
     // render loop
     float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(window))
@@ -158,6 +155,9 @@ int main()
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
 
         // imgui
         ImGui_ImplOpenGL3_NewFrame();
@@ -259,13 +259,37 @@ int main()
         ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_None);
         ImGui::Text("Entity: ");
         ImGui::End();
+
+        ImGui::Begin("Game");
+        {
+            ImGui::BeginChild("Render");
+            
+            float width = ImGui::GetContentRegionAvail().x;
+            float height = ImGui::GetContentRegionAvail().y;
+            
+            gameFrameBuffer.Rescale(width, height);
+            window_size_callback(window, width, height);
+
+            ImGui::Image(
+                (ImTextureID)gameFrameBuffer.GetColorTexture(), 
+                ImGui::GetContentRegionAvail(), 
+                ImVec2(0, 1), 
+                ImVec2(1, 0)
+            );
+        }
+        ImGui::EndChild();
+        ImGui::End();
+        // imgui rendering
+        ImGui::Render();
         
 
-        // game loop stuff
-        update(window);
+        gameFrameBuffer.Bind();
 
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
+
+        // game loop stuff
+        update(window);
 
         objectShader.use();
 
@@ -307,39 +331,16 @@ int main()
         objectShader.setFloat("spotLight.linear", 0.14f);
         objectShader.setFloat("spotLight.quadratic", 0.07f);
 
-
-
         TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
+
         // rendering
-        glm::mat4 model = glm::mat4(1.0f);
-        // for (unsigned int x = 0; x < 16; x++)
-        // {
-        //     for (unsigned int y = 0; y < 16; y++)
-        //     {
-        //         for (unsigned int z = 0; z < 16; z++)
-        //         {
-        //             model = glm::mat4(1.0f);
-        //             model = glm::translate(model, glm::vec3(1.0f * x, -1.0f * y, -1.0f * z));
-                    
-        //             objectShader.setMat4("model", model);
-                    
-        //             glBindVertexArray(VAO);
-        //             glDrawArrays(GL_TRIANGLES, 0, 36);
-        //         }
-        //     }
-        // }
         
-        model = glm::mat4(1.0f);
+
+        glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
         objectShader.setMat4("model", model);
         windfall.Draw(objectShader);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, -2.0f, 2.0f));
-        model = glm::scale(model, glm::vec3(50.0f, 50.0f, 50.0f));
-        objectShader.setMat4("model", model);
-        placeholder.Draw(objectShader);
         
         
         glBindVertexArray(lightVAO);
@@ -354,9 +355,9 @@ int main()
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         
+        // game rendering finished
+        gameFrameBuffer.Unbind();
 
-        // imgui
-        ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
@@ -366,6 +367,8 @@ int main()
     // end of process life
     // glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &lightVAO);
+    gameFrameBuffer.Cleanup();
     objectShader.deleteProgram();
     lightSourceShader.deleteProgram();
 
@@ -468,9 +471,9 @@ void update(GLFWwindow* window)
     keysRefresh();
 }
 
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void window_size_callback(GLFWwindow* window, int width, int height)
 {
+    // letterbox scaling
     float aspect = (float)width / height;
     float targetAspect = (float)initWidth / initHeight;
 
@@ -488,8 +491,31 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     int viewX = (width - viewWidth) / 2;
     int viewY = (height - viewHeight) / 2;
 
-    glViewport(viewX,viewY,viewWidth,viewHeight);
+    glViewport(viewX, viewY, viewWidth, viewHeight);
 }
+
+// void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+// {
+//     // letterbox scaling
+//     float aspect = (float)width / height;
+//     float targetAspect = (float)initWidth / initHeight;
+
+//     if (aspect > targetAspect)
+//     {
+//         viewHeight = height;
+//         viewWidth = (int)(height * targetAspect);
+//     }
+//     else
+//     {
+//         viewWidth = width;
+//         viewHeight = (int)(width / targetAspect);
+//     }
+
+//     int viewX = (width - viewWidth) / 2;
+//     int viewY = (height - viewHeight) / 2;
+
+//     glViewport(viewX, viewY, viewWidth, viewHeight);
+// }
 
 bool firstMouse = true;
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)

@@ -76,10 +76,11 @@ vec4 sampleTexArraySubtex(int layer)
 {
     vec2 subSize = subTexRes[layer];
 
-    vec2 tiled = fract(texCoord) * (subSize / bucketSize);
+    vec2 wrapped = fract(texCoord);
+    vec2 transformed = wrapped * (subSize / bucketSize);
 
-    vec4 textureColor = texture(texArray, vec3(tiled, float(layer)));
-    if(textureColor.a < 0.5)
+    vec4 textureColor = texture(texArray, vec3(transformed, float(layer)));
+    if(textureColor.a < 0.1)
     {
         discard;
     }
@@ -87,7 +88,7 @@ vec4 sampleTexArraySubtex(int layer)
 }
 
 float near = 0.1;
-float far = 100.0; 
+float far = 100.0;
 float linearizeDepth(float depth)
 {
     float z = depth * 2.0 - 1.0; // convert depth to normalized device coords

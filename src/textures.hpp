@@ -31,11 +31,11 @@ public:
         return subTexRes;
     }
 
-    void GenerateTextureArray(int _texWidth, int _texHeight, int _maxTextures, Shader shader)
+    void GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, int _maxTextures, Shader shader)
     {
         maxTexLayers = _maxTextures;
-        maxTexWidth = _texWidth;
-        maxTexHeight = _texHeight;
+        maxTexWidth = _maxTexWidth;
+        maxTexHeight = _maxTexHeight;
 
         shader.setVec2("bucketSize", glm::vec2(maxTexWidth, maxTexHeight));
 
@@ -46,10 +46,10 @@ public:
         glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
     
         glTexStorage3D(GL_TEXTURE_2D_ARRAY,
-            mipLevels,
-            GL_RGBA8,
-            maxTexWidth, maxTexHeight,
-            maxTexLayers
+            mipLevels,                       // numbers of mipmaps
+            GL_RGBA8,                        // color format
+            maxTexWidth, maxTexHeight,       // max width and height with border padding
+            maxTexLayers                     // max num of textures stored in array
         );
         
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -68,9 +68,9 @@ public:
             return -1;
         }
 
+
         int width, height, numChannels;
         unsigned char *data = stbi_load((directoryPath + "/" + path).c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
-
 
         if (!data)
         {
@@ -95,11 +95,14 @@ public:
         glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
 
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-            0, 
-            0, 0, nextTexLayer,
-            width, height, 1,
-            GL_RGBA, GL_UNSIGNED_BYTE,
-            data
+            0,                          // mipmap level
+            0, 0,                       // 1 pixel offset in order to create 1 pix border
+            nextTexLayer,               // tex layer of tex array to insert image in
+            width, height,              // size of image
+            1,           
+            GL_RGBA,                    // color format
+            GL_UNSIGNED_BYTE, 
+            data                        // pixel (image) data
         );
 
         subTexRes.push_back(glm::vec2(width, height));
@@ -137,7 +140,7 @@ private:
     std::vector<glm::vec2> subTexRes;
     int maxTexWidth;
     int maxTexHeight;
-
+    
     int mipLevels;
 
     int maxTexLayers;
