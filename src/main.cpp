@@ -63,19 +63,27 @@ int main()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; 
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 5.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
+    
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
 
-    auto& style = ImGui::GetStyle();
-    ImVec4* colors = style.Colors;
+    // auto& style = ImGui::GetStyle();
+    // ImVec4* colors = style.Colors;
 
-    const ImVec4 bgColor = ImVec4(0.1, 0.1, 0.1, 0.5);
-    colors[ImGuiCol_WindowBg] = bgColor;
-    colors[ImGuiCol_ChildBg] = bgColor;
-    colors[ImGuiCol_TitleBg] = bgColor;
+    // const ImVec4 bgColor = ImVec4(0.1, 0.1, 0.1, 0.8);
+    // colors[ImGuiCol_WindowBg] = bgColor;
+    // colors[ImGuiCol_ChildBg] = bgColor;
+    // colors[ImGuiCol_TitleBg] = bgColor;
 
     // setup keybinds from json file
     std::string cur_actionName;
@@ -359,6 +367,13 @@ int main()
         gameFrameBuffer.Unbind();
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
