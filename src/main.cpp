@@ -9,7 +9,7 @@
 #include "../lib/imgui/backends/imgui_impl_opengl3.h"
 
 #include "shader.hpp"
-#include "cube.hpp"
+#include "primitives.hpp"
 #include "keymap.hpp"
 #include "helpers.hpp"
 #include "camera.hpp"
@@ -71,35 +71,30 @@ int main()
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         style.WindowRounding = 5.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        style.Colors[ImGuiCol_TitleBg] = ImVec4(41/255.0f, 44/255.0f, 60/255.0f, 1.0f);
+        style.Colors[ImGuiCol_WindowBg] = ImVec4(48/255.0f, 52/255.0f, 70/255.0f, 0.8f);
+        style.Colors[ImGuiCol_Border] = ImVec4(35/255.0f, 38/255.0f, 52/255.0f, 1.0f);
     }
     
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
 
-    // auto& style = ImGui::GetStyle();
-    // ImVec4* colors = style.Colors;
-
-    // const ImVec4 bgColor = ImVec4(0.1, 0.1, 0.1, 0.8);
-    // colors[ImGuiCol_WindowBg] = bgColor;
-    // colors[ImGuiCol_ChildBg] = bgColor;
-    // colors[ImGuiCol_TitleBg] = bgColor;
-
     // setup keybinds from json file
     std::string cur_actionName;
     std::vector<int> cur_keycodes;
-    reloadConfigKeymaps();    
+    reloadConfigKeymaps();
     
     
     // rendering and shader stuff
     Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
     Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_fragment.glsl");
+    Shader renderTextureShader("/home/jonah/Programming/Opengl/opengl-first-project/src/render_texture_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/render_texture_vertex.glsl");
 
-
-    unsigned int lightVAO;
+    // light block setup
+    GLuint lightVAO;
     glGenVertexArrays(1, &lightVAO);
     
-    unsigned int VBO; // vertex byffer object
+    GLuint VBO; // vertex byffer object
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), vertices_cube, GL_STATIC_DRAW);
@@ -110,6 +105,13 @@ int main()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0); // unbinding VBO
     glBindVertexArray(0); // unbinding VAO
+
+    // render texture quad setup
+    GLuint renderTexVAO;
+    glGenVertexArrays(1, &renderTexVAO);
+
+    
+
 
     // enable depth testing and face culling
     glEnable(GL_DEPTH_TEST);
@@ -163,9 +165,6 @@ int main()
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
-        glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
 
         // imgui
         ImGui_ImplOpenGL3_NewFrame();
@@ -292,9 +291,10 @@ int main()
         
 
         gameFrameBuffer.Bind();
-
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
+        glEnable(GL_DEPTH_TEST);
+
 
         // game loop stuff
         update(window);
@@ -342,8 +342,6 @@ int main()
         TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
 
         // rendering
-        
-
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
@@ -365,6 +363,11 @@ int main()
         
         // game rendering finished
         gameFrameBuffer.Unbind();
+        glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT); //clear color + depth buffer
+        glDisable(GL_DEPTH_TEST); // disable depth test so framebuffer quad always draws in front
+
+
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
