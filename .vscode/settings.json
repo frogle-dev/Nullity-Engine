@@ -75,5 +75,10 @@
         "shared_mutex": "cpp",
         "stack": "cpp",
         "stop_token": "cpp"
+    },
+    "launch": {
+        "env": {"GDK_BACKEND": "wayland"},
+        "configurations": [],
+        "compounds": []
     }
 }

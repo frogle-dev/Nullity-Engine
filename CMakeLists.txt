@@ -41,8 +41,6 @@ target_include_directories(imgui PUBLIC lib/imgui/ lib/imgui/backends/)
 add_executable(first_opengl 
 src/main.cpp
 lib/glad.c
-src/vertex.glsl
-src/fragment.glsl
 )
 
 target_link_libraries(first_opengl 

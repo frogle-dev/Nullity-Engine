@@ -37,7 +37,7 @@ bool init(GLFWwindow *&windowID, int width, int height)
 void setLightSourceVertAttribs()
 {
     // position vertex attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
 }
 

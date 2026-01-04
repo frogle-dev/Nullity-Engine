@@ -30,8 +30,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void update(GLFWwindow* window);
 
 
-const unsigned int initWidth = 1280, initHeight = 720;
-unsigned int viewWidth = initWidth, viewHeight = initHeight;
+const int initWidth = 1280, initHeight = 720;
+int viewWidth = initWidth, viewHeight = initHeight;
 
 float deltaTime = 0.0f;
 int fps;
@@ -67,13 +67,50 @@ int main()
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; 
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     
+    // imgui styling
     ImGuiStyle& style = ImGui::GetStyle();
+    ImVec4 pink = ImVec4(0.725f, 0.451f, 0.459f, 1.0f);
+    ImVec4 gray = ImVec4(0.176f, 0.176f, 0.204f, 1.0f);
+    ImVec4 dark_gray = ImVec4(0.155f, 0.155f, 0.183f, 1.0f);
+    ImVec4 light_pink = ImVec4(0.808f, 0.694f, 0.745f, 1.0f);
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         style.WindowRounding = 5.0f;
-        style.Colors[ImGuiCol_TitleBg] = ImVec4(41/255.0f, 44/255.0f, 60/255.0f, 1.0f);
-        style.Colors[ImGuiCol_WindowBg] = ImVec4(48/255.0f, 52/255.0f, 70/255.0f, 0.8f);
-        style.Colors[ImGuiCol_Border] = ImVec4(35/255.0f, 38/255.0f, 52/255.0f, 1.0f);
+        style.ChildRounding = 2.5f;
+        style.FrameRounding = 2.5f;
+        style.TabBarOverlineSize = 0.0f;
+        
+        // windows
+        style.Colors[ImGuiCol_TitleBg] = dark_gray;
+        style.Colors[ImGuiCol_TitleBgActive] = dark_gray;
+        style.Colors[ImGuiCol_TabActive] = light_pink;
+        style.Colors[ImGuiCol_TabHovered] = light_pink;
+        style.Colors[ImGuiCol_TabDimmed] = pink;
+        style.Colors[ImGuiCol_TabDimmedSelected] = pink;
+        style.Colors[ImGuiCol_Tab] = pink;
+        style.Colors[ImGuiCol_TabUnfocused] = pink;
+        style.Colors[ImGuiCol_TabUnfocusedActive] = pink;
+        style.Colors[ImGuiCol_TabSelected] = light_pink;
+        style.Colors[ImGuiCol_WindowBg] = gray;
+        style.Colors[ImGuiCol_PopupBg] = gray;
+        style.Colors[ImGuiCol_Border] = pink;
+        style.Colors[ImGuiCol_ResizeGrip] = pink;
+        style.Colors[ImGuiCol_ResizeGripActive] = light_pink;
+        style.Colors[ImGuiCol_ResizeGripHovered] = light_pink;
+        
+        // menu bar
+        style.Colors[ImGuiCol_MenuBarBg] = dark_gray;
+        style.Colors[ImGuiCol_Header] = pink;
+        style.Colors[ImGuiCol_HeaderHovered] = light_pink;
+        style.Colors[ImGuiCol_HeaderActive] = light_pink;
+
+        // list
+        style.Colors[ImGuiCol_FrameBg] = dark_gray;
+
+        // buttons
+        style.Colors[ImGuiCol_Button] = pink;
+        style.Colors[ImGuiCol_ButtonActive] = light_pink;
+        style.Colors[ImGuiCol_ButtonHovered] = light_pink;
     }
     
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -86,32 +123,31 @@ int main()
     
     
     // rendering and shader stuff
-    Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/src/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/fragment.glsl");
-    Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/light_source_fragment.glsl");
-    Shader renderTextureShader("/home/jonah/Programming/Opengl/opengl-first-project/src/render_texture_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/src/render_texture_vertex.glsl");
+    Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/fragment.glsl");
+    Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source_fragment.glsl");
+    Shader skyboxShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox_fragment.glsl");
 
     // light block setup
-    GLuint lightVAO;
+    GLuint lightVAO, VBO;
     glGenVertexArrays(1, &lightVAO);
-    
-    GLuint VBO; // vertex byffer object
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), vertices_cube, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), &vertices_cube, GL_STATIC_DRAW);
     glBindVertexArray(lightVAO);
     setLightSourceVertAttribs();
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // unbinding VBO
-    glBindVertexArray(0); // unbinding VAO
-
-    // render texture quad setup
-    GLuint renderTexVAO;
-    glGenVertexArrays(1, &renderTexVAO);
+    GLuint skyboxVAO, skyboxVBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     
-
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
     // enable depth testing and face culling
     glEnable(GL_DEPTH_TEST);
@@ -120,20 +156,31 @@ int main()
     glEnable(GL_BLEND); 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
     // texture stuff
+    glActiveTexture(GL_TEXTURE0);
+
     objectShader.use();
     TextureManager::Get().GenerateTextureArray(4096, 4096, 100, objectShader);
     
     GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
-
     objectShader.setInt("texArray", 0); // tex array should use tex unit 0
 
     objectShader.setFloat("material.emissionStrength", 1.0f);
     objectShader.setFloat("material.shininess", 128.0f);
+    
+    skyboxShader.use();
+    skyboxShader.setInt("skybox", 0);
+    std::vector<std::string> skyboxFaces = {
+        "../images/skybox/right.jpg",
+        "../images/skybox/left.jpg",
+        "../images/skybox/top.jpg",
+        "../images/skybox/bottom.jpg",
+        "../images/skybox/front.jpg",
+        "../images/skybox/back.jpg",
+    };
+    GLuint skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
+
 
     // model loading
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -342,6 +389,7 @@ int main()
         TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
 
         // rendering
+        // drawing scene
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
@@ -349,25 +397,39 @@ int main()
         windfall.Draw(objectShader);
         
         
+        // drawing all light object cube thingies
         glBindVertexArray(lightVAO);
         lightSourceShader.use();
         lightSourceShader.setMat4("projection", projection);
         lightSourceShader.setMat4("view", view);
         
-        // drawing all light object cube thingies
         model = glm::mat4(1.0f);
         model = glm::translate(model, pointLightPos[0]);
         lightSourceShader.setMat4("model", model);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // drawing skybox
+        glDepthFunc(GL_LEQUAL);
+        skyboxShader.use();
+
+        view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+        skyboxShader.setMat4("view", view);
+        skyboxShader.setMat4("projection", projection);
+
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDepthFunc(GL_LESS);
+
+        glBindVertexArray(0);
         
-        // game rendering finished
+        // game rendering finished, now render texture quad rendering
         gameFrameBuffer.Unbind();
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT); //clear color + depth buffer
-        glDisable(GL_DEPTH_TEST); // disable depth test so framebuffer quad always draws in front
-
-
+        
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
