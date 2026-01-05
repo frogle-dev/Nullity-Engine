@@ -165,6 +165,7 @@ int main()
     GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
     objectShader.setInt("texArray", 0); // tex array should use tex unit 0
+    objectShader.setInt("skybox", 1);
 
     objectShader.setFloat("material.emissionStrength", 1.0f);
     objectShader.setFloat("material.shininess", 128.0f);
@@ -390,6 +391,9 @@ int main()
 
         // rendering
         // drawing scene
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap); // binding skybox for reflections
+
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));

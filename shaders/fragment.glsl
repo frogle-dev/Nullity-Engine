@@ -11,6 +11,9 @@ uniform vec2 bucketSize;
 
 in vec2 texCoord;
 
+uniform samplerCube skybox;
+uniform vec3 viewPos;
+
 
 struct Material
 {
@@ -69,7 +72,8 @@ struct SpotLight
 };
 uniform SpotLight spotLight;
 
-uniform vec3 viewPos;
+
+#define USE_FOG 0
 
 
 vec4 sampleTexArraySubtex(int layer)
@@ -132,14 +136,23 @@ void main()
     }
     result += emission;
 
-    //fog
-    float fogDensity = 5;
-    float depth = linearizeDepth(gl_FragCoord.z) / far;
-    float fogDepth = exp(-pow(depth * fogDensity, 2.0));
-    vec3 fogColor = vec3(0.902, 0.902, 0.980);
-    vec3 color = mix(fogColor, result, fogDepth);
+    // reflection
+    vec3 I = normalize(fragPos - viewPos);
+    vec3 R = reflect(I, norm);
+    vec4 reflectColor = vec4(texture(skybox, R).rgb, 1.0);
 
-    FragColor = vec4(color, 1.0);
+    //fog
+    if (USE_FOG == 1)
+    {
+        float fogDensity = 5;
+        float depth = linearizeDepth(gl_FragCoord.z) / far;
+        float fogDepth = exp(-pow(depth * fogDensity, 2.0));
+        vec3 fogColor = vec3(0.902, 0.902, 0.980);
+        result = mix(fogColor, result, fogDepth);
+    }
+
+    FragColor = mix(vec4(result, 1.0), reflectColor, 0.5);
+    // FragColor = vec4(result, 1.0);
 }
 
 
