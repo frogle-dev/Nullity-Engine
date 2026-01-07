@@ -2,24 +2,24 @@
 
 out vec4 FragColor;
 
-in vec3 fragPos;
-in vec3 normal;
+in VS_OUT 
+{
+    vec2 texCoord;
+    vec3 fragPos;
+    vec3 normal;
+} fs_in;
+
+
+uniform samplerCube skybox;
 
 uniform sampler2DArray texArray;
 uniform ivec2 subTexRes[100]; // size should be same as tex array
 uniform vec2 bucketSize;
 
-in vec2 texCoord;
-
 uniform vec3 viewPos;
 
-layout (std140, binding = 0) uniform Matrices
-{
-    mat4 view; // 64 bytes
-    mat4 projection; // 64 bytes
-};
 
-uniform samplerCube skybox;
+#define USE_FOG 0
 
 
 struct Material
@@ -80,14 +80,12 @@ struct SpotLight
 uniform SpotLight spotLight;
 
 
-#define USE_FOG 0
-
 
 vec4 sampleTexArraySubtex(int layer)
 {
     vec2 subSize = subTexRes[layer];
 
-    vec2 wrapped = fract(texCoord);
+    vec2 wrapped = fract(fs_in.texCoord);
     vec2 transformed = wrapped * (subSize / bucketSize);
 
     vec4 textureColor = texture(texArray, vec3(transformed, float(layer)));
@@ -117,8 +115,8 @@ vec3 calcSpecular(vec3 lightSpecular, float specularAmount);
 
 void main()
 {
-    vec3 norm = normalize(normal);
-    vec3 viewDir = normalize(viewPos - fragPos);
+    vec3 norm = normalize(fs_in.normal);
+    vec3 viewDir = normalize(viewPos - fs_in.fragPos);
 
     // directional lights
     vec3 result = vec3(0.0);
@@ -127,10 +125,10 @@ void main()
     // point lights
     for (int i = 0; i < NUM_POINT_LIGHTS; i++)
     {
-        result += calcPointLight(pointLights[i], norm, fragPos, viewDir);
+        result += calcPointLight(pointLights[i], norm, fs_in.fragPos, viewDir);
     }
 
-    result += calcSpotLight(spotLight, norm, fragPos, viewDir);
+    result += calcSpotLight(spotLight, norm, fs_in.fragPos, viewDir);
 
     // emission
     vec3 emission = vec3(0.0);
@@ -144,7 +142,7 @@ void main()
     result += emission;
 
     // reflection
-    vec3 I = normalize(fragPos - viewPos);
+    vec3 I = normalize(fs_in.fragPos - viewPos);
     vec3 R = reflect(I, norm);
     vec4 reflectColor = vec4(texture(skybox, R).rgb, 1.0);
 

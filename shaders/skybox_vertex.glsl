@@ -2,7 +2,10 @@
 
 layout (location = 0) in vec3 aPos;
 
-out vec3 texCoords;
+out VS_OUT
+{
+    vec3 texCoords;
+} vs_out;
 
 layout (std140, binding = 0) uniform Matrices
 {
@@ -12,7 +15,7 @@ layout (std140, binding = 0) uniform Matrices
 
 void main()
 {
-    texCoords = aPos;
+    vs_out.texCoords = aPos;
     vec4 pos = projection * view * vec4(aPos, 1.0);
     gl_Position = pos.xyww;
 }
