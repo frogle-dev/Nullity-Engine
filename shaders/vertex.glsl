@@ -9,9 +9,14 @@ out vec2 texCoord;
 out vec3 fragPos;
 out vec3 normal;
 
+layout (std140, binding = 0) uniform Matrices
+{
+    mat4 view; // 64 bytes
+    mat4 projection; // 64 bytes
+};
+
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+
 
 void main()
 {

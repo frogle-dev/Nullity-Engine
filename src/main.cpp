@@ -121,6 +121,14 @@ int main()
     std::vector<int> cur_keycodes;
     reloadConfigKeymaps();
     
+    // uniform buffers
+    GLuint matricesUBO;
+    glGenBuffers(1, &matricesUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
+    glBufferData(GL_UNIFORM_BUFFER, 128, NULL, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, matricesUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
     
     // rendering and shader stuff
     Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/fragment.glsl");
@@ -169,7 +177,15 @@ int main()
 
     objectShader.setFloat("material.emissionStrength", 1.0f);
     objectShader.setFloat("material.shininess", 128.0f);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    Model windfall("../models/Windfall/Windfall.obj");
+
+    TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
+    TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
     
+
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
     std::vector<std::string> skyboxFaces = {
@@ -182,23 +198,13 @@ int main()
     };
     GLuint skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
 
-
-    // model loading
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    Model windfall("../models/Windfall/Windfall.obj");
-
-    TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
-    TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
-
-    
     glm::vec3 pointLightPos[] = {
         glm::vec3( 0.7f,  5.0f,  2.0f),
         glm::vec3( 2.3f, -3.3f, -4.0f),
         glm::vec3(-4.0f,  2.0f, -12.0f),
         glm::vec3( 0.0f,  0.0f, -3.0f)
     };
-    
+
 
     // imgui stuff
     bool demoWindow = false;
@@ -346,17 +352,8 @@ int main()
 
         // game loop stuff
         update(window);
-
+        
         objectShader.use();
-
-        glm::mat4 view = camera.GetViewMatrix();
-        objectShader.setMat4("view", view);
-        
-        glm::mat4 projection;
-        projection = glm::perspective(glm::radians(85.0f), (float)viewWidth / viewHeight, 0.1f, 100.0f);
-        objectShader.setMat4("projection", projection);
-        
-        
         // lighting
         objectShader.setVec3("viewPos", camera.position);
 
@@ -390,6 +387,12 @@ int main()
         TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
 
         // rendering
+        glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)viewWidth / viewHeight, 0.1f, 100.0f);
+
+        SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
+        SetUniformBufferData(matricesUBO, 64, 64, glm::value_ptr(projection));
+
         // drawing scene
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap); // binding skybox for reflections
@@ -404,8 +407,6 @@ int main()
         // drawing all light object cube thingies
         glBindVertexArray(lightVAO);
         lightSourceShader.use();
-        lightSourceShader.setMat4("projection", projection);
-        lightSourceShader.setMat4("view", view);
         
         model = glm::mat4(1.0f);
         model = glm::translate(model, pointLightPos[0]);
@@ -418,8 +419,8 @@ int main()
         skyboxShader.use();
 
         view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-        skyboxShader.setMat4("view", view);
-        skyboxShader.setMat4("projection", projection);
+
+        SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
 
         glBindVertexArray(skyboxVAO);
         glActiveTexture(GL_TEXTURE0);
@@ -578,28 +579,6 @@ void window_size_callback(GLFWwindow* window, int width, int height)
     glViewport(viewX, viewY, viewWidth, viewHeight);
 }
 
-// void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-// {
-//     // letterbox scaling
-//     float aspect = (float)width / height;
-//     float targetAspect = (float)initWidth / initHeight;
-
-//     if (aspect > targetAspect)
-//     {
-//         viewHeight = height;
-//         viewWidth = (int)(height * targetAspect);
-//     }
-//     else
-//     {
-//         viewWidth = width;
-//         viewHeight = (int)(width / targetAspect);
-//     }
-
-//     int viewX = (width - viewWidth) / 2;
-//     int viewY = (height - viewHeight) / 2;
-
-//     glViewport(viewX, viewY, viewWidth, viewHeight);
-// }
 
 bool firstMouse = true;
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)

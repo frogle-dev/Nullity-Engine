@@ -11,8 +11,15 @@ uniform vec2 bucketSize;
 
 in vec2 texCoord;
 
-uniform samplerCube skybox;
 uniform vec3 viewPos;
+
+layout (std140, binding = 0) uniform Matrices
+{
+    mat4 view; // 64 bytes
+    mat4 projection; // 64 bytes
+};
+
+uniform samplerCube skybox;
 
 
 struct Material
@@ -151,8 +158,7 @@ void main()
         result = mix(fogColor, result, fogDepth);
     }
 
-    FragColor = mix(vec4(result, 1.0), reflectColor, 0.5);
-    // FragColor = vec4(result, 1.0);
+    FragColor = mix(vec4(result, 1.0), reflectColor, 0.1);
 }
 
 

@@ -7,6 +7,15 @@
 #include <sstream>
 #include <iostream>
 
+
+void SetUniformBufferData(GLuint ubo, unsigned int offset, unsigned int size, const void* data)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+
 class Shader
 {
 public:
