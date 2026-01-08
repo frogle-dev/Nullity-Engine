@@ -131,9 +131,10 @@ int main()
 
     
     // rendering and shader stuff
-    Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/fragment.glsl");
-    Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source_fragment.glsl");
-    Shader skyboxShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox_vertex.glsl", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox_fragment.glsl");
+    Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.frag");
+    Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.frag");
+    Shader skyboxShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.frag");
+    Shader instancedShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.frag"); 
 
     // light block setup
     GLuint lightVAO, VBO;
@@ -152,6 +153,17 @@ int main()
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    GLuint instanceVAO, instanceVBO;
+    glGenVertexArrays(1, &instanceVAO);
+    glGenBuffers(1, &instanceVBO);
+    glBindVertexArray(instanceVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), &vertices_cube, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
 
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -204,6 +216,28 @@ int main()
         glm::vec3(-4.0f,  2.0f, -12.0f),
         glm::vec3( 0.0f,  0.0f, -3.0f)
     };
+
+    // instancing
+    glm::mat4 positions[100];
+    int index = 0;
+    for (int x = 0; x < 10; x += 1)
+    {
+        for (int z = 0; z < 10; z += 1)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(x, 0.0f, z));
+            positions[index] = model;
+            index++;
+        }
+    }
+
+    instancedShader.use();
+    for (int i = 0; i < 100; i++)
+    {
+        std::string name = "positions[" + std::to_string(i) + "]"; 
+        instancedShader.setMat4(name, positions[i]);
+    }
+    GLuint dirtTexture = TextureManager::Get().LoadStandaloneTexture("/home/jonah/Programming/Opengl/opengl-first-project/images/dirt.png");
 
 
     // imgui stuff
@@ -392,16 +426,23 @@ int main()
 
         SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
         SetUniformBufferData(matricesUBO, 64, 64, glm::value_ptr(projection));
-
+        
         // drawing scene
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap); // binding skybox for reflections
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -50.0f));
         model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
         objectShader.setMat4("model", model);
         windfall.Draw(objectShader);
+
+        // drawing instanced cubes
+        instancedShader.use();
+        glBindVertexArray(instanceVAO);
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_2D, dirtTexture);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100);
         
         
         // drawing all light object cube thingies

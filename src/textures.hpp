@@ -60,7 +60,36 @@ public:
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
 
-    int LoadTexture(std::string path, std::string directoryPath)
+
+    GLuint LoadStandaloneTexture(std::string path)
+    {
+        int width, height, numChannels;
+        unsigned char *data = stbi_load(path.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
+
+        if (!data)
+        {
+            std::cout << "(Texture Manager): Texture Error: Failed to load texture" << std::endl;
+            return -1;
+        }
+        
+        GLuint texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+ 
+        stbi_image_free(data);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        return texture;
+    }
+
+    int LoadTextureIntoTexArray(std::string path, std::string directoryPath)
     {
         if (nextTexLayer >= maxTexLayers)
         {
@@ -74,19 +103,19 @@ public:
 
         if (!data)
         {
-            std::cout << "(Texture Manager): Texture Error: Failed to load texture" << std::endl;
+            std::cout << "(Texture Manager): Texture Array Error: Failed to load texture" << std::endl;
             return -1;
         }
         
         if (width > maxTexWidth || height > maxTexHeight)
         {
-            std::cout << "(Texture Manager): Texture Error: width and height are larger than texture array width and height" << std::endl;
+            std::cout << "(Texture Manager): Texture Array Error: width and height are larger than texture array width and height" << std::endl;
             return -1;
         }
 
         if (width != maxTexWidth || height != maxTexHeight)
         {
-            std::cout << "(Texture Manager): Texture Warning: width and height do not match texture array width and height, "
+            std::cout << "(Texture Manager): Texture Array Warning: width and height do not match texture array width and height, "
             "texture will still be inserted but will not take up the full resolution." << std::endl;
         }
 
@@ -116,6 +145,7 @@ public:
 
         return texLayerUsed; // return the layer just used in order to be used in shaders
     }
+
 
     GLuint LoadCubemap(std::vector<std::string> faces)
     {

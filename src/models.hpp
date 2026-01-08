@@ -288,7 +288,7 @@ private:
             if(!skip)
             { // load texture if it hasnt already been loaded
                 Texture texture;
-                texture.layer = TextureManager::Get().LoadTexture(str.C_Str(), directory);
+                texture.layer = TextureManager::Get().LoadTextureIntoTexArray(str.C_Str(), directory);
                 texture.type = internalType;
                 texture.path = str.C_Str();
                 textures.push_back(texture);
