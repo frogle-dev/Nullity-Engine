@@ -45,16 +45,20 @@ struct Material
     float shininess;
 };
 
+int totalVertices = 0;
 
 class Mesh
 {
 public:
+    unsigned int instanceCount;
+    std::vector<glm::mat4> instanceMatrices;
+
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
 
-    Mesh(std::vector<Vertex>& _vertices, std::vector<unsigned int>& _indices, std::vector<Texture>& _textures)
+    Mesh(std::vector<Vertex>& _vertices, std::vector<unsigned int>& _indices, std::vector<Texture>& _textures) : instanceCount(instanceCount)
     {
         vertices = _vertices;
         indices = _indices;
@@ -63,8 +67,21 @@ public:
         SetupMesh();
     }
 
+    Mesh(unsigned int instanceCount, std::vector<glm::mat4>& instanceMatrices, std::vector<Vertex>& _vertices, std::vector<unsigned int>& _indices, std::vector<Texture>& _textures)
+        : instanceCount(instanceCount), instanceMatrices(instanceMatrices)
+    {
+        vertices = _vertices;
+        indices = _indices;
+        textures = _textures;
+
+        SetupMeshInstanced();
+    }
+    
+
     void Draw(Shader &shader)
     {
+        shader.use();
+
         GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
         glActiveTexture(GL_TEXTURE0);
@@ -114,11 +131,33 @@ public:
         shader.setInt("material.specularLayerCount", numSpecular);
         shader.setInt("material.emissionLayerCount", numEmission);
 
+        totalVertices+= vertices.size();
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, 0);
 
         glBindVertexArray(0);
     }
+
+    void DrawInstanced(Shader &shader)
+    {
+        shader.use();
+
+        GLuint texArrayID = TextureManager::Get().GetTexArrayID();
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
+
+        shader.setInt("layer", textures[0].layer);
+
+        totalVertices+= vertices.size() * instanceCount;
+
+        glBindVertexArray(VAO);
+        glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, instanceCount);
+
+        glBindVertexArray(0);
+    }
+
 
 private:
     // render buffers
@@ -150,26 +189,94 @@ private:
 
         glBindVertexArray(0);
     }
+
+    void SetupMeshInstanced()
+    {
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
+
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
+        // vertex position attribute
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        // vertex normal attribute
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+        // vertex texure coord attributre
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+
+        GLuint matrixBuffer; // instance transformation matrices
+        glGenBuffers(1, &matrixBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, matrixBuffer);
+        glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(glm::mat4), instanceMatrices.data(), GL_STATIC_DRAW);
+
+        std::size_t vec4Size = sizeof(glm::vec4);
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+
+        glBindVertexArray(0);
+    }
 };
 
 
 class Model
 {
 public:
+
     Model(std::string path)
+    {
+        LoadModel(path);
+    }
+
+    Model(std::string path, unsigned int instanceCount, std::vector<glm::mat4>& instanceMatrices) 
+        : instanceCount(instanceCount), instanceMatrices(instanceMatrices)
     {
         LoadModel(path);
     }
 
     void Draw(Shader &shader)
     {
-        for(unsigned int i = 0; i < meshes.size(); i++)
+        if (instanceCount == 0)
         {
-            meshes[i].Draw(shader);
+            for(unsigned int i = 0; i < meshes.size(); i++)
+            {
+                meshes[i].Draw(shader);
+            }
+        }
+        else
+        {
+            for(unsigned int i = 0; i < meshes.size(); i++)
+            {
+                meshes[i].DrawInstanced(shader);
+            }
         }
     }
 
+
 private:
+    unsigned int instanceCount = 0;
+    std::vector<glm::mat4> instanceMatrices;
+
     std::vector<Mesh> meshes;
     std::string directory;
 
@@ -214,6 +321,7 @@ private:
         // initializing vertices
         for (unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
+
             Vertex vertex;
 
             glm::vec3 vector3;
@@ -265,7 +373,10 @@ private:
             textures.insert(textures.end(), specularMaps.begin(), specularMaps.end()); // likewise as before
         }
 
-        return Mesh(vertices, indices, textures);
+        if (instanceCount == 0)
+            return Mesh(vertices, indices, textures);
+        else
+            return Mesh(instanceCount, instanceMatrices, vertices, indices, textures);
     }
 
     std::vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, TextureType internalType)

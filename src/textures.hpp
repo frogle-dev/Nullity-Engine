@@ -31,13 +31,13 @@ public:
         return subTexRes;
     }
 
-    void GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, int _maxTextures, Shader shader)
+    void GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, int _maxTextures, GLuint ubo)
     {
         maxTexLayers = _maxTextures;
         maxTexWidth = _maxTexWidth;
         maxTexHeight = _maxTexHeight;
 
-        shader.setVec2("bucketSize", glm::vec2(maxTexWidth, maxTexHeight));
+        SetUniformBufferData(ubo, 0, 8, glm::value_ptr(glm::vec2(maxTexWidth, maxTexHeight)));
 
         mipLevels = (int)std::floor(std::log2(maxTexWidth)) + 1;
 
@@ -185,12 +185,20 @@ public:
         glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
     }
 
-    void SendSubTexResArrayToShader(Shader &shader)
+    void SendSubTexResArrayToShader(GLuint ubo)
     {
-        for (int i = 0; i < subTexRes.size(); i++)
+        std::vector<float> packed;
+        packed.reserve(subTexRes.size() * 4);
+
+        for (auto& res : subTexRes)
         {
-            shader.setIVec2("subTexRes[" + std::to_string(i) + "]", subTexRes[i].x, subTexRes[i].y);
+            packed.push_back(res.x);
+            packed.push_back(res.y);
+            packed.push_back(0.0f);
+            packed.push_back(0.0f);
         }
+
+        SetUniformBufferData(ubo, 16, sizeof(float) * packed.size(), packed.data());
     }
 
 private:

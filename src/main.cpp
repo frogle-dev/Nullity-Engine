@@ -129,6 +129,13 @@ int main()
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, matricesUBO);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+    GLuint texArrayDataUBO;
+    glGenBuffers(1, &texArrayDataUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, texArrayDataUBO);
+    glBufferData(GL_UNIFORM_BUFFER, 1616, NULL, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, texArrayDataUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
     
     // rendering and shader stuff
     Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.frag");
@@ -154,18 +161,24 @@ int main()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
-    GLuint instanceVAO, instanceVBO;
-    glGenVertexArrays(1, &instanceVAO);
-    glGenBuffers(1, &instanceVBO);
-    glBindVertexArray(instanceVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), &vertices_cube, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+    // instancing
+    int instanceAmount = 100000;
+    int e = std::floor(std::cbrt(instanceAmount));
+    std::vector<glm::mat4> positions;
+    for (int x = 0; x < e; x++)
+    {
+        for (int z = 0; z < e; z++)
+        {
+            for (int y = 0; y < e; y ++)
+            {
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(x, y, z) * 2.0f);
+                positions.push_back(model);
+            }
+        }
+    }
 
-    
+        
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
@@ -180,7 +193,7 @@ int main()
     glActiveTexture(GL_TEXTURE0);
 
     objectShader.use();
-    TextureManager::Get().GenerateTextureArray(4096, 4096, 100, objectShader);
+    TextureManager::Get().GenerateTextureArray(4096, 4096, 100, texArrayDataUBO);
     
     GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
@@ -193,10 +206,13 @@ int main()
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     Model windfall("../models/Windfall/Windfall.obj");
+    Model dirt("../models/Dirt.obj", instanceAmount, positions); // instanced model
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
-    TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
+    TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
     
+
+    GLuint dirtTexture = TextureManager::Get().LoadStandaloneTexture("/home/jonah/Programming/Opengl/opengl-first-project/images/dirt.png");
 
     skyboxShader.use();
     skyboxShader.setInt("skybox", 0);
@@ -217,28 +233,6 @@ int main()
         glm::vec3( 0.0f,  0.0f, -3.0f)
     };
 
-    // instancing
-    glm::mat4 positions[100];
-    int index = 0;
-    for (int x = 0; x < 10; x += 1)
-    {
-        for (int z = 0; z < 10; z += 1)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(x, 0.0f, z));
-            positions[index] = model;
-            index++;
-        }
-    }
-
-    instancedShader.use();
-    for (int i = 0; i < 100; i++)
-    {
-        std::string name = "positions[" + std::to_string(i) + "]"; 
-        instancedShader.setMat4(name, positions[i]);
-    }
-    GLuint dirtTexture = TextureManager::Get().LoadStandaloneTexture("/home/jonah/Programming/Opengl/opengl-first-project/images/dirt.png");
-
 
     // imgui stuff
     bool demoWindow = false;
@@ -253,6 +247,7 @@ int main()
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
 
         // imgui
         ImGui_ImplOpenGL3_NewFrame();
@@ -283,6 +278,7 @@ int main()
         ImGui::Begin("Info", NULL, ImGuiWindowFlags_None);
         ImGui::Text("ms per frame: %f", msPerFrame);
         ImGui::Text("fps: %i", fps);
+        ImGui::Text("Total vertices loaded: %i", totalVertices);
         
         ImGui::Separator();
         ImGui::Text("Keymaps");
@@ -376,6 +372,9 @@ int main()
         ImGui::End();
         // imgui rendering
         ImGui::Render();
+
+
+        totalVertices = 0;
         
 
         gameFrameBuffer.Bind();
@@ -418,11 +417,11 @@ int main()
         objectShader.setFloat("spotLight.linear", 0.14f);
         objectShader.setFloat("spotLight.quadratic", 0.07f);
 
-        TextureManager::Get().SendSubTexResArrayToShader(objectShader); // send the tex res array to the frag shader
+        TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
 
         // rendering
         glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)viewWidth / viewHeight, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(80.0f), viewWidth / (float)viewHeight, 0.1f, 1000.0f);
 
         SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
         SetUniformBufferData(matricesUBO, 64, 64, glm::value_ptr(projection));
@@ -438,11 +437,7 @@ int main()
         windfall.Draw(objectShader);
 
         // drawing instanced cubes
-        instancedShader.use();
-        glBindVertexArray(instanceVAO);
-        glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_2D, dirtTexture);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100);
+        dirt.Draw(instancedShader);
         
         
         // drawing all light object cube thingies

@@ -13,8 +13,12 @@ in VS_OUT
 uniform samplerCube skybox;
 
 uniform sampler2DArray texArray;
-uniform ivec2 subTexRes[100]; // size should be same as tex array
-uniform vec2 bucketSize;
+
+layout (std140, binding = 1) uniform TexArrayData
+{
+    vec2 bucketSize;
+    vec2 subTexRes[100]; // size should be same as tex array
+};
 
 uniform vec3 viewPos;
 
