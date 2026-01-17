@@ -45,12 +45,11 @@ struct Material
     float shininess;
 };
 
-int totalVertices = 0;
 
 class Mesh
 {
 public:
-    unsigned int instanceCount;
+    unsigned int instanceCount = 0;
     std::vector<glm::mat4> instanceMatrices;
 
     std::vector<Vertex> vertices;
@@ -58,22 +57,16 @@ public:
     std::vector<Texture> textures;
 
 
-    Mesh(std::vector<Vertex>& _vertices, std::vector<unsigned int>& _indices, std::vector<Texture>& _textures) : instanceCount(instanceCount)
+    Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures)
+        : vertices(vertices), indices(indices), textures(textures)
     {
-        vertices = _vertices;
-        indices = _indices;
-        textures = _textures;
-
         SetupMesh();
     }
 
-    Mesh(unsigned int instanceCount, std::vector<glm::mat4>& instanceMatrices, std::vector<Vertex>& _vertices, std::vector<unsigned int>& _indices, std::vector<Texture>& _textures)
-        : instanceCount(instanceCount), instanceMatrices(instanceMatrices)
+    Mesh(unsigned int instanceCount, std::vector<glm::mat4>& instanceMatrices, 
+        std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures)
+        : instanceCount(instanceCount), instanceMatrices(instanceMatrices), vertices(vertices), indices(indices), textures(textures)
     {
-        vertices = _vertices;
-        indices = _indices;
-        textures = _textures;
-
         SetupMeshInstanced();
     }
     
@@ -131,8 +124,6 @@ public:
         shader.setInt("material.specularLayerCount", numSpecular);
         shader.setInt("material.emissionLayerCount", numEmission);
 
-        totalVertices+= vertices.size();
-
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, 0);
 
@@ -150,10 +141,8 @@ public:
 
         shader.setInt("layer", textures[0].layer);
 
-        totalVertices+= vertices.size() * instanceCount;
-
         glBindVertexArray(VAO);
-        glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, instanceCount);
+        glDrawElementsInstanced(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, 0, instanceCount);
 
         glBindVertexArray(0);
     }
@@ -161,7 +150,7 @@ public:
 
 private:
     // render buffers
-    unsigned int VAO, VBO, EBO; // vertex array object, vertex buffer object, element buffer object
+    GLuint VAO, VBO, EBO; // vertex array object, vertex buffer object, element buffer object
 
     void SetupMesh()
     {
@@ -321,7 +310,6 @@ private:
         // initializing vertices
         for (unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
-
             Vertex vertex;
 
             glm::vec3 vector3;
@@ -354,6 +342,7 @@ private:
         // initializing indices
         for (unsigned int i = 0; i < mesh->mNumFaces; i++)
         {
+            std::cout << mesh->mNumFaces << std::endl;
             aiFace face = mesh->mFaces[i];
             for(unsigned int j = 0; j <face.mNumIndices; j++)
             {
@@ -373,10 +362,10 @@ private:
             textures.insert(textures.end(), specularMaps.begin(), specularMaps.end()); // likewise as before
         }
 
-        if (instanceCount == 0)
-            return Mesh(vertices, indices, textures);
-        else
-            return Mesh(instanceCount, instanceMatrices, vertices, indices, textures);
+        // if (instanceCount == 0)
+        //     return Mesh(vertices, indices, textures);
+        // else
+        return Mesh(instanceCount, instanceMatrices, vertices, indices, textures);
     }
 
     std::vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, TextureType internalType)

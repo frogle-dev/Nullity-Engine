@@ -7,7 +7,7 @@ in VS_OUT
     vec3 texCoords;
 } fs_in;
 
-uniform samplerCube skybox;
+layout (binding = 1) uniform samplerCube skybox;
 
 void main()
 {

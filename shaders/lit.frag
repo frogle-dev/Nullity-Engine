@@ -10,9 +10,9 @@ in VS_OUT
 } fs_in;
 
 
-uniform samplerCube skybox;
+layout (binding = 1) uniform samplerCube skybox;
 
-uniform sampler2DArray texArray;
+layout (binding = 0) uniform sampler2DArray texArray;
 
 layout (std140, binding = 1) uniform TexArrayData
 {

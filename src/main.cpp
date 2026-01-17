@@ -162,7 +162,7 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     // instancing
-    int instanceAmount = 100000;
+    int instanceAmount = 1000;
     int e = std::floor(std::cbrt(instanceAmount));
     std::vector<glm::mat4> positions;
     for (int x = 0; x < e; x++)
@@ -197,16 +197,13 @@ int main()
     
     GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
-    objectShader.setInt("texArray", 0); // tex array should use tex unit 0
-    objectShader.setInt("skybox", 1);
-
     objectShader.setFloat("material.emissionStrength", 1.0f);
     objectShader.setFloat("material.shininess", 128.0f);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     Model windfall("../models/Windfall/Windfall.obj");
-    Model dirt("../models/Dirt.obj", instanceAmount, positions); // instanced model
+    Model dirt("../models/Dirt/Dirt.obj", positions.size(), positions); // instanced model
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
     TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
@@ -215,7 +212,6 @@ int main()
     GLuint dirtTexture = TextureManager::Get().LoadStandaloneTexture("/home/jonah/Programming/Opengl/opengl-first-project/images/dirt.png");
 
     skyboxShader.use();
-    skyboxShader.setInt("skybox", 0);
     std::vector<std::string> skyboxFaces = {
         "../images/skybox/right.jpg",
         "../images/skybox/left.jpg",
@@ -278,7 +274,6 @@ int main()
         ImGui::Begin("Info", NULL, ImGuiWindowFlags_None);
         ImGui::Text("ms per frame: %f", msPerFrame);
         ImGui::Text("fps: %i", fps);
-        ImGui::Text("Total vertices loaded: %i", totalVertices);
         
         ImGui::Separator();
         ImGui::Text("Keymaps");
@@ -373,10 +368,6 @@ int main()
         // imgui rendering
         ImGui::Render();
 
-
-        totalVertices = 0;
-        
-
         gameFrameBuffer.Bind();
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
@@ -431,10 +422,6 @@ int main()
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap); // binding skybox for reflections
 
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, -50.0f));
-        model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
-        objectShader.setMat4("model", model);
-        windfall.Draw(objectShader);
 
         // drawing instanced cubes
         dirt.Draw(instancedShader);
@@ -459,7 +446,7 @@ int main()
         SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
 
         glBindVertexArray(skyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glDepthFunc(GL_LESS);
