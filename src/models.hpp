@@ -21,6 +21,8 @@ struct Vertex
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoords;
+    glm::vec4 color;
+    float useTex;
 };
 
 enum class TextureType
@@ -35,14 +37,6 @@ struct Texture
     unsigned int layer;
     TextureType type;
     std::string path;
-};
-
-struct Material
-{
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-    glm::vec3 ambient;
-    float shininess;
 };
 
 
@@ -134,13 +128,15 @@ public:
     {
         shader.use();
 
-        GLuint texArrayID = TextureManager::Get().GetTexArrayID();
+        if (textures.size() > 0)
+        {
+            GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
 
-        shader.setInt("layer", textures[0].layer);
-
+            shader.setInt("layer", textures[0].layer);
+        }
         glBindVertexArray(VAO);
         glDrawElementsInstanced(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, 0, instanceCount);
 
@@ -202,6 +198,12 @@ private:
         // vertex texure coord attributre
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoords));
+        // vertex color
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+        // use texture or use material for vertex
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, useTex));
 
         GLuint matrixBuffer; // instance transformation matrices
         glGenBuffers(1, &matrixBuffer);
@@ -209,19 +211,19 @@ private:
         glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(glm::mat4), instanceMatrices.data(), GL_STATIC_DRAW);
 
         std::size_t vec4Size = sizeof(glm::vec4);
-        glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
-        glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
         glEnableVertexAttribArray(5);
-        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
         glEnableVertexAttribArray(6);
-        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+        glEnableVertexAttribArray(7);
+        glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+        glEnableVertexAttribArray(8);
+        glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
 
-        glVertexAttribDivisor(3, 1);
-        glVertexAttribDivisor(4, 1);
         glVertexAttribDivisor(5, 1);
         glVertexAttribDivisor(6, 1);
+        glVertexAttribDivisor(7, 1);
+        glVertexAttribDivisor(8, 1);
 
         glBindVertexArray(0);
     }
@@ -336,13 +338,25 @@ private:
                 vertex.texCoords = glm::vec2(0.0f, 0.0f);
             }
 
+            if (scene->mNumMaterials > mesh->mMaterialIndex) // use textures or material color
+            {
+                aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+                aiColor4D diffuse;
+                
+                if(aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &diffuse) == AI_SUCCESS)
+                {
+                    vertex.color = glm::vec4(diffuse.r, diffuse.g, diffuse.b, diffuse.a);
+                }
+
+                vertex.useTex = material->GetTextureCount(aiTextureType_DIFFUSE) > 0;
+            }
+
             vertices.push_back(vertex);
         }
 
         // initializing indices
         for (unsigned int i = 0; i < mesh->mNumFaces; i++)
         {
-            std::cout << mesh->mNumFaces << std::endl;
             aiFace face = mesh->mFaces[i];
             for(unsigned int j = 0; j <face.mNumIndices; j++)
             {
@@ -351,7 +365,7 @@ private:
         }
 
         
-        if (mesh->mMaterialIndex >= 0) // check if mesh contains materials
+        if (mesh->mMaterialIndex >= 0) // check if mesh contains tex materials
         {        
             aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
@@ -362,10 +376,11 @@ private:
             textures.insert(textures.end(), specularMaps.begin(), specularMaps.end()); // likewise as before
         }
 
-        // if (instanceCount == 0)
-        //     return Mesh(vertices, indices, textures);
-        // else
-        return Mesh(instanceCount, instanceMatrices, vertices, indices, textures);
+
+        if (instanceCount == 0)
+            return Mesh(vertices, indices, textures);
+        else
+            return Mesh(instanceCount, instanceMatrices, vertices, indices, textures);
     }
 
     std::vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, TextureType internalType)
@@ -397,25 +412,4 @@ private:
         }
         return textures;
     }
-
-    // Material LoadMaterial(aiMaterial* mat) 
-    // {
-    //     Material material;
-    //     aiColor3D color(0.f, 0.f, 0.f);
-    //     float shininess;
-        
-    //     mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-    //     material.diffuse = glm::vec3(color.r, color.b, color.g);
-        
-    //     mat->Get(AI_MATKEY_COLOR_AMBIENT, color);
-    //     material.ambient = glm::vec3(color.r, color.b, color.g);
-        
-    //     mat->Get(AI_MATKEY_COLOR_SPECULAR, color);
-    //     material.specular = glm::vec3(color.r, color.b, color.g);
-        
-    //     mat->Get(AI_MATKEY_SHININESS, shininess);
-    //     material.shininess = shininess;
-        
-    //     return material;
-    // }
 };

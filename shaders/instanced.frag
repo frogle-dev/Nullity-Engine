@@ -14,6 +14,8 @@ layout (std140, binding = 1) uniform TexArrayData
 in VS_OUT 
 {
     vec2 texCoord;
+    vec4 color;
+    float useTex;
 } fs_in;
 
 vec4 sampleTexArraySubtex(int layer)
@@ -34,5 +36,12 @@ vec4 sampleTexArraySubtex(int layer)
 
 void main()
 {
-    FragColor = sampleTexArraySubtex(layer);
+    if (fs_in.useTex > 0.5)
+    {
+        FragColor = sampleTexArraySubtex(layer);
+    }
+    else
+    {
+        FragColor = fs_in.color;
+    }
 }

@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <random>
 #include <iostream>
 #include <map>
 
@@ -142,6 +143,7 @@ int main()
     Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.frag");
     Shader skyboxShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.frag");
     Shader instancedShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.frag"); 
+    Shader grassShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/grass.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/grass.frag");
 
     // light block setup
     GLuint lightVAO, VBO;
@@ -162,19 +164,23 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     // instancing
-    int instanceAmount = 1000;
-    int e = std::floor(std::cbrt(instanceAmount));
+    std::random_device device;
+    std::mt19937 rng;
+    rng.seed(device());
+    std::uniform_int_distribution<int> intDist(-10, 10);
+    std::uniform_int_distribution<int> heightDist(2, 3);
+
     std::vector<glm::mat4> positions;
-    for (int x = 0; x < e; x++)
+    for (int x = 0; x < 1000; x++)
     {
-        for (int z = 0; z < e; z++)
+        for (int z = 0; z < 1000; z++)
         {
-            for (int y = 0; y < e; y ++)
-            {
-                glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, glm::vec3(x, y, z) * 2.0f);
-                positions.push_back(model);
-            }
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(x/10.0f + intDist(rng), 0.0f, z/10.0f + intDist(rng)));
+            model = glm::scale(model, glm::vec3(0.1f, heightDist(rng) / 10.0f, 0.1f));
+            model = glm::rotate(model, glm::radians((float)(intDist(rng) * 36)), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            positions.push_back(model);
         }
     }
 
@@ -184,7 +190,7 @@ int main()
 
     // enable depth testing and face culling
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
+    // glEnable(GL_CULL_FACE);
 
     glEnable(GL_BLEND); 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -202,8 +208,7 @@ int main()
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    Model windfall("../models/Windfall/Windfall.obj");
-    Model dirt("../models/Dirt/Dirt.obj", positions.size(), positions); // instanced model
+    Model grass("../models/Grass/Grass.obj", positions.size(), positions);
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
     TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
@@ -423,8 +428,7 @@ int main()
 
         glm::mat4 model = glm::mat4(1.0f);
 
-        // drawing instanced cubes
-        dirt.Draw(instancedShader);
+        grass.Draw(grassShader);
         
         
         // drawing all light object cube thingies
