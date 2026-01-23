@@ -15,7 +15,7 @@ void main()
     vec4 endColor = vec4(0.04, 0.54, 0.06, 1.0);
 
     float mixVal = distance(fs_in.texCoord, vec2(0,1));
-    vec4 color = mix(endColor, startColor, mixVal);
+    vec4 color = mix(endColor, startColor, mixVal - 0.1);
 
     FragColor = color.xyzw;
 }

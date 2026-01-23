@@ -17,34 +17,24 @@
 #include "models.hpp"
 #include "framebuffer.h"
 
+#include "systems.hpp"
+#include "player.hpp"
+#include "render.hpp"
+
 #include <algorithm>
 #include <cmath>
-#include <random>
 #include <iostream>
-#include <map>
 
 
 void window_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-void update(GLFWwindow* window);
-
-
 const int initWidth = 1280, initHeight = 720;
 int viewWidth = initWidth, viewHeight = initHeight;
 
-float deltaTime = 0.0f;
-int fps;
-float msPerFrame;
-
 Camera camera;
 float lastMouseX = initWidth/2, lastMouseY = initHeight/2;
-
-glm::vec3 feetPos = glm::vec3(0.0f, 0.0f, 2.0f);
-glm::vec3 feetVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
-const float bodyHeight = 1.0f;
-
 
 int main()
 {
@@ -164,33 +154,12 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     // instancing
-    std::random_device device;
-    std::mt19937 rng;
-    rng.seed(device());
-    std::uniform_int_distribution<int> intDist(-10, 10);
-    std::uniform_int_distribution<int> heightDist(2, 3);
-
-    std::vector<glm::mat4> positions;
-    for (int x = 0; x < 1000; x++)
-    {
-        for (int z = 0; z < 1000; z++)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(x/10.0f + intDist(rng), 0.0f, z/10.0f + intDist(rng)));
-            model = glm::scale(model, glm::vec3(0.1f, heightDist(rng) / 10.0f, 0.1f));
-            model = glm::rotate(model, glm::radians((float)(intDist(rng) * 36)), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            positions.push_back(model);
-        }
-    }
-
-        
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
     // enable depth testing and face culling
     glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
 
     glEnable(GL_BLEND); 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -208,7 +177,6 @@ int main()
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    Model grass("../models/Grass/Grass.obj", positions.size(), positions);
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
     TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
@@ -227,12 +195,18 @@ int main()
     };
     GLuint skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
 
-    glm::vec3 pointLightPos[] = {
-        glm::vec3( 0.7f,  5.0f,  2.0f),
-        glm::vec3( 2.3f, -3.3f, -4.0f),
-        glm::vec3(-4.0f,  2.0f, -12.0f),
-        glm::vec3( 0.0f,  0.0f, -3.0f)
-    };
+    // object loading
+    entt::registry registry;
+
+    auto dirt = registry.create();
+    registry.emplace<Transform>(dirt, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.01f));
+    registry.emplace<WorldObject>(dirt, objectShader);
+    registry.emplace<ObjectModel>(dirt, Model("../models/Windfall/Windfall.obj"), true);
+
+    auto player = registry.create();
+    registry.emplace<Transform>(player);
+    registry.emplace<Player>(player);
+    registry.emplace<Velocity>(player);
 
 
     // imgui stuff
@@ -242,12 +216,19 @@ int main()
     gameFrameBuffer.Unbind();
 
     // render loop
+    float deltaTime = 0.0f;
+    int fps;
+    float msPerFrame;
+
     float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        
+        msPerFrame = deltaTime * 1000;
+        fps = 1000 / msPerFrame;
 
 
         // imgui
@@ -380,38 +361,13 @@ int main()
 
 
         // game loop stuff
-        update(window);
-        
+        PlayerUpdate(registry, camera, deltaTime);
+
+
         objectShader.use();
         // lighting
         objectShader.setVec3("viewPos", camera.position);
 
-        // directional light
-        objectShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-        objectShader.setVec3("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        objectShader.setVec3("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
-        objectShader.setVec3("dirLight.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-
-        // point light
-        objectShader.setVec3("pointLights[0].position", pointLightPos[0]);
-        objectShader.setVec3("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        objectShader.setVec3("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-        objectShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-        objectShader.setFloat("pointLights[0].constant", 1.0f);
-        objectShader.setFloat("pointLights[0].linear", 0.027f);
-        objectShader.setFloat("pointLights[0].quadratic", 0.0028f);
-
-        // spot light
-        objectShader.setVec3("spotLight.position", glm::vec3(0.0f, 1.0f, 4.0f));
-        objectShader.setVec3("spotLight.direction", glm::vec3(1.0f, 0.0f, 0.0f));
-        objectShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-        objectShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-        objectShader.setVec3("spotLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        objectShader.setVec3("spotLight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
-        objectShader.setVec3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-        objectShader.setFloat("spotLight.constant", 1.0f);
-        objectShader.setFloat("spotLight.linear", 0.14f);
-        objectShader.setFloat("spotLight.quadratic", 0.07f);
 
         TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
 
@@ -423,25 +379,14 @@ int main()
         SetUniformBufferData(matricesUBO, 64, 64, glm::value_ptr(projection));
         
         // drawing scene
+        WorldObjectSystem(registry);
+
+        DrawSystem(registry);
+
+
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap); // binding skybox for reflections
 
-        glm::mat4 model = glm::mat4(1.0f);
-
-        grass.Draw(grassShader);
-        
-        
-        // drawing all light object cube thingies
-        glBindVertexArray(lightVAO);
-        lightSourceShader.use();
-        
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, pointLightPos[0]);
-        lightSourceShader.setMat4("model", model);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        // drawing skybox
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
 
@@ -494,95 +439,6 @@ int main()
 }
 
 
-// game loop stuff
-bool grounded = false;
-bool focus = true;
-bool wireframe = false;
-void update(GLFWwindow* window)
-{
-    // fps
-    msPerFrame = deltaTime * 1000;
-    fps = 1000 / msPerFrame;
-
-    // utility
-    if (isActionJustPressed("focus"))
-    {
-        focus = !focus;
-
-        if (focus)
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        else
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    }
-
-    if (isActionJustPressed("wireframe"))
-    {
-        wireframe = !wireframe;
-
-        if (wireframe)
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        else
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-
-
-    // movement
-    const float moveSpeed = 5.0f; 
-    glm::vec3 moveDir(0.0f);
-    feetVelocity = glm::vec3(0.0f, feetVelocity.y, 0.0f);
-    if (isActionPressed("forward"))
-    {
-        moveDir -= camera.straightFront;
-    }
-    if (isActionPressed("backward"))
-    {
-        moveDir += camera.straightFront;
-    }
-    if (isActionPressed("left"))
-    {
-        moveDir -= camera.right;
-    }
-    if (isActionPressed("right"))
-    {
-        moveDir += camera.right;
-    }
-
-    if (glm::length(moveDir) > 0.0f)
-    {
-        moveDir = glm::normalize(moveDir);
-        feetVelocity.x = moveDir.x * moveSpeed; 
-        feetVelocity.z = moveDir.z * moveSpeed;
-    }
-
-    
-    const float jumpSpeed = 7.0f; 
-    if (isActionPressed("jump") && grounded)
-    {
-        grounded = false;
-        feetVelocity.y = jumpSpeed;
-    }
-
-    const float gravity = -9.81f * 2.0f; 
-    feetVelocity.y += gravity * deltaTime;
-
-    feetPos += feetVelocity * deltaTime;
-
-    if (feetPos.y <= 1.0f)
-    {
-        grounded = true;
-        feetPos.y = 1.0f;
-        feetVelocity.y = 0.0f;
-    }
-    else
-    {
-        grounded = false;
-    }
-
-    camera.position = glm::vec3(feetPos.x, feetPos.y + bodyHeight, feetPos.z);
-
-    keysRefresh();
-}
-
 void window_size_callback(GLFWwindow* window, int width, int height)
 {
     // letterbox scaling
@@ -617,7 +473,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         firstMouse = false;
     } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
 
-    if (focus)
+    // if (focus)
     {
         float xOffset = xpos - lastMouseX;
         float yOffset = lastMouseY - ypos;
