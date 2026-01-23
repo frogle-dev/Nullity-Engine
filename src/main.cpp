@@ -134,6 +134,7 @@ int main()
     Shader skyboxShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.frag");
     Shader instancedShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.frag"); 
     Shader grassShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/grass.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/grass.frag");
+    Shader unlitShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/unlit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/unlit.frag");
 
     // light block setup
     GLuint lightVAO, VBO;
@@ -161,8 +162,8 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    glEnable(GL_BLEND); 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glEnable(GL_BLEND); 
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // texture stuff
     glActiveTexture(GL_TEXTURE0);
@@ -182,8 +183,6 @@ int main()
     TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
     
 
-    GLuint dirtTexture = TextureManager::Get().LoadStandaloneTexture("/home/jonah/Programming/Opengl/opengl-first-project/images/dirt.png");
-
     skyboxShader.use();
     std::vector<std::string> skyboxFaces = {
         "../images/skybox/right.jpg",
@@ -200,7 +199,7 @@ int main()
 
     auto dirt = registry.create();
     registry.emplace<Transform>(dirt, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.01f));
-    registry.emplace<WorldObject>(dirt, objectShader);
+    registry.emplace<WorldObject>(dirt, unlitShader);
     registry.emplace<ObjectModel>(dirt, Model("../models/Windfall/Windfall.obj"), true);
 
     auto player = registry.create();
@@ -365,9 +364,7 @@ int main()
 
 
         objectShader.use();
-        // lighting
         objectShader.setVec3("viewPos", camera.position);
-
 
         TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
 
@@ -379,17 +376,15 @@ int main()
         SetUniformBufferData(matricesUBO, 64, 64, glm::value_ptr(projection));
         
         // drawing scene
-        WorldObjectSystem(registry);
-
-        DrawSystem(registry);
-
-
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap); // binding skybox for reflections
 
+        WorldObjectSystem(registry);
+        DrawSystem(registry);
+
+        // skybox
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
-
         view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 
         SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
