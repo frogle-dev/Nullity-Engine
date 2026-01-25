@@ -42,6 +42,7 @@ target_include_directories(imgui PUBLIC lib/imgui/ lib/imgui/backends/)
 add_executable(first_opengl 
 src/main.cpp
 src/camera.cpp
+src/debug_output.cpp
 lib/glad.c
 )
 
