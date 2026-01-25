@@ -20,13 +20,6 @@ struct Material
 {
     int diffuseLayerCount;
     int diffuseStartLayer;
-    int specularLayerCount;
-    int specularStartLayer;
-    int emissionLayerCount;
-    int emissionStartLayer;
-
-    float emissionStrength;
-    float shininess;
 };
 uniform Material material;
 
@@ -46,8 +39,21 @@ vec4 sampleTexArraySubtex(int layer)
     return textureColor;
 }
 
+vec4 calcDiffuse()
+{
+    vec4 diffuse = vec4(0.0);
+    if (material.diffuseLayerCount > 0)
+    {
+        for (int i = 0; i < material.diffuseLayerCount; i++)
+        {
+            diffuse += sampleTexArraySubtex(material.diffuseStartLayer + i);
+        }
+    }
+
+    return diffuse;
+}
 
 void main()
 {
-    FragColor = sampleTexArraySubtex(material.diffuseStartLayer);
+    FragColor = calcDiffuse();
 }

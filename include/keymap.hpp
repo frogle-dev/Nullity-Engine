@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "../lib/json.hpp"
+#include "json.hpp"
 #include <fstream>
 
 #include <unordered_map>

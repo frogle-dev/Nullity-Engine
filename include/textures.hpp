@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../lib/glad.h"
+#include "glad.h"
 #include <GLFW/glfw3.h>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../lib/stb_image.h"
+#include "stb_image.h"
 
 #include "shader.hpp"
 

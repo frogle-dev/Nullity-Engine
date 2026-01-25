@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/glad.h"
+#include "glad.h"
 #include <GLFW/glfw3.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -9,8 +9,14 @@
 #include "models.hpp"
 #include "shader.hpp"
 
+#include <string>
 #include <entt/entt.hpp>
 
+
+struct DisplayName
+{
+    std::string name;
+};
 
 struct WorldObject
 {

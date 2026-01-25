@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "../lib/glad.h"
+#include "glad.h"
 #include <GLFW/glfw3.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -44,7 +44,9 @@ public:
 
     void Rescale(float width, float height)
     {
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         GenerateFrameBufferData(width, height);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     void Bind()

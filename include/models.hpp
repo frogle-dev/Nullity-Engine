@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/glad.h"
+#include "glad.h"
 #include <GLFW/glfw3.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -113,10 +113,12 @@ public:
             }
         }
 
-
-        shader.setInt("material.diffuseLayerCount", numDiffuse);
-        shader.setInt("material.specularLayerCount", numSpecular);
-        shader.setInt("material.emissionLayerCount", numEmission);
+        if (numDiffuse)
+            shader.setInt("material.diffuseLayerCount", numDiffuse);
+        if (numSpecular)
+            shader.setInt("material.specularLayerCount", numSpecular);
+        if (numEmission)
+            shader.setInt("material.emissionLayerCount", numEmission);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, 0);

@@ -1,22 +1,25 @@
-#include "../lib/glad.h"
+#include "glad.h"
 #include <GLFW/glfw3.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "../lib/imgui/imgui.h"
-#include "../lib/imgui/backends/imgui_impl_glfw.h"
-#include "../lib/imgui/backends/imgui_impl_opengl3.h"
+#include "imgui/imgui.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
 
 #include "shader.hpp"
 #include "primitives.hpp"
 #include "keymap.hpp"
-#include "helpers.hpp"
 #include "camera.hpp"
 #include "textures.hpp"
 #include "models.hpp"
-#include "framebuffer.h"
+#include "framebuffer.hpp"
 
+#include "initialization.hpp"
+#include "utility.hpp"
+#include "inspector.hpp"
+#include "gui.hpp"
 #include "systems.hpp"
 #include "player.hpp"
 #include "render.hpp"
@@ -38,7 +41,6 @@ float lastMouseX = initWidth/2, lastMouseY = initHeight/2;
 
 int main()
 {
-    // initialization
     GLFWwindow* window;
     if (!init(window, initWidth, initHeight))
         return -1;
@@ -50,68 +52,21 @@ int main()
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetKeyCallback(window, key_callback);
 
-    // imgui init
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; 
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    ImguiInit(window);
+ImGuiIO& io = ImGui::GetIO();
     
-    // imgui styling
-    ImGuiStyle& style = ImGui::GetStyle();
-    ImVec4 pink = ImVec4(0.725f, 0.451f, 0.459f, 1.0f);
-    ImVec4 gray = ImVec4(0.176f, 0.176f, 0.204f, 1.0f);
-    ImVec4 dark_gray = ImVec4(0.155f, 0.155f, 0.183f, 1.0f);
-    ImVec4 light_pink = ImVec4(0.808f, 0.694f, 0.745f, 1.0f);
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        style.WindowRounding = 5.0f;
-        style.ChildRounding = 2.5f;
-        style.FrameRounding = 2.5f;
-        style.TabBarOverlineSize = 0.0f;
-        
-        // windows
-        style.Colors[ImGuiCol_TitleBg] = dark_gray;
-        style.Colors[ImGuiCol_TitleBgActive] = dark_gray;
-        style.Colors[ImGuiCol_TabActive] = light_pink;
-        style.Colors[ImGuiCol_TabHovered] = light_pink;
-        style.Colors[ImGuiCol_TabDimmed] = pink;
-        style.Colors[ImGuiCol_TabDimmedSelected] = pink;
-        style.Colors[ImGuiCol_Tab] = pink;
-        style.Colors[ImGuiCol_TabUnfocused] = pink;
-        style.Colors[ImGuiCol_TabUnfocusedActive] = pink;
-        style.Colors[ImGuiCol_TabSelected] = light_pink;
-        style.Colors[ImGuiCol_WindowBg] = gray;
-        style.Colors[ImGuiCol_PopupBg] = gray;
-        style.Colors[ImGuiCol_Border] = pink;
-        style.Colors[ImGuiCol_ResizeGrip] = pink;
-        style.Colors[ImGuiCol_ResizeGripActive] = light_pink;
-        style.Colors[ImGuiCol_ResizeGripHovered] = light_pink;
-        
-        // menu bar
-        style.Colors[ImGuiCol_MenuBarBg] = dark_gray;
-        style.Colors[ImGuiCol_Header] = pink;
-        style.Colors[ImGuiCol_HeaderHovered] = light_pink;
-        style.Colors[ImGuiCol_HeaderActive] = light_pink;
-
-        // list
-        style.Colors[ImGuiCol_FrameBg] = dark_gray;
-
-        // buttons
-        style.Colors[ImGuiCol_Button] = pink;
-        style.Colors[ImGuiCol_ButtonActive] = light_pink;
-        style.Colors[ImGuiCol_ButtonHovered] = light_pink;
-    }
-    
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init("#version 460");
-
     // setup keybinds from json file
-    std::string cur_actionName;
-    std::vector<int> cur_keycodes;
     reloadConfigKeymaps();
-    
+
+
+    Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.frag");
+    Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.frag");
+    Shader skyboxShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.frag");
+    Shader instancedShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.frag"); 
+    Shader grassShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/grass.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/grass.frag");
+    Shader unlitShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/unlit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/unlit.frag");
+
     // uniform buffers
     GLuint matricesUBO;
     glGenBuffers(1, &matricesUBO);
@@ -128,23 +83,6 @@ int main()
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     
-    // rendering and shader stuff
-    Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.frag");
-    Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.frag");
-    Shader skyboxShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.frag");
-    Shader instancedShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.frag"); 
-    Shader grassShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/grass.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/grass.frag");
-    Shader unlitShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/unlit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/unlit.frag");
-
-    // light block setup
-    GLuint lightVAO, VBO;
-    glGenVertexArrays(1, &lightVAO);
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), &vertices_cube, GL_STATIC_DRAW);
-    glBindVertexArray(lightVAO);
-    setLightSourceVertAttribs();
-
     GLuint skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
     glGenBuffers(1, &skyboxVBO);
@@ -178,7 +116,6 @@ int main()
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
     TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
     
@@ -198,11 +135,13 @@ int main()
     entt::registry registry;
 
     auto dirt = registry.create();
+    registry.emplace<DisplayName>(dirt, "dirt");
     registry.emplace<Transform>(dirt, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.01f));
     registry.emplace<WorldObject>(dirt, unlitShader);
     registry.emplace<ObjectModel>(dirt, Model("../models/Windfall/Windfall.obj"), true);
 
     auto player = registry.create();
+    registry.emplace<DisplayName>(player, "player");
     registry.emplace<Transform>(player);
     registry.emplace<Player>(player);
     registry.emplace<Velocity>(player);
@@ -210,7 +149,6 @@ int main()
 
     // imgui stuff
     bool demoWindow = false;
-    bool changingKeybind = false;
 
     gameFrameBuffer.Unbind();
 
@@ -255,81 +193,9 @@ int main()
             ImGui::ShowDemoWindow();
         }
         
-        // info panel for fps/ms per frame and keymaps
-        ImGui::Begin("Info", NULL, ImGuiWindowFlags_None);
-        ImGui::Text("ms per frame: %f", msPerFrame);
-        ImGui::Text("fps: %i", fps);
-        
-        ImGui::Separator();
-        ImGui::Text("Keymaps");
-        ImGui::BeginChild("Keymaps");
-        auto& bindings = getConfigKeymaps();
-        for (auto& [actionName, keycodes] : bindings)
-        {
-            if (ImGui::Button(actionName.c_str()))
-            {
-                cur_actionName = actionName;
-                changingKeybind = true;
-                ImGui::OpenPopup("Change Keymap?");
-            }
-        }
-        if (changingKeybind)
-        {
-            cur_keycodes = bindings[cur_actionName];
-        }
-
-        if(ImGui::BeginPopupModal("Change Keymap?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ImGui::Text("Changing action: %s", cur_actionName.c_str());
-            ImGui::Text("Press a key, then click 'add' or 'change' to assign the currently pressed key to that slot");
-            
-            ImGui::Separator();
-            ImGui::Text("Press any key: %i", currentScancodePress);
-
-            if(ImGui::BeginListBox("Current assigned keycodes"))
-            {
-                for (int i = 0; i < cur_keycodes.size(); i++)
-                {
-                    int key = cur_keycodes[i];
-                    ImGui::Text("%i", key);
-                    ImGui::SameLine();
-
-                    ImGui::PushID(key + i);
-                    if (ImGui::Button("Change"))
-                    {
-                        setConfigKeymap(cur_actionName, false, currentScancodePress, i);
-                        reloadConfigKeymaps();
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Remove"))
-                    {
-                        removeConfigKeymap(cur_actionName, i);
-                        reloadConfigKeymaps();
-                    }
-                    ImGui::PopID();
-                }
-                if(ImGui::Button("Add"))
-                {
-                    setConfigKeymap(cur_actionName, true, currentScancodePress);
-                    reloadConfigKeymaps();
-                }
-                ImGui::EndListBox();
-            }
-
-            if (ImGui::Button("Close")) 
-            { 
-                ImGui::CloseCurrentPopup(); 
-                changingKeybind = false;
-            }
-            ImGui::EndPopup();
-        }
-        ImGui::EndChild();
-        ImGui::End();
-        
-        // inspector window for modifying properties of objects
-        ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_None);
-        ImGui::Text("Entity: ");
-        ImGui::End();
+        InfoWindow(msPerFrame, fps);
+        DebugOutputWindow();
+        InspectorWindow(registry);
 
         ImGui::Begin("Game");
         {
@@ -360,6 +226,7 @@ int main()
 
 
         // game loop stuff
+        UtilityKeybinds(window);
         PlayerUpdate(registry, camera, deltaTime);
 
 
@@ -417,9 +284,6 @@ int main()
     }
     
     // end of process life
-    // glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &lightVAO);
     gameFrameBuffer.Cleanup();
     objectShader.deleteProgram();
     lightSourceShader.deleteProgram();
@@ -468,7 +332,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         firstMouse = false;
     } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
 
-    // if (focus)
+    if (focus)
     {
         float xOffset = xpos - lastMouseX;
         float yOffset = lastMouseY - ypos;
