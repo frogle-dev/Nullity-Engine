@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "shader.hpp"
-#include "debug_output.hpp"
+#include "debugging.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"

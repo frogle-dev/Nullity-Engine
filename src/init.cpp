@@ -3,10 +3,11 @@
 #include "glad.h"
 #include <GLFW/glfw3.h>
 
-#include <iostream>
+#include <sstream>
 
+#include "debugging.hpp"
 #include "shader.hpp"
-#include "debug_output.hpp"
+#include "debugging.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
@@ -27,7 +28,10 @@ bool init(GLFWwindow *&windowID, int width, int height)
     windowID = glfwCreateWindow(width, height, "First OpenGL", NULL, NULL);
     if (windowID == NULL)
     {
-        std::cout << "(Initialization): Error: Failed to create GLFW window" << std::endl;
+        std::ostringstream oss;
+        oss << "(Initialization): Error: Failed to create GLFW window" << std::endl;
+        DebugLog(oss);
+        
         glfwTerminate();
         return false;
     }
@@ -37,7 +41,9 @@ bool init(GLFWwindow *&windowID, int width, int height)
     
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "(Initialization): Error: Failed to initialize GLAD" << std::endl;
+        std::ostringstream oss;
+        oss << "(Initialization): Error: Failed to initialize GLAD" << std::endl;
+        DebugLog(oss);
         return false;
     }
 

@@ -1,5 +1,7 @@
 #include "textures.hpp"
 
+#include "debugging.hpp"
+
 #include "glad.h"
 #include <GLFW/glfw3.h>
 
@@ -61,7 +63,11 @@ GLuint TextureManager::LoadStandaloneTexture(std::string path)
 
     if (!data)
     {
-        std::cout << "(Texture Manager): Texture Error: Failed to load texture" << std::endl;
+        std::ostringstream oss;
+        oss << "(Texture Manager): Texture Error: Failed to load texture" << std::endl;
+
+        DebugLog(oss);
+
         return -1;
     }
     
@@ -86,7 +92,10 @@ int TextureManager::LoadTextureIntoTexArray(std::string path, std::string direct
 {
     if (nextTexLayer >= maxTexLayers)
     {
-        std::cout << "(Texture Manager): Texture Array Error: cant have more textures than max specified for texture array" << std::endl;
+        std::ostringstream oss;
+        oss << "(Texture Manager): Texture Array Error: cant have more textures than max specified for texture array" << std::endl;
+
+        DebugLog(oss);
         return -1;
     }
 
@@ -96,20 +105,29 @@ int TextureManager::LoadTextureIntoTexArray(std::string path, std::string direct
 
     if (!data)
     {
-        std::cout << "(Texture Manager): Texture Array Error: Failed to load texture" << std::endl;
+        std::ostringstream oss;
+        oss << "(Texture Manager): Texture Array Error: Failed to load texture" << std::endl;
+
+        DebugLog(oss);
         return -1;
     }
     
     if (width > maxTexWidth || height > maxTexHeight)
     {
-        std::cout << "(Texture Manager): Texture Array Error: width and height are larger than texture array width and height" << std::endl;
+        std::ostringstream oss;
+        oss << "(Texture Manager): Texture Array Error: width and height are larger than texture array width and height" << std::endl;
+
+        DebugLog(oss);
         return -1;
     }
 
     if (width != maxTexWidth || height != maxTexHeight)
     {
-        std::cout << "(Texture Manager): Texture Array Warning: width and height do not match texture array width and height, "
+        std::ostringstream oss;
+        oss << "(Texture Manager): Texture Array Warning: width and height do not match texture array width and height, "
         "texture will still be inserted but will not take up the full resolution." << std::endl;
+
+        DebugLog(oss);
     }
 
 
@@ -152,8 +170,13 @@ GLuint TextureManager::LoadCubemap(std::vector<std::string> faces)
         unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &numChannels, 0);
         if (!data)
         {
-            std::cout << "(Texture Manager): Texture Error: Failed to load cubemap" << std::endl;
+            std::ostringstream oss;
+            oss << "(Texture Manager): Texture Error: Failed to load cubemap" << std::endl;
+
+            DebugLog(oss);
             stbi_image_free(data);
+
+            return -1;
         }
         else
         {

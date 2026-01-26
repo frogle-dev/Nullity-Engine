@@ -6,6 +6,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "debugging.hpp"
+
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -47,7 +49,10 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     }
     catch(std::ifstream::failure e)
     {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        std::ostringstream oss;
+        oss << "(Shader): Error: File not succesfully read" << std::endl;
+
+        DebugLog(oss);
     }
     const char* vertexShaderCode = vertexCode.c_str();
     const char* fragmentShaderCode = fragmentCode.c_str();
@@ -90,58 +95,65 @@ void Shader::deleteProgram()
     glDeleteProgram(shaderProgramID);
 }
 // utility uniform functions
-void Shader::setBool(const std::string &name, bool value) const
-{
-    glUniform1i(glGetUniformLocation(shaderProgramID, name.c_str()), (int)value);
-}
 void Shader::setInt(const std::string &name, int value) const
 {
-    int loc = glGetUniformLocation(shaderProgramID, name.c_str());
-    glUniform1i(loc, value);
-
-    if (loc == -1) std::cout << "(Shader): Error: Uniform not found " << name << std::endl;
+    glUniform1i(getUniformLoc(name), value);
 }
 void Shader::setIVec2(const std::string &name, int value1, int value2) const
 {
-    int loc = glGetUniformLocation(shaderProgramID, name.c_str());
-
-    if (loc == -1) std::cout << "(Shader): Error: Uniform not found " << name << std::endl;
-
-    glUniform2i(loc, value1, value2);
+    glUniform2i(getUniformLoc(name), value1, value2);
 }
 void Shader::setFloat(const std::string &name, float value) const
 {
-    glUniform1f(glGetUniformLocation(shaderProgramID, name.c_str()), value);
+    glUniform1f(getUniformLoc(name), value);
 }
 void Shader::setMat4(const std::string &name, glm::mat4 value) const
 {
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+    glUniformMatrix4fv(getUniformLoc(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 void Shader::setMat3(const std::string &name, glm::mat3 value) const
 {
-    glUniformMatrix3fv(glGetUniformLocation(shaderProgramID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+    glUniformMatrix3fv(getUniformLoc(name), 1, GL_FALSE, glm::value_ptr(value));
 }
 void Shader::setVec3(const std::string &name, glm::vec3 value) const
 {
-    glUniform3f(glGetUniformLocation(shaderProgramID, name.c_str()), value.x, value.y, value.z);
+    glUniform3f(getUniformLoc(name), value.x, value.y, value.z);
 }
 void Shader::setVec2(const std::string &name, glm::vec2 value) const
 {
-    glUniform2f(glGetUniformLocation(shaderProgramID, name.c_str()), value.x, value.y);
+    glUniform2f(getUniformLoc(name), value.x, value.y);
 }
 
+
+GLint Shader::getUniformLoc(const std::string& name) const
+{
+    GLint loc = glGetUniformLocation(shaderProgramID, name.c_str());
+
+    std::ostringstream oss;
+    if (loc == -1)
+    {
+        oss << "(Shader): Error: uniform not found" << name << std::endl;
+        DebugLog(oss);
+    } 
+
+    return loc;
+}
 
 void Shader::checkCompileErrors(unsigned int shader, std::string type)
 {
     int success;
     char infoLog[1024];
+    std::ostringstream oss;
     if (type != "PROGRAM")
     {
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success)
         {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            std::cout << "Error: shader compilation error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+
+            oss << "Error: shader compilation error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+
+            DebugLog(oss);
         }
     }
     else
@@ -150,7 +162,10 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
         if (!success)
         {
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            std::cout << "Error: program linking error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+
+            oss << "Error: program linking error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+
+            DebugLog(oss);
         }
     }
 }

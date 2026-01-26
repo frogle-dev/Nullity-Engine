@@ -6,7 +6,7 @@
 
 #include "glad.h"
 
-#include "debug_output.hpp"
+#include "debugging.hpp"
 
 #include <vector>
 #include <string>
@@ -19,18 +19,13 @@ void DebugOutputWindow()
     ImGui::Begin("Debug Output");
 
     std::ifstream fin;
-    fin.open("DebugLog.txt", std::ofstream::out | std::ofstream::trunc); // trunc removes contents of file
+    fin.open("DebugLog.txt");
 
-    if (ImGui::BeginListBox("Debug"))
+    while(!fin.eof())
     {
-        while(!fin.eof())
-        {
-            std::string line;
-            std::getline(fin, line);
-            ImGui::TextWrapped("%s", line.c_str());
-        }
-
-        ImGui::EndListBox();
+        std::string line;
+        std::getline(fin, line);
+        ImGui::TextWrapped("%s", line.c_str());
     }
 
     fin.close();
@@ -38,11 +33,12 @@ void DebugOutputWindow()
     ImGui::End();
 }
 
-void OutputDebugText(std::ostream& out, std::ostringstream& oss)
-{
-    out << "---------------" << std::endl;
 
-    out << oss.str() << std::endl;
+std::ofstream fout("DebugLog.txt");
+void DebugLog(std::ostringstream& oss)
+{
+    fout << "---------------" << std::endl;
+    fout << oss.str() << std::endl;
 }
 
 void APIENTRY glDebugOutput(GLenum source, 
@@ -100,9 +96,5 @@ void APIENTRY glDebugOutput(GLenum source,
     oss << typeText << std::endl;
     oss << severityText << std::endl;
 
-    std::ofstream fout;
-    fout.open("DebugLog.txt");
-    OutputDebugText(fout, oss);
-    fout.close();
-    OutputDebugText(std::cout, oss);
+    DebugLog(oss);
 }

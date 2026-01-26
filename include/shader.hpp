@@ -38,5 +38,6 @@ public:
     void setVec2(const std::string &name, glm::vec2 value) const;
 
 private:
+    GLint getUniformLoc(const std::string& name) const;
     void checkCompileErrors(unsigned int shader, std::string type);
 };

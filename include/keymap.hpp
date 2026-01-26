@@ -1,5 +1,7 @@
 #pragma once
 
+#include "debugging.hpp"
+
 #include <GLFW/glfw3.h>
 
 #include "json.hpp"

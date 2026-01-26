@@ -35,20 +35,29 @@ void window_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-const int initWidth = 1280, initHeight = 720;
-int viewWidth = initWidth, viewHeight = initHeight;
 
-Camera camera;
-float lastMouseX = initWidth/2, lastMouseY = initHeight/2;
+struct AppState
+{
+    const glm::ivec2 initViewRes = glm::ivec2(1280, 720); 
+    glm::ivec2 viewRes = initViewRes;
+
+    Camera camera;
+    glm::vec2 lastMousePos = initViewRes / 2;
+};
+
 
 int main()
 {
+    AppState appState;
+
     GLFWwindow* window;
-    if (!init(window, initWidth, initHeight))
+    if (!init(window, appState.initViewRes.x, appState.initViewRes.y))
         return -1;
-    
+ 
+    glfwSetWindowUserPointer(window, &appState);
+
     // framebuffer
-    Framebuffer gameFrameBuffer(viewWidth, viewHeight);
+    Framebuffer gameFrameBuffer(appState.viewRes.x, appState.viewRes.y);
     glfwSetWindowSizeCallback(window, window_size_callback);
 
     glfwSetCursorPosCallback(window, mouse_callback);
@@ -56,7 +65,7 @@ int main()
 
 
     ImguiInit(window);
-ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO& io = ImGui::GetIO();
     
     // setup keybinds from json file
     reloadConfigKeymaps();
@@ -229,17 +238,17 @@ ImGuiIO& io = ImGui::GetIO();
 
         // game loop stuff
         UtilityKeybinds(window);
-        PlayerUpdate(registry, camera, deltaTime);
+        PlayerUpdate(registry, appState.camera, deltaTime);
 
 
         objectShader.use();
-        objectShader.setVec3("viewPos", camera.position);
+        objectShader.setVec3("viewPos", appState.camera.position);
 
         TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
 
         // rendering
-        glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(80.0f), viewWidth / (float)viewHeight, 0.1f, 1000.0f);
+        glm::mat4 view = appState.camera.GetViewMatrix();
+        glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)appState.viewRes.x / appState.viewRes.y, 0.1f, 1000.0f);
 
         SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
         SetUniformBufferData(matricesUBO, 64, 64, glm::value_ptr(projection));
@@ -254,7 +263,7 @@ ImGuiIO& io = ImGui::GetIO();
         // skybox
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
-        view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+        view = glm::mat4(glm::mat3(appState.camera.GetViewMatrix()));
 
         SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
 
@@ -302,46 +311,50 @@ ImGuiIO& io = ImGui::GetIO();
 
 void window_size_callback(GLFWwindow* window, int width, int height)
 {
+    AppState* state = static_cast<AppState*>(glfwGetWindowUserPointer(window));
+
     // letterbox scaling
     float aspect = (float)width / height;
-    float targetAspect = (float)initWidth / initHeight;
+    float targetAspect = (float)state->initViewRes.x / state->initViewRes.y;
 
     if (aspect > targetAspect)
     {
-        viewHeight = height;
-        viewWidth = (int)(height * targetAspect);
+        state->viewRes.y = height;
+        state->viewRes.x = (int)(height * targetAspect);
     }
     else
     {
-        viewWidth = width;
-        viewHeight = (int)(width / targetAspect);
+        state->viewRes.x = width;
+        state->viewRes.y = (int)(width / targetAspect);
     }
 
-    int viewX = (width - viewWidth) / 2;
-    int viewY = (height - viewHeight) / 2;
+    int viewX = (width - state->viewRes.x) / 2;
+    int viewY = (height - state->viewRes.y) / 2;
 
-    glViewport(viewX, viewY, viewWidth, viewHeight);
+    glViewport(viewX, viewY, state->viewRes.x, state->viewRes.y);
 }
 
 
 bool firstMouse = true;
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    AppState* state = static_cast<AppState*>(glfwGetWindowUserPointer(window));
+
     if (firstMouse)
     {
-        lastMouseX = xpos;
-        lastMouseY = ypos;
+        state->lastMousePos.x = xpos;
+        state->lastMousePos.y = ypos;
         firstMouse = false;
     } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
 
     if (focus)
     {
-        float xOffset = xpos - lastMouseX;
-        float yOffset = lastMouseY - ypos;
-        lastMouseX = xpos;
-        lastMouseY = ypos;
+        float xOffset = xpos - state->lastMousePos.x;
+        float yOffset = state->lastMousePos.y - ypos;
+        state->lastMousePos.x = xpos;
+        state->lastMousePos.y = ypos;
     
-        camera.ProcessMouseMovement(xOffset, yOffset);
+        state->camera.ProcessMouseMovement(xOffset, yOffset);
     }
 }
 

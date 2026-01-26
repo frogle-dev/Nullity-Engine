@@ -1,5 +1,6 @@
-#include <iostream>
+#include <sstream>
 
+#include "debugging.hpp"
 #include "framebuffer.hpp"
 
 #include "glad.h"
@@ -21,7 +22,10 @@ Framebuffer::Framebuffer(float width, float height)
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        std::cout << "(Framebuffer): Error: Framebuffer is not complete" << std::endl;
+        std::ostringstream oss;
+        oss << "(Framebuffer): Error: Framebuffer is not complete" << std::endl;
+        DebugLog(oss);
+        return;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -10,9 +10,11 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "debugging.hpp"
 #include "shader.hpp"
 #include "textures.hpp"
 
+#include <sstream>
 #include <iostream>
 
 
@@ -230,7 +232,10 @@ void Model::LoadModel(std::string path)
     const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_OptimizeMeshes);
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        std::cout << "(Assimp): Error: " << importer.GetErrorString() << std::endl;
+        std::ostringstream oss;
+        oss << "(Assimp): Error: " << importer.GetErrorString() << std::endl;
+
+        DebugLog(oss);
         return;
     }
     directory = path.substr(0, path.find_last_of('/')); //get the directory the model is in

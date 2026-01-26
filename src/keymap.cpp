@@ -5,6 +5,9 @@
 #include "json.hpp"
 #include <fstream>
 
+#include "debugging.hpp"
+
+#include <sstream>
 #include <unordered_map>
 #include <vector>
 #include <iostream>
@@ -114,11 +117,16 @@ void setConfigKeymap(const std::string& actionName, bool addKeycode, int keycode
 void removeConfigKeymap(const std::string& actionName, int index)
 {
     // check if the action name exists
-    if (data.contains(actionName) && index >= 0 && index < data[actionName].size()) {
+    if (data.contains(actionName) && index >= 0 && index < data[actionName].size()) 
+    {
         // remove keycode at index of action array
         data[actionName].erase(data[actionName].begin() + index);
-    } else {
-        std::cerr << "Invalid action or index.\n";
+    }
+    else 
+    {
+        std::ostringstream oss;
+        oss << "Invalid action or index.\n";
+        DebugLog(oss);
     }
 
     std::ofstream out("../game_config/keymaps.json");
