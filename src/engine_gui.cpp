@@ -1,17 +1,17 @@
-#pragma once
-
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 
+#include "engine_gui.hpp"
 #include "keymap.hpp"
 
 #include <entt/entt.hpp>
 
 
-std::string cur_actionName;
-std::vector<int> cur_keycodes;
+std::string currentActionName;
+std::vector<int> currentKeycodes;
 bool changingKeybind = false;
+
 void KeybindChangePopup()
 {
     ImGui::Separator();
@@ -22,19 +22,19 @@ void KeybindChangePopup()
     {
         if (ImGui::Button(actionName.c_str()))
         {
-            cur_actionName = actionName;
+            currentActionName = actionName;
             changingKeybind = true;
             ImGui::OpenPopup("Change Keymap?");
         }
     }
     if (changingKeybind)
     {
-        cur_keycodes = bindings[cur_actionName];
+        currentKeycodes = bindings[currentActionName];
     }
 
     if(ImGui::BeginPopupModal("Change Keymap?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("Changing action: %s", cur_actionName.c_str());
+        ImGui::Text("Changing action: %s", currentActionName.c_str());
         ImGui::Text("Press a key, then click 'add' or 'change' to assign the currently pressed key to that slot");
         
         ImGui::Separator();
@@ -42,29 +42,29 @@ void KeybindChangePopup()
 
         if(ImGui::BeginListBox("Current assigned keycodes"))
         {
-            for (int i = 0; i < cur_keycodes.size(); i++)
+            for (int i = 0; i < currentKeycodes.size(); i++)
             {
-                int key = cur_keycodes[i];
+                int key = currentKeycodes[i];
                 ImGui::Text("%i", key);
                 ImGui::SameLine();
 
                 ImGui::PushID(key + i);
                 if (ImGui::Button("Change"))
                 {
-                    setConfigKeymap(cur_actionName, false, currentScancodePress, i);
+                    setConfigKeymap(currentActionName, false, currentScancodePress, i);
                     reloadConfigKeymaps();
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Remove"))
                 {
-                    removeConfigKeymap(cur_actionName, i);
+                    removeConfigKeymap(currentActionName, i);
                     reloadConfigKeymaps();
                 }
                 ImGui::PopID();
             }
             if(ImGui::Button("Add"))
             {
-                setConfigKeymap(cur_actionName, true, currentScancodePress);
+                setConfigKeymap(currentActionName, true, currentScancodePress);
                 reloadConfigKeymaps();
             }
             ImGui::EndListBox();

@@ -19,7 +19,7 @@ void DebugOutputWindow()
     ImGui::Begin("Debug Output");
 
     std::ifstream fin;
-    fin.open("DebugLog.txt");
+    fin.open("DebugLog.txt", std::ofstream::out | std::ofstream::trunc); // trunc removes contents of file
 
     if (ImGui::BeginListBox("Debug"))
     {

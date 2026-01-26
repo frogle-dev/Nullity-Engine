@@ -17,117 +17,33 @@ struct ActionState
     bool released = false;
 };
 
-std::unordered_map<std::string, std::vector<int>> bindings;
-std::unordered_map<std::string, ActionState> actions;
-int currentScancodePress;
+extern std::unordered_map<std::string, std::vector<int>> bindings;
+extern std::unordered_map<std::string, ActionState> actions;
+extern int currentScancodePress;
 
-void keysRefresh() 
-{
-    for (auto& [name, state] : actions) 
-    {
-        state.justPressed = false;
-        state.released = false;
-    }
-}
+void keysRefresh(); 
 
+bool isActionPressed(const std::string& actionName); 
 
-bool isActionPressed(const std::string& actionName) 
-{
-    return actions[actionName].pressed;
-}
+bool isActionJustPressed(const std::string& actionName);
 
-bool isActionJustPressed(const std::string& actionName) 
-{
-    return actions[actionName].justPressed;
-}
-
-bool isActionReleased(const std::string& actionName) 
-{
-    return actions[actionName].released;
-}
+bool isActionReleased(const std::string& actionName);
 
 // called by glfw key callback thing
-void processKeyEvent(int scancode, int action) 
-{
-    currentScancodePress = scancode;
-
-    for (auto& [actionName, scancodes] : bindings) 
-    {
-        for (int boundScancode : scancodes)
-        {
-            if (boundScancode == currentScancodePress) 
-            {
-                auto& state = actions[actionName];
-
-                if (action == GLFW_PRESS) 
-                {
-                    if (!state.pressed)
-                        state.justPressed = true;
-                    state.pressed = true;
-                } 
-                else if (action == GLFW_RELEASE)
-                {
-                    if (state.pressed)
-                        state.released = true;
-                    state.pressed = false;
-                }
-            }
-        }
-    }
-}
+void processKeyEvent(int scancode, int action);
 
 
-std::ifstream keymapJson("../game_config/keymaps.json");
-nlohmann::json data = nlohmann::json::parse(keymapJson);
+extern std::ifstream keymapJson;
+extern nlohmann::json data;
 // returns all keymaps that have been set from "reloadConfigKeymaps()"
-auto& getConfigKeymaps()
-{
-    return bindings;
-}
+std::unordered_map<std::string, std::vector<int>>& getConfigKeymaps();
 
 // reads and loads all keymaps from keymaps.json (run whenever keymaps.json is changed)
-void reloadConfigKeymaps()
-{
-    bindings.clear();
-    for (auto& [actionName, keycodes] : data.items())
-    {
-        std::vector<int> scancodes;
-        for (int i : keycodes)
-        {
-            scancodes.push_back(glfwGetKeyScancode(i));
-        }
-        bindings[actionName] = scancodes;
-    }
-}
+void reloadConfigKeymaps();
 
 // sets an already existing mapping to another key, or creates a new one in keymaps.json. 
 //bool 'addkeycode' = true, adds the keycode to the json file, as false it changes a keycode at 'index'
-void setConfigKeymap(const std::string& actionName, bool addKeycode, int keycode, int index = 0)
-{
-    if (addKeycode)
-    {
-        data[actionName].push_back(keycode);
-    }
-    else
-    {
-        data[actionName][index] = keycode;
-    }
-
-    std::ofstream out("../game_config/keymaps.json");
-    out << data.dump(4);
-}
+void setConfigKeymap(const std::string& actionName, bool addKeycode, int keycode, int index = 0);
 
 // removes an already existing mapping in keymaps.json. 
-void removeConfigKeymap(const std::string& actionName, int index)
-{
-    // check if the action name exists
-    if (data.contains(actionName) && index >= 0 && index < data[actionName].size()) {
-        // remove keycode at index of action array
-        data[actionName].erase(data[actionName].begin() + index);
-    } else {
-        std::cerr << "Invalid action or index.\n";
-    }
-
-    std::ofstream out("../game_config/keymaps.json");
-    out << data.dump(4);
-}
+void removeConfigKeymap(const std::string& actionName, int index);

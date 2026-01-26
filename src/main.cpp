@@ -1,3 +1,5 @@
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "glad.h"
 #include <GLFW/glfw3.h>
 #include "glm/glm.hpp"
@@ -16,10 +18,10 @@
 #include "models.hpp"
 #include "framebuffer.hpp"
 
-#include "initialization.hpp"
+#include "init.hpp"
 #include "utility.hpp"
 #include "inspector.hpp"
-#include "gui.hpp"
+#include "engine_gui.hpp"
 #include "systems.hpp"
 #include "player.hpp"
 #include "render.hpp"

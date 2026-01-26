@@ -1,4 +1,4 @@
-#pragma once
+#include "init.hpp"
 
 #include "glad.h"
 #include <GLFW/glfw3.h>

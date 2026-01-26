@@ -43,6 +43,18 @@ add_executable(first_opengl
 src/main.cpp
 src/camera.cpp
 src/debug_output.cpp
+src/framebuffer.cpp
+src/engine_gui.cpp
+src/init.cpp
+src/inspector.cpp
+src/keymap.cpp
+src/models.cpp
+src/player.cpp
+src/render.cpp
+src/systems.cpp
+src/textures.cpp
+src/utility.cpp
+src/shader.cpp
 lib/glad.c
 )
 
