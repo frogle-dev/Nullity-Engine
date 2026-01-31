@@ -41,10 +41,8 @@ struct AppState
     const glm::ivec2 initViewRes = glm::ivec2(1280, 720); 
     glm::ivec2 viewRes = initViewRes;
 
-    Camera camera;
-    glm::vec2 lastMousePos = initViewRes / 2;
-
     EngineState engineState;
+    MouseState mouseState;
 };
 
 
@@ -52,6 +50,8 @@ int main()
 {
     AppState appState;
     appState.engineState = EngineState();
+    appState.mouseState = MouseState();
+    appState.mouseState.lastMousePos = appState.initViewRes / 2;
 
     GLFWwindow* window;
     if (!init(window, appState.initViewRes.x, appState.initViewRes.y))
@@ -77,7 +77,6 @@ int main()
     
     // setup keybinds from json file
     reloadConfigKeymaps();
-
 
     Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.frag");
     Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.frag");
@@ -254,16 +253,17 @@ int main()
 
         // game loop stuff
         UtilityKeybinds(window, appState.engineState);
-        PlayerUpdate(registry, appState.camera, deltaTime);
+        PlayerUpdate(registry, appState.mouseState.camera, deltaTime);
+        CameraControls(appState.mouseState, appState.engineState);
 
 
         objectShader.use();
-        objectShader.setVec3("viewPos", appState.camera.position);
+        objectShader.setVec3("viewPos", appState.mouseState.camera.position);
 
         TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
 
         // rendering
-        glm::mat4 view = appState.camera.GetViewMatrix();
+        glm::mat4 view = appState.mouseState.camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)appState.viewRes.x / appState.viewRes.y, 0.1f, 1000.0f);
 
         SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
@@ -279,7 +279,7 @@ int main()
         // skybox
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
-        view = glm::mat4(glm::mat3(appState.camera.GetViewMatrix()));
+        view = glm::mat4(glm::mat3(appState.mouseState.camera.GetViewMatrix()));
 
         SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
 
@@ -351,27 +351,11 @@ void window_size_callback(GLFWwindow* window, int width, int height)
 }
 
 
-bool firstMouse = true;
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     AppState* state = static_cast<AppState*>(glfwGetWindowUserPointer(window));
 
-    if (firstMouse)
-    {
-        state->lastMousePos.x = xpos;
-        state->lastMousePos.y = ypos;
-        firstMouse = false;
-    } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
-
-    if (state->engineState.focus)
-    {
-        float xOffset = xpos - state->lastMousePos.x;
-        float yOffset = state->lastMousePos.y - ypos;
-        state->lastMousePos.x = xpos;
-        state->lastMousePos.y = ypos;
-    
-        state->camera.ProcessMouseMovement(xOffset, yOffset);
-    }
+    state->mouseState.mousePos = glm::dvec2(xpos, ypos);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

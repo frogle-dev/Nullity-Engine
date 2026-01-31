@@ -5,6 +5,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "utility.hpp"
+
 #include <algorithm>
 
 
@@ -36,3 +38,13 @@ public:
 private:
     void UpdateCameraVectors();
 };
+
+struct MouseState
+{
+    Camera camera;
+    glm::vec2 lastMousePos;
+    bool firstMouse = true;
+    glm::dvec2 mousePos;
+};
+
+void CameraControls(MouseState& mouseState, EngineState& engineState);

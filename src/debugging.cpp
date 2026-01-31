@@ -41,6 +41,12 @@ void DebugLog(std::ostringstream& oss)
     fout << oss.str() << std::endl;
 }
 
+void DebugLog(std::string& string)
+{
+    fout << "---------------" << std::endl;
+    fout << string << std::endl;
+}
+
 void APIENTRY glDebugOutput(GLenum source, 
                             GLenum type, 
                             unsigned int id, 

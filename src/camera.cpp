@@ -5,6 +5,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "utility.hpp"
+
 #include <algorithm>
 
 
@@ -55,4 +57,22 @@ void Camera::UpdateCameraVectors()
     up = glm::normalize(glm::cross(right, front));
 
     straightFront = glm::normalize(glm::cross(right, worldUp));
+}
+
+void CameraControls(MouseState& mouseState, EngineState& engineState)
+{
+    if (mouseState.firstMouse)
+    {
+        mouseState.lastMousePos = mouseState.mousePos;
+        mouseState.firstMouse = false;
+    } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
+
+    if (engineState.focus)
+    {
+        float xOffset = mouseState.mousePos.x - mouseState.lastMousePos.x;
+        float yOffset = mouseState.lastMousePos.y - mouseState.mousePos.y;
+        mouseState.lastMousePos = mouseState.mousePos;
+    
+        mouseState.camera.ProcessMouseMovement(xOffset, yOffset);
+    }
 }

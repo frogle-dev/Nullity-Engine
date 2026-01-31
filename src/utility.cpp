@@ -7,6 +7,7 @@
 
 #include "keymap.hpp"
 
+#include <sstream>
 
 void UtilityKeybinds(GLFWwindow* window, EngineState& engineState)
 {
