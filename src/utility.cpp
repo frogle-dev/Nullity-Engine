@@ -8,15 +8,13 @@
 #include "keymap.hpp"
 
 
-bool focus = true;
-bool wireframe = false;
-void UtilityKeybinds(GLFWwindow* window)
+void UtilityKeybinds(GLFWwindow* window, EngineState& engineState)
 {
     if (isActionJustPressed("focus"))
     {
-        focus = !focus;
+        engineState.focus = !engineState.focus;
 
-        if (focus)
+        if (engineState.focus)
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         else
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -24,9 +22,9 @@ void UtilityKeybinds(GLFWwindow* window)
 
     if (isActionJustPressed("wireframe"))
     {
-        wireframe = !wireframe;
+        engineState.wireframe = !engineState.wireframe;
 
-        if (wireframe)
+        if (engineState.wireframe)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

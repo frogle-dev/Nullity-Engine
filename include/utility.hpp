@@ -8,6 +8,10 @@
 #include "keymap.hpp"
 
 
-extern bool focus;
-extern bool wireframe;
-void UtilityKeybinds(GLFWwindow* window);
+struct EngineState
+{
+    bool focus = true;
+    bool wireframe = false;
+};
+
+void UtilityKeybinds(GLFWwindow* window, EngineState& engineState);

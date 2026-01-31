@@ -13,5 +13,6 @@ extern std::string currentActionName;
 extern std::vector<int> currentKeycodes;
 extern bool changingKeybind;
 
+void Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2);
 void KeybindChangePopup();
 void InfoWindow(float msPerFrame, int fps);

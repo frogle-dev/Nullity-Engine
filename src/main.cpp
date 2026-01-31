@@ -43,12 +43,15 @@ struct AppState
 
     Camera camera;
     glm::vec2 lastMousePos = initViewRes / 2;
+
+    EngineState engineState;
 };
 
 
 int main()
 {
     AppState appState;
+    appState.engineState = EngineState();
 
     GLFWwindow* window;
     if (!init(window, appState.initViewRes.x, appState.initViewRes.y))
@@ -66,6 +69,11 @@ int main()
 
     ImguiInit(window);
     ImGuiIO& io = ImGui::GetIO();
+
+    float accent1[4] = {251.0f/255, 103.0f/255, 255.0f/255, 255.0f/255};
+    float accent2[4] = {251.0f/255, 103.0f/255, 255.0f/255, 100.0f/255};
+    float bg1[4] = {60.0f/255, 60.0f/255, 60.0f/255, 255.0f/255};
+    float bg2[4] = {0.0f/255, 0.0f/255, 0.0f/255, 84.0f/255};
     
     // setup keybinds from json file
     reloadConfigKeymaps();
@@ -227,6 +235,14 @@ int main()
         }
         ImGui::EndChild();
         ImGui::End();
+
+        ImGui::Begin("Style");
+        ImGui::ColorEdit4("accent1", accent1);
+        ImGui::ColorEdit4("accent2", accent2);
+        ImGui::ColorEdit4("bg1", bg1);
+        ImGui::ColorEdit4("bg2", bg2);
+        Styling(accent1, accent2, bg1, bg2);
+        ImGui::End();
         // imgui rendering
         ImGui::Render();
 
@@ -237,7 +253,7 @@ int main()
 
 
         // game loop stuff
-        UtilityKeybinds(window);
+        UtilityKeybinds(window, appState.engineState);
         PlayerUpdate(registry, appState.camera, deltaTime);
 
 
@@ -347,7 +363,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         firstMouse = false;
     } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
 
-    if (focus)
+    if (state->engineState.focus)
     {
         float xOffset = xpos - state->lastMousePos.x;
         float yOffset = state->lastMousePos.y - ypos;
