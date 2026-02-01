@@ -50,23 +50,23 @@ struct AppState
 
 int main()
 {
-    AppState appState;
+    AppState App;
     EngineState engineState;
     MouseState mouseState;
-    appState.engineState = &engineState;
-    appState.mouseState = &mouseState;
+    App.engineState = &engineState;
+    App.mouseState = &mouseState;
 
-    mouseState.lastMousePos = appState.initViewRes / 2;
+    mouseState.lastMousePos = App.initViewRes / 2;
 
 
     GLFWwindow* window;
-    if (!init(window, appState.initViewRes.x, appState.initViewRes.y))
+    if (!init(window, App.initViewRes.x, App.initViewRes.y))
         return -1;
  
-    glfwSetWindowUserPointer(window, &appState);
+    glfwSetWindowUserPointer(window, &App);
 
     // framebuffer
-    Framebuffer gameFrameBuffer(appState.viewRes.x, appState.viewRes.y);
+    Framebuffer gameFrameBuffer(App.viewRes.x, App.viewRes.y);
     glfwSetWindowSizeCallback(window, window_size_callback);
 
     glfwSetCursorPosCallback(window, mouse_callback);
@@ -80,43 +80,12 @@ int main()
     float accent2[4] = {251.0f/255, 103.0f/255, 255.0f/255, 100.0f/255};
     float bg1[4] = {60.0f/255, 60.0f/255, 60.0f/255, 255.0f/255};
     float bg2[4] = {0.0f/255, 0.0f/255, 0.0f/255, 84.0f/255};
-    
+
+
+    EngineData Engine;
+
     // setup keybinds from json file
     reloadConfigKeymaps();
-
-    // EngineData Engine;
-
-    Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.frag");
-    Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.frag");
-    Shader skyboxShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/skybox.frag");
-    Shader instancedShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/instanced.frag"); 
-    Shader grassShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/grass.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/grass.frag");
-    Shader unlitShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/unlit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/unlit.frag");
-
-    // uniform buffers
-    GLuint matricesUBO;
-    glGenBuffers(1, &matricesUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
-    glBufferData(GL_UNIFORM_BUFFER, 128, NULL, GL_STATIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, matricesUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    GLuint texArrayDataUBO;
-    glGenBuffers(1, &texArrayDataUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, texArrayDataUBO);
-    glBufferData(GL_UNIFORM_BUFFER, 1616, NULL, GL_STATIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, texArrayDataUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    
-    GLuint skyboxVAO, skyboxVBO;
-    glGenVertexArrays(1, &skyboxVAO);
-    glGenBuffers(1, &skyboxVBO);
-    glBindVertexArray(skyboxVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     // instancing
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -132,21 +101,21 @@ int main()
     // texture stuff
     glActiveTexture(GL_TEXTURE0);
 
-    objectShader.use();
-    TextureManager::Get().GenerateTextureArray(4096, 4096, 100, texArrayDataUBO);
+    Engine.objectShader.use();
+    TextureManager::Get().GenerateTextureArray(4096, 4096, 100, Engine.texArrayDataUBO);
     
     GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
-    objectShader.setFloat("material.emissionStrength", 1.0f);
-    objectShader.setFloat("material.shininess", 128.0f);
+    Engine.objectShader.setFloat("material.emissionStrength", 1.0f);
+    Engine.objectShader.setFloat("material.shininess", 128.0f);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
-    TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
+    TextureManager::Get().SendSubTexResArrayToShader(Engine.texArrayDataUBO); // send the tex res array to the frag shader
     
 
-    skyboxShader.use();
+    Engine.skyboxShader.use();
     std::vector<std::string> skyboxFaces = {
         "../images/skybox/right.jpg",
         "../images/skybox/left.jpg",
@@ -184,7 +153,7 @@ int main()
 
     auto dirt = registry.create();
     registry.emplace<DisplayName>(dirt, "dirt");
-    registry.emplace<ObjectShader>(dirt, instancedShader);
+    registry.emplace<ObjectShader>(dirt, Engine.instancedShader);
     registry.emplace<ObjectModel>(dirt, Model("../models/Dirt/Dirt.obj", mats.size(), mats), true);
 
     auto player = registry.create();
@@ -286,17 +255,17 @@ int main()
         CameraControls(mouseState, engineState);
 
 
-        objectShader.use();
-        objectShader.setVec3("viewPos", mouseState.camera.position);
+        Engine.objectShader.use();
+        Engine.objectShader.setVec3("viewPos", mouseState.camera.position);
 
-        TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
+        TextureManager::Get().SendSubTexResArrayToShader(Engine.texArrayDataUBO); // send the tex res array to the frag shader
 
         // rendering
         glm::mat4 view = mouseState.camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)appState.viewRes.x / appState.viewRes.y, 0.1f, 1000.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)App.viewRes.x / App.viewRes.y, 0.1f, 1000.0f);
 
-        SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
-        SetUniformBufferData(matricesUBO, 64, 64, glm::value_ptr(projection));
+        SetUniformBufferData(Engine.matricesUBO, 0, 64, glm::value_ptr(view));
+        SetUniformBufferData(Engine.matricesUBO, 64, 64, glm::value_ptr(projection));
         
         // drawing scene
         glActiveTexture(GL_TEXTURE1);
@@ -307,12 +276,12 @@ int main()
 
         // skybox
         glDepthFunc(GL_LEQUAL);
-        skyboxShader.use();
+        Engine.skyboxShader.use();
         view = glm::mat4(glm::mat3(mouseState.camera.GetViewMatrix()));
 
-        SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
+        SetUniformBufferData(Engine.matricesUBO, 0, 64, glm::value_ptr(view));
 
-        glBindVertexArray(skyboxVAO);
+        glBindVertexArray(Engine.skyboxVAO);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap);
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -340,9 +309,8 @@ int main()
     }
     
     // end of process life
+    Engine.Cleanup();
     gameFrameBuffer.Cleanup();
-    objectShader.deleteProgram();
-    lightSourceShader.deleteProgram();
 
     // imgui
     ImGui_ImplOpenGL3_Shutdown();

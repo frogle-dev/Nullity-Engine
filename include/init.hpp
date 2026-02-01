@@ -18,7 +18,6 @@ class EngineData
 {
 public:
     EngineData();
-    ~EngineData();
 
     Shader objectShader = Shader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.frag");
     Shader lightSourceShader = Shader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.frag");

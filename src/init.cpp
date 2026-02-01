@@ -17,13 +17,8 @@
 
 EngineData::EngineData()
 {
-    InitUBOs();
     InitSkybox();
-}
-
-EngineData::~EngineData()
-{
-    Cleanup();
+    InitUBOs();
 }
 
 void EngineData::InitUBOs()
