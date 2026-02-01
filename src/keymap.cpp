@@ -13,9 +13,9 @@
 #include <iostream>
 
 
-std::unordered_map<std::string, std::vector<int>> bindings;
-std::unordered_map<std::string, ActionState> actions;
-int currentScancodePress;
+static std::unordered_map<std::string, std::vector<int>> bindings;
+static std::unordered_map<std::string, ActionState> actions;
+static int currentScancodePress;
 
 void keysRefresh() 
 {
@@ -73,12 +73,17 @@ void processKeyEvent(int scancode, int action)
 }
 
 
-std::ifstream keymapJson("../game_config/keymaps.json");
-nlohmann::json data = nlohmann::json::parse(keymapJson);
+static std::ifstream keymapJson("../game_config/keymaps.json");
+static nlohmann::json data = nlohmann::json::parse(keymapJson);
 // returns all keymaps that have been set from "reloadConfigKeymaps()"
 std::unordered_map<std::string, std::vector<int>>& getConfigKeymaps()
 {
     return bindings;
+}
+
+int getCurrentScancodePressed()
+{
+    return currentScancodePress;
 }
 
 // reads and loads all keymaps from keymaps.json (run whenever keymaps.json is changed)

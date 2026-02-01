@@ -9,5 +9,4 @@
 #include "components.hpp"
 
 
-extern std::string inspectorCurrent;
 void InspectorWindow(entt::registry& registry);

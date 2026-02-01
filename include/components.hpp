@@ -20,9 +20,12 @@ struct DisplayName
 
 struct WorldObject
 {
-    Shader& shader;
-
     glm::mat4 modelMatrix = glm::mat4(1.0f);
+};
+
+struct ObjectShader
+{
+    Shader& shader;
 };
 
 struct ObjectModel

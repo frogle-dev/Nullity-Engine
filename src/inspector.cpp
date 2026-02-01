@@ -9,9 +9,10 @@
 #include "components.hpp"
 
 
-std::string inspectorCurrent = "None";
 void InspectorWindow(entt::registry& registry)
 {
+    static std::string inspectorCurrent = "None";
+
     ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_None);
 
     ImGui::Text("Entity: ");

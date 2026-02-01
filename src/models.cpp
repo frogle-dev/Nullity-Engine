@@ -331,7 +331,6 @@ Mesh Model::ProcessMesh(aiMesh *mesh, const aiScene *scene)
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end()); // likewise as before
     }
 
-
     if (instanceCount == 0)
         return Mesh(vertices, indices, textures);
     else

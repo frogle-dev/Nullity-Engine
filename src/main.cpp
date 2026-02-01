@@ -6,6 +6,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "FastNoiseLite.h"
+
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
@@ -149,14 +151,35 @@ int main()
     };
     GLuint skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
 
+
+    FastNoiseLite noise;
+    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise.SetFractalType(FastNoiseLite::FractalType_FBm);
+    std::vector<float> noiseData(128 * 128);
+    std::vector<glm::mat4> mats;
+    int index = 0;
+
+    for (int y = 0; y < 128; y++)
+    {
+        for (int x = 0; x < 128; x++)
+        {
+            noiseData.push_back( noise.GetNoise((float)x, (float)y));
+            glm::mat4 model = glm::mat4(0.0f);
+            model = glm::translate(model, glm::vec3(x, noiseData[index], y));
+            model = glm::scale(model, glm::vec3(1.0f));
+            mats.push_back(model);
+            index++;
+        }
+    }
+
+
     // object loading
     entt::registry registry;
 
     auto dirt = registry.create();
     registry.emplace<DisplayName>(dirt, "dirt");
-    registry.emplace<Transform>(dirt, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(0.01f));
-    registry.emplace<WorldObject>(dirt, unlitShader);
-    registry.emplace<ObjectModel>(dirt, Model("../models/Windfall/Windfall.obj"), true);
+    registry.emplace<ObjectShader>(dirt, instancedShader);
+    registry.emplace<ObjectModel>(dirt, Model("../models/Dirt/Dirt.obj", mats.size(), mats), true);
 
     auto player = registry.create();
     registry.emplace<DisplayName>(player, "player");

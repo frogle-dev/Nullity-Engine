@@ -15,11 +15,11 @@
 
 void WorldObjectSystem(entt::registry& registry)
 {
-    auto view = registry.view<WorldObject, Transform>();
+    auto view = registry.view<WorldObject, Transform, ObjectShader>();
 
-    for (auto [entity, cmp_object, cmp_transform] : view.each())
+    for (auto [entity, cmp_object, cmp_transform, cmp_shader] : view.each())
     {
-        cmp_object.shader.use();
+        cmp_shader.shader.use();
         
         cmp_object.modelMatrix = glm::mat4(1.0f);
         cmp_object.modelMatrix = glm::translate(cmp_object.modelMatrix, cmp_transform.position);
@@ -28,6 +28,6 @@ void WorldObjectSystem(entt::registry& registry)
         cmp_object.modelMatrix = glm::rotate(cmp_object.modelMatrix, glm::radians(cmp_transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
         cmp_object.modelMatrix = glm::scale(cmp_object.modelMatrix, cmp_transform.scale);
 
-        cmp_object.shader.setMat4("model", cmp_object.modelMatrix);
+        cmp_shader.shader.setMat4("model", cmp_object.modelMatrix);
     }
 }

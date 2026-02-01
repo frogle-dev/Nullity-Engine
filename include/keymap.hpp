@@ -19,10 +19,6 @@ struct ActionState
     bool released = false;
 };
 
-extern std::unordered_map<std::string, std::vector<int>> bindings;
-extern std::unordered_map<std::string, ActionState> actions;
-extern int currentScancodePress;
-
 void keysRefresh(); 
 
 bool isActionPressed(const std::string& actionName); 
@@ -35,10 +31,9 @@ bool isActionReleased(const std::string& actionName);
 void processKeyEvent(int scancode, int action);
 
 
-extern std::ifstream keymapJson;
-extern nlohmann::json data;
 // returns all keymaps that have been set from "reloadConfigKeymaps()"
 std::unordered_map<std::string, std::vector<int>>& getConfigKeymaps();
+int getCurrentScancodePressed();
 
 // reads and loads all keymaps from keymaps.json (run whenever keymaps.json is changed)
 void reloadConfigKeymaps();

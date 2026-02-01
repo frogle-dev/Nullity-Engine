@@ -8,10 +8,6 @@
 #include <entt/entt.hpp>
 
 
-std::string currentActionName;
-std::vector<int> currentKeycodes;
-bool changingKeybind = false;
-
 void Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
 {
     ImGuiStyle& style = ImGui::GetStyle();
@@ -60,6 +56,10 @@ void Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
 
 void KeybindChangePopup()
 {
+    static std::string currentActionName;
+    static std::vector<int> currentKeycodes;
+    static bool changingKeybind = false;
+
     ImGui::Separator();
     ImGui::Text("Keymaps");
     ImGui::BeginChild("Keymaps");
@@ -84,7 +84,7 @@ void KeybindChangePopup()
         ImGui::Text("Press a key, then click 'add' or 'change' to assign the currently pressed key to that slot");
         
         ImGui::Separator();
-        ImGui::Text("Press any key: %i", currentScancodePress);
+        ImGui::Text("Press any key: %i", getCurrentScancodePressed());
 
         if(ImGui::BeginListBox("Current assigned keycodes"))
         {
@@ -97,7 +97,7 @@ void KeybindChangePopup()
                 ImGui::PushID(key + i);
                 if (ImGui::Button("Change"))
                 {
-                    setConfigKeymap(currentActionName, false, currentScancodePress, i);
+                    setConfigKeymap(currentActionName, false, getCurrentScancodePressed(), i);
                     reloadConfigKeymaps();
                 }
                 ImGui::SameLine();
@@ -110,7 +110,7 @@ void KeybindChangePopup()
             }
             if(ImGui::Button("Add"))
             {
-                setConfigKeymap(currentActionName, true, currentScancodePress);
+                setConfigKeymap(currentActionName, true, getCurrentScancodePressed());
                 reloadConfigKeymaps();
             }
             ImGui::EndListBox();

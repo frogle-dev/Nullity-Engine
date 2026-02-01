@@ -132,7 +132,7 @@ GLint Shader::getUniformLoc(const std::string& name) const
     std::ostringstream oss;
     if (loc == -1)
     {
-        oss << "(Shader): Error: uniform not found" << name << std::endl;
+        oss << "(Shader): Error: uniform not found " << name << std::endl;
         DebugLog(oss);
     } 
 

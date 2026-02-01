@@ -6,13 +6,13 @@
 
 void DrawSystem(entt::registry& registry)
 {
-    auto view = registry.view<ObjectModel, WorldObject>();
+    auto view = registry.view<ObjectModel, ObjectShader>();
 
-    for (auto [entity, cmp_model, cmp_object] : view.each())
+    for (auto [entity, cmp_model, cmp_shader] : view.each())
     {
         if (cmp_model.render)
         {
-            cmp_model.model.Draw(cmp_object.shader);
+            cmp_model.model.Draw(cmp_shader.shader);
         }
     }
 }
