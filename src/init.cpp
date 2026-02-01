@@ -9,6 +9,7 @@
 #include "shader.hpp"
 #include "debugging.hpp"
 #include "primitives.hpp"
+#include "textures.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
@@ -45,6 +46,16 @@ void EngineData::InitSkybox()
     glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    std::vector<std::string> skyboxFaces = {
+        "../images/skybox/right.jpg",
+        "../images/skybox/left.jpg",
+        "../images/skybox/top.jpg",
+        "../images/skybox/bottom.jpg",
+        "../images/skybox/front.jpg",
+        "../images/skybox/back.jpg",
+    };
+    skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
 }
 
 void EngineData::Cleanup()

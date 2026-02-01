@@ -30,6 +30,7 @@ public:
     GLuint matricesUBO;
     GLuint texArrayDataUBO;
     GLuint skyboxVAO, skyboxVBO;
+    GLuint skyboxCubemap;
 
     void InitUBOs();
     void InitSkybox();

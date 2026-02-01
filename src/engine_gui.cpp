@@ -12,8 +12,7 @@ void Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
 {
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4 accent = ImVec4(_accent[0], _accent[1], _accent[2], _accent[3]);
-    ImVec4 accent2 = ImVec4(_accent2[0], _accent2[1], _accent2[2], _accent2[3]);
-    ImVec4 bg1 = ImVec4(_bg1[0], _bg1[1], _bg1[2], _bg1[3]);
+    ImVec4 accent2 = ImVec4(_accent2[0], _accent2[1], _accent2[2], _accent2[3]); ImVec4 bg1 = ImVec4(_bg1[0], _bg1[1], _bg1[2], _bg1[3]);
     ImVec4 bg2 = ImVec4(_bg2[0], _bg2[1], _bg2[2], _bg2[3]);
 
     style.WindowRounding = 5.0f;

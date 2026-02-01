@@ -65,10 +65,8 @@ int main()
  
     glfwSetWindowUserPointer(window, &App);
 
-    // framebuffer
     Framebuffer gameFrameBuffer(App.viewRes.x, App.viewRes.y);
     glfwSetWindowSizeCallback(window, window_size_callback);
-
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetKeyCallback(window, key_callback);
 
@@ -84,28 +82,22 @@ int main()
 
     EngineData Engine;
 
-    // setup keybinds from json file
     reloadConfigKeymaps();
 
-    // instancing
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    // enable depth testing and face culling
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
     // glEnable(GL_BLEND); 
     // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // texture stuff
+    // textures
     glActiveTexture(GL_TEXTURE0);
 
-    Engine.objectShader.use();
     TextureManager::Get().GenerateTextureArray(4096, 4096, 100, Engine.texArrayDataUBO);
     
     GLuint texArrayID = TextureManager::Get().GetTexArrayID();
 
+    Engine.objectShader.use();
     Engine.objectShader.setFloat("material.emissionStrength", 1.0f);
     Engine.objectShader.setFloat("material.shininess", 128.0f);
 
@@ -114,18 +106,6 @@ int main()
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
     TextureManager::Get().SendSubTexResArrayToShader(Engine.texArrayDataUBO); // send the tex res array to the frag shader
     
-
-    Engine.skyboxShader.use();
-    std::vector<std::string> skyboxFaces = {
-        "../images/skybox/right.jpg",
-        "../images/skybox/left.jpg",
-        "../images/skybox/top.jpg",
-        "../images/skybox/bottom.jpg",
-        "../images/skybox/front.jpg",
-        "../images/skybox/back.jpg",
-    };
-    GLuint skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
-
 
     FastNoiseLite noise;
     noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
@@ -163,16 +143,13 @@ int main()
     registry.emplace<Velocity>(player);
 
 
-    // imgui stuff
     bool demoWindow = false;
 
     gameFrameBuffer.Unbind();
 
-    // render loop
     float deltaTime = 0.0f;
     int fps;
     float msPerFrame;
-
     float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(window))
     {
@@ -184,7 +161,6 @@ int main()
         fps = 1000 / msPerFrame;
 
 
-        // imgui
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -240,8 +216,9 @@ int main()
         ImGui::ColorEdit4("bg2", bg2);
         Styling(accent1, accent2, bg1, bg2);
         ImGui::End();
-        // imgui rendering
+
         ImGui::Render();
+
 
         gameFrameBuffer.Bind();
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
@@ -260,16 +237,14 @@ int main()
 
         TextureManager::Get().SendSubTexResArrayToShader(Engine.texArrayDataUBO); // send the tex res array to the frag shader
 
-        // rendering
         glm::mat4 view = mouseState.camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)App.viewRes.x / App.viewRes.y, 0.1f, 1000.0f);
 
         SetUniformBufferData(Engine.matricesUBO, 0, 64, glm::value_ptr(view));
         SetUniformBufferData(Engine.matricesUBO, 64, 64, glm::value_ptr(projection));
         
-        // drawing scene
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap); // binding skybox for reflections
+        glBindTexture(GL_TEXTURE_CUBE_MAP, Engine.skyboxCubemap); // binding skybox for reflections
 
         WorldObjectSystem(registry);
         DrawSystem(registry);
@@ -283,16 +258,16 @@ int main()
 
         glBindVertexArray(Engine.skyboxVAO);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxCubemap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, Engine.skyboxCubemap);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glDepthFunc(GL_LESS);
 
         glBindVertexArray(0);
         
-        // game rendering finished, now render texture quad rendering
+        // rendering to framebuffer
         gameFrameBuffer.Unbind();
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT); //clear color + depth buffer
+        glClear(GL_COLOR_BUFFER_BIT);
         
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -312,7 +287,6 @@ int main()
     Engine.Cleanup();
     gameFrameBuffer.Cleanup();
 
-    // imgui
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
