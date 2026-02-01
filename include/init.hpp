@@ -3,6 +3,8 @@
 #include "glad.h"
 #include <GLFW/glfw3.h>
 
+#include <entt/entt.hpp>
+
 #include <iostream>
 #include <string>
 
@@ -32,10 +34,21 @@ public:
     GLuint skyboxVAO, skyboxVBO;
     GLuint skyboxCubemap;
 
+    entt::registry registry;
+
     void InitUBOs();
     void InitSkybox();
 
     void Cleanup();
+};
+
+class SceneData
+{
+public:
+    entt::entity dirt;
+    entt::entity player;
+
+    void LoadObjects(EngineData&);
 };
 
 

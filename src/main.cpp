@@ -127,21 +127,8 @@ int main()
         }
     }
 
-
-    // object loading
-    entt::registry registry;
-
-    auto dirt = registry.create();
-    registry.emplace<DisplayName>(dirt, "dirt");
-    registry.emplace<ObjectShader>(dirt, Engine.instancedShader);
-    registry.emplace<ObjectModel>(dirt, Model("../models/Dirt/Dirt.obj", mats.size(), mats), true);
-
-    auto player = registry.create();
-    registry.emplace<DisplayName>(player, "player");
-    registry.emplace<Transform>(player);
-    registry.emplace<Player>(player);
-    registry.emplace<Velocity>(player);
-
+    SceneData Scene;
+    Scene.LoadObjects(Engine);
 
     bool demoWindow = false;
 
@@ -187,7 +174,7 @@ int main()
         
         InfoWindow(msPerFrame, fps);
         DebugOutputWindow();
-        InspectorWindow(registry);
+        InspectorWindow(Engine.registry);
 
         ImGui::Begin("Game");
         {
@@ -228,7 +215,7 @@ int main()
 
         // game loop stuff
         UtilityKeybinds(window, engineState);
-        PlayerUpdate(registry, mouseState.camera, deltaTime);
+        PlayerUpdate(Engine.registry, mouseState.camera, deltaTime);
         CameraControls(mouseState, engineState);
 
 
@@ -246,8 +233,8 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, Engine.skyboxCubemap); // binding skybox for reflections
 
-        WorldObjectSystem(registry);
-        DrawSystem(registry);
+        WorldObjectSystem(Engine.registry);
+        DrawSystem(Engine.registry);
 
         // skybox
         glDepthFunc(GL_LEQUAL);

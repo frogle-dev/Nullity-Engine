@@ -4,6 +4,9 @@
 #include <GLFW/glfw3.h>
 
 #include <sstream>
+#include <entt/entt.hpp>
+
+#include "components.hpp"
 
 #include "debugging.hpp"
 #include "shader.hpp"
@@ -71,6 +74,22 @@ void EngineData::Cleanup()
     instancedShader.deleteProgram();
     grassShader.deleteProgram();
     unlitShader.deleteProgram();
+}
+
+
+void SceneData::LoadObjects(EngineData& eng)
+{
+    dirt = eng.registry.create();
+    eng.registry.emplace<DisplayName>(dirt, "dirt");
+    eng.registry.emplace<ObjectShader>(dirt, eng.unlitShader);
+    eng.registry.emplace<WorldObject>(dirt);
+    eng.registry.emplace<ObjectModel>(dirt, Model("../models/Dirt/Dirt.obj"), true);
+
+    player = eng.registry.create();
+    eng.registry.emplace<DisplayName>(player, "player");
+    eng.registry.emplace<Transform>(player);
+    eng.registry.emplace<Player>(player);
+    eng.registry.emplace<Velocity>(player);
 }
 
 
