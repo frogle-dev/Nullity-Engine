@@ -43,17 +43,21 @@ struct AppState
     const glm::ivec2 initViewRes = glm::ivec2(1280, 720); 
     glm::ivec2 viewRes = initViewRes;
 
-    EngineState engineState;
-    MouseState mouseState;
+    EngineState* engineState;
+    MouseState* mouseState;
 };
 
 
 int main()
 {
     AppState appState;
-    appState.engineState = EngineState();
-    appState.mouseState = MouseState();
-    appState.mouseState.lastMousePos = appState.initViewRes / 2;
+    EngineState engineState;
+    MouseState mouseState;
+    appState.engineState = &engineState;
+    appState.mouseState = &mouseState;
+
+    mouseState.lastMousePos = appState.initViewRes / 2;
+
 
     GLFWwindow* window;
     if (!init(window, appState.initViewRes.x, appState.initViewRes.y))
@@ -79,6 +83,8 @@ int main()
     
     // setup keybinds from json file
     reloadConfigKeymaps();
+
+    // EngineData Engine;
 
     Shader objectShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/lit.frag");
     Shader lightSourceShader("/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.vert", "/home/jonah/Programming/Opengl/opengl-first-project/shaders/light_source.frag");
@@ -165,7 +171,7 @@ int main()
         {
             noiseData.push_back( noise.GetNoise((float)x, (float)y));
             glm::mat4 model = glm::mat4(0.0f);
-            model = glm::translate(model, glm::vec3(x, noiseData[index], y));
+            model = glm::translate(model, glm::vec3((float)x, 0.0f, (float)y));
             model = glm::scale(model, glm::vec3(1.0f));
             mats.push_back(model);
             index++;
@@ -275,18 +281,18 @@ int main()
 
 
         // game loop stuff
-        UtilityKeybinds(window, appState.engineState);
-        PlayerUpdate(registry, appState.mouseState.camera, deltaTime);
-        CameraControls(appState.mouseState, appState.engineState);
+        UtilityKeybinds(window, engineState);
+        PlayerUpdate(registry, mouseState.camera, deltaTime);
+        CameraControls(mouseState, engineState);
 
 
         objectShader.use();
-        objectShader.setVec3("viewPos", appState.mouseState.camera.position);
+        objectShader.setVec3("viewPos", mouseState.camera.position);
 
         TextureManager::Get().SendSubTexResArrayToShader(texArrayDataUBO); // send the tex res array to the frag shader
 
         // rendering
-        glm::mat4 view = appState.mouseState.camera.GetViewMatrix();
+        glm::mat4 view = mouseState.camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)appState.viewRes.x / appState.viewRes.y, 0.1f, 1000.0f);
 
         SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
@@ -302,7 +308,7 @@ int main()
         // skybox
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
-        view = glm::mat4(glm::mat3(appState.mouseState.camera.GetViewMatrix()));
+        view = glm::mat4(glm::mat3(mouseState.camera.GetViewMatrix()));
 
         SetUniformBufferData(matricesUBO, 0, 64, glm::value_ptr(view));
 
@@ -378,7 +384,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     AppState* state = static_cast<AppState*>(glfwGetWindowUserPointer(window));
 
-    state->mouseState.mousePos = glm::dvec2(xpos, ypos);
+    state->mouseState->mousePos = glm::dvec2(xpos, ypos);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

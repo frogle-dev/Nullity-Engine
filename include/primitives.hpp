@@ -1,6 +1,6 @@
 #pragma once
 
-float vertices_cube[] = {
+inline float vertices_cube[] = {
     // vert coords        // colors           // tex coords       // normals  
     // back face
     -0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   0.0f,  0.0f, -1.0f,
@@ -46,7 +46,7 @@ float vertices_cube[] = {
     -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   0.0f,  1.0f,  0.0f,
 };
 
-float skyboxVertices[] = {
+inline float skyboxVertices[] = {
     // positions          
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,
@@ -91,7 +91,7 @@ float skyboxVertices[] = {
      1.0f, -1.0f,  1.0f
 };
 
-float vertices_quad[] = { // used for screen render texture
+inline float vertices_quad[] = { // used for screen render texture
     // positions   // texCoords
     -1.0f,  1.0f,  0.0f, 1.0f,
     -1.0f, -1.0f,  0.0f, 0.0f,

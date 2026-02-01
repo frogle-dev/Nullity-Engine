@@ -8,10 +8,65 @@
 #include "debugging.hpp"
 #include "shader.hpp"
 #include "debugging.hpp"
+#include "primitives.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
+
+
+EngineData::EngineData()
+{
+    InitUBOs();
+    InitSkybox();
+}
+
+EngineData::~EngineData()
+{
+    Cleanup();
+}
+
+void EngineData::InitUBOs()
+{
+    glGenBuffers(1, &matricesUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
+    glBufferData(GL_UNIFORM_BUFFER, 128, NULL, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, matricesUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    glGenBuffers(1, &texArrayDataUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, texArrayDataUBO);
+    glBufferData(GL_UNIFORM_BUFFER, 1616, NULL, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 1, texArrayDataUBO);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void EngineData::InitSkybox()
+{
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+}
+
+void EngineData::Cleanup()
+{
+    glDeleteBuffers(1, &matricesUBO);
+    glDeleteBuffers(1, &texArrayDataUBO);
+    glDeleteVertexArrays(1, &skyboxVAO);
+    glDeleteBuffers(1, &skyboxVBO);
+    
+    objectShader.deleteProgram();
+    lightSourceShader.deleteProgram();
+    skyboxShader.deleteProgram();
+    instancedShader.deleteProgram();
+    grassShader.deleteProgram();
+    unlitShader.deleteProgram();
+}
+
 
 
 bool init(GLFWwindow *&windowID, int width, int height)
