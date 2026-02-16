@@ -20,7 +20,6 @@
 #include "engine_gui.hpp"
 
 #include "init.hpp"
-#include "utility.hpp"
 #include "systems.hpp"
 #include "player.hpp"
 #include "render.hpp"
@@ -31,25 +30,15 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 
-struct AppState
-{
-    const glm::ivec2 initViewRes = glm::ivec2(1920, 1080); 
-    glm::ivec2 viewRes = initViewRes;
-
-    EngineState* engineState;
-    MouseState* mouseState;
-};
-
-
 int main()
 {
-    AppState App;
-    EngineState engineState;
-    MouseState mouseState;
-    App.engineState = &engineState;
-    App.mouseState = &mouseState;
+    Engine::State App;
+    Engine::MouseState mouseState;
+    App.mouse = &mouseState;
 
     mouseState.lastMousePos = App.initViewRes / 2;
+
+    Camera camera;
 
 
     GLFWwindow* window;
@@ -103,9 +92,9 @@ int main()
     Scene.LoadObjects(Engine);
 
 
-    bool demoWindow = false;
-
     gameFrameBuffer.Unbind();
+    
+    bool demoWindow = false;
 
     float deltaTime = 0.0f;
     int fps;
@@ -181,17 +170,17 @@ int main()
 
 
         // game loop stuff
-        UtilityKeybinds(window, engineState);
-        PlayerUpdate(Engine.registry, mouseState.camera, deltaTime);
-        CameraControls(mouseState, engineState);
+        Engine::UtilityKeybinds(window, App);
+        PlayerUpdate(Engine.registry, camera, deltaTime);
+        CameraControls(mouseState, App, camera);
 
 
         Engine.objectShader.use();
-        Engine.objectShader.setVec3("viewPos", mouseState.camera.position);
+        Engine.objectShader.setVec3("viewPos", camera.position);
 
         TextureManager::Get().SendSubTexResArrayToShader(Engine.texArrayDataUBO); // send the tex res array to the frag shader
 
-        glm::mat4 view = mouseState.camera.GetViewMatrix();
+        glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)App.viewRes.x / App.viewRes.y, 0.1f, 1000.0f);
 
         SetUniformBufferData(Engine.matricesUBO, 0, 64, glm::value_ptr(view));
@@ -206,7 +195,7 @@ int main()
         // skybox
         glDepthFunc(GL_LEQUAL);
         Engine.skyboxShader.use();
-        view = glm::mat4(glm::mat3(mouseState.camera.GetViewMatrix()));
+        view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 
         SetUniformBufferData(Engine.matricesUBO, 0, 64, glm::value_ptr(view));
 
@@ -252,7 +241,7 @@ int main()
 
 void window_size_callback(GLFWwindow* window, int width, int height)
 {
-    AppState* state = static_cast<AppState*>(glfwGetWindowUserPointer(window));
+    Engine::State* state = static_cast<Engine::State*>(glfwGetWindowUserPointer(window));
 
     // letterbox scaling
     float aspect = (float)width / height;
@@ -278,9 +267,9 @@ void window_size_callback(GLFWwindow* window, int width, int height)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    AppState* state = static_cast<AppState*>(glfwGetWindowUserPointer(window));
+    Engine::State* state = static_cast<Engine::State*>(glfwGetWindowUserPointer(window));
 
-    state->mouseState->mousePos = glm::dvec2(xpos, ypos);
+    state->mouse->mousePos = glm::dvec2(xpos, ypos);
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

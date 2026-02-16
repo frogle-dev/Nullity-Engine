@@ -53,7 +53,6 @@ src/player.cpp
 src/render.cpp
 src/systems.cpp
 src/textures.cpp
-src/utility.cpp
 src/shader.cpp
 src/engine.cpp
 lib/glad.c

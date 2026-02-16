@@ -6,11 +6,34 @@
 #include <entt/entt.hpp>
 
 #include "components.hpp"
-
+#include "keymap.hpp"
 #include "shader.hpp"
 #include "primitives.hpp"
 #include "textures.hpp"
 
+
+void Engine::UtilityKeybinds(GLFWwindow* window, State& engineState)
+{
+    if (isActionJustPressed("focus"))
+    {
+        engineState.focus = !engineState.focus;
+
+        if (engineState.focus)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
+    if (isActionJustPressed("wireframe"))
+    {
+        engineState.wireframe = !engineState.wireframe;
+
+        if (engineState.wireframe)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        else
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+}
 
 Engine::Data::Data()
 {

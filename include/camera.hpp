@@ -1,14 +1,12 @@
 #pragma once
 
+#include "engine.hpp"
 #include "glad.h"
 #include <GLFW/glfw3.h>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "utility.hpp"
-
 #include <algorithm>
-
 
 const float def_yaw = -90.0f;
 const float def_pitch = 0.0f;
@@ -39,12 +37,4 @@ private:
     void UpdateCameraVectors();
 };
 
-struct MouseState
-{
-    Camera camera;
-    glm::vec2 lastMousePos;
-    bool firstMouse = true;
-    glm::dvec2 mousePos;
-};
-
-void CameraControls(MouseState& mouseState, EngineState& engineState);
+void CameraControls(Engine::MouseState& mouse, Engine::State& engineState, Camera& camera);

@@ -7,8 +7,30 @@
 
 #include "shader.hpp"
 
+
 namespace Engine 
 {
+    struct MouseState
+    {
+        glm::vec2 lastMousePos;
+        bool firstMouse = true;
+        glm::dvec2 mousePos;
+    };
+
+    struct State
+    {
+        const glm::ivec2 initViewRes = glm::ivec2(1920, 1080); 
+        glm::ivec2 viewRes = initViewRes;
+
+        bool focus = true;
+        bool wireframe = false;
+
+        MouseState* mouse;
+    };
+
+    void UtilityKeybinds(GLFWwindow* window, State& engineState);
+
+
     class Data
     {
     public:
