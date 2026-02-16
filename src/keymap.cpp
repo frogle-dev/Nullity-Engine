@@ -10,7 +10,6 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
-#include <iostream>
 
 
 static std::unordered_map<std::string, std::vector<int>> bindings;
@@ -73,7 +72,7 @@ void processKeyEvent(int scancode, int action)
 }
 
 
-static std::ifstream keymapJson("../game_config/keymaps.json");
+static std::ifstream keymapJson("game_config/keymaps.json");
 static nlohmann::json data = nlohmann::json::parse(keymapJson);
 // returns all keymaps that have been set from "reloadConfigKeymaps()"
 std::unordered_map<std::string, std::vector<int>>& getConfigKeymaps()

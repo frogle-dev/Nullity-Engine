@@ -14,12 +14,12 @@ namespace Engine
     public:
         Data();
 
-        Shader objectShader = Shader("../shaders/lit.vert", "../shaders/lit.frag");
-        Shader lightSourceShader = Shader("../shaders/light_source.vert", "../shaders/light_source.frag");
-        Shader skyboxShader = Shader("../shaders/skybox.vert", "../shaders/skybox.frag");
-        Shader instancedShader = Shader("../shaders/instanced.vert", "../shaders/instanced.frag"); 
-        Shader grassShader = Shader("../shaders/grass.vert", "../shaders/grass.frag");
-        Shader unlitShader = Shader("../shaders/unlit.vert", "../shaders/unlit.frag");
+        Shader objectShader = Shader("shaders/lit.vert", "shaders/lit.frag");
+        Shader lightSourceShader = Shader("shaders/light_source.vert", "shaders/light_source.frag");
+        Shader skyboxShader = Shader("shaders/skybox.vert", "shaders/skybox.frag");
+        Shader instancedShader = Shader("shaders/instanced.vert", "shaders/instanced.frag"); 
+        Shader grassShader = Shader("shaders/grass.vert", "shaders/grass.frag");
+        Shader unlitShader = Shader("shaders/unlit.vert", "shaders/unlit.frag");
 
         // uniform buffers
         GLuint matricesUBO;

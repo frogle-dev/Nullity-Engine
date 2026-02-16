@@ -44,12 +44,12 @@ void Engine::Data::InitSkybox()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     std::vector<std::string> skyboxFaces = {
-        "../images/skybox/right.jpg",
-        "../images/skybox/left.jpg",
-        "../images/skybox/top.jpg",
-        "../images/skybox/bottom.jpg",
-        "../images/skybox/front.jpg",
-        "../images/skybox/back.jpg",
+        "images/skybox/right.jpg",
+        "images/skybox/left.jpg",
+        "images/skybox/top.jpg",
+        "images/skybox/bottom.jpg",
+        "images/skybox/front.jpg",
+        "images/skybox/back.jpg",
     };
     skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
 }
@@ -76,7 +76,7 @@ void Engine::Scene::LoadObjects(Engine::Data& eng)
     eng.registry.emplace<DisplayName>(dirt, "dirt");
     eng.registry.emplace<ObjectShader>(dirt, eng.unlitShader);
     eng.registry.emplace<WorldObject>(dirt);
-    eng.registry.emplace<ObjectModel>(dirt, Model("../models/Dirt/Dirt.obj"), true);
+    eng.registry.emplace<ObjectModel>(dirt, Model("models/Dirt/Dirt.obj"), true);
 
     player = eng.registry.create();
     eng.registry.emplace<DisplayName>(player, "player");
