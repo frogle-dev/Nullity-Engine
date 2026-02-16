@@ -2,17 +2,20 @@
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 
+#include "components.hpp"
+
 #include "engine_gui.hpp"
 #include "keymap.hpp"
 
 #include <entt/entt.hpp>
 
 
-void Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
+void Engine::Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
 {
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4 accent = ImVec4(_accent[0], _accent[1], _accent[2], _accent[3]);
-    ImVec4 accent2 = ImVec4(_accent2[0], _accent2[1], _accent2[2], _accent2[3]); ImVec4 bg1 = ImVec4(_bg1[0], _bg1[1], _bg1[2], _bg1[3]);
+    ImVec4 accent2 = ImVec4(_accent2[0], _accent2[1], _accent2[2], _accent2[3]); 
+    ImVec4 bg1 = ImVec4(_bg1[0], _bg1[1], _bg1[2], _bg1[3]);
     ImVec4 bg2 = ImVec4(_bg2[0], _bg2[1], _bg2[2], _bg2[3]);
 
     style.WindowRounding = 5.0f;
@@ -53,7 +56,7 @@ void Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
     style.Colors[ImGuiCol_ButtonHovered] = accent2;
 }
 
-void KeybindChangePopup()
+void Engine::KeybindChangePopup()
 {
     static std::string currentActionName;
     static std::vector<int> currentKeycodes;
@@ -125,13 +128,62 @@ void KeybindChangePopup()
     ImGui::EndChild();
 }
 
-void InfoWindow(float msPerFrame, int fps)
+void Engine::InfoWindow(float msPerFrame, int fps)
 {
     ImGui::Begin("Info", NULL, ImGuiWindowFlags_None);
     ImGui::Text("ms per frame: %f", msPerFrame);
     ImGui::Text("fps: %i", fps);
 
     KeybindChangePopup();
+
+    ImGui::End();
+}
+
+void Engine::InspectorWindow(entt::registry& registry)
+{
+    static std::string inspectorCurrent = "None";
+
+    ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_None);
+
+    ImGui::Text("Entity: ");
+    
+    auto view = registry.view<DisplayName>();
+    if (ImGui::BeginCombo("##", inspectorCurrent.c_str()))
+    {
+        for (auto [entity, cmp_name] : view.each())
+        {
+            bool selected = (inspectorCurrent == cmp_name.name);
+            if (ImGui::Selectable(cmp_name.name.c_str(), selected))
+            {
+                inspectorCurrent = cmp_name.name;
+            }
+            if (selected)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+
+        ImGui::EndCombo();
+    }
+
+    ImGui::End();
+}
+
+void Engine::DebugOutputWindow()
+{
+    ImGui::Begin("Debug Output");
+
+    std::ifstream fin;
+    fin.open("DebugLog.txt");
+
+    while(!fin.eof())
+    {
+        std::string line;
+        std::getline(fin, line);
+        ImGui::TextWrapped("%s", line.c_str());
+    }
+
+    fin.close();
 
     ImGui::End();
 }

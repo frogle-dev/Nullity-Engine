@@ -14,40 +14,21 @@
 #include <fstream>
 
 
-void DebugOutputWindow()
-{
-    ImGui::Begin("Debug Output");
-
-    std::ifstream fin;
-    fin.open("DebugLog.txt");
-
-    while(!fin.eof())
-    {
-        std::string line;
-        std::getline(fin, line);
-        ImGui::TextWrapped("%s", line.c_str());
-    }
-
-    fin.close();
-
-    ImGui::End();
-}
-
 
 std::ofstream fout("DebugLog.txt");
-void DebugLog(std::ostringstream& oss)
+void Engine::DebugLog(std::ostringstream& oss)
 {
     fout << "---------------" << std::endl;
     fout << oss.str() << std::endl;
 }
 
-void DebugLog(std::string& string)
+void Engine::DebugLog(std::string& string)
 {
     fout << "---------------" << std::endl;
     fout << string << std::endl;
 }
 
-void APIENTRY glDebugOutput(GLenum source, 
+void APIENTRY Engine::glDebugOutput(GLenum source, 
                             GLenum type, 
                             unsigned int id, 
                             GLenum severity, 

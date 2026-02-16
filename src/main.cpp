@@ -6,31 +6,24 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "FastNoiseLite.h"
-
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 
 #include "shader.hpp"
-#include "primitives.hpp"
 #include "keymap.hpp"
 #include "camera.hpp"
 #include "textures.hpp"
-#include "models.hpp"
 #include "framebuffer.hpp"
+
+#include "engine.hpp"
+#include "engine_gui.hpp"
 
 #include "init.hpp"
 #include "utility.hpp"
-#include "inspector.hpp"
-#include "engine_gui.hpp"
 #include "systems.hpp"
 #include "player.hpp"
 #include "render.hpp"
-
-#include <algorithm>
-#include <cmath>
-#include <iostream>
 
 
 void window_size_callback(GLFWwindow* window, int width, int height);
@@ -40,7 +33,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 struct AppState
 {
-    const glm::ivec2 initViewRes = glm::ivec2(1280, 720); 
+    const glm::ivec2 initViewRes = glm::ivec2(1920, 1080); 
     glm::ivec2 viewRes = initViewRes;
 
     EngineState* engineState;
@@ -60,7 +53,7 @@ int main()
 
 
     GLFWwindow* window;
-    if (!init(window, App.initViewRes.x, App.initViewRes.y))
+    if (!Engine::init(window, App.initViewRes.x, App.initViewRes.y))
         return -1;
  
     glfwSetWindowUserPointer(window, &App);
@@ -71,7 +64,7 @@ int main()
     glfwSetKeyCallback(window, key_callback);
 
 
-    ImguiInit(window);
+    Engine::ImguiInit(window);
     ImGuiIO& io = ImGui::GetIO();
 
     float accent1[4] = {251.0f/255, 103.0f/255, 255.0f/255, 255.0f/255};
@@ -80,7 +73,7 @@ int main()
     float bg2[4] = {0.0f/255, 0.0f/255, 0.0f/255, 84.0f/255};
 
 
-    EngineData Engine;
+    Engine::Data Engine;
 
     reloadConfigKeymaps();
 
@@ -105,30 +98,10 @@ int main()
 
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
     TextureManager::Get().SendSubTexResArrayToShader(Engine.texArrayDataUBO); // send the tex res array to the frag shader
-    
 
-    FastNoiseLite noise;
-    noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-    noise.SetFractalType(FastNoiseLite::FractalType_FBm);
-    std::vector<float> noiseData(128 * 128);
-    std::vector<glm::mat4> mats;
-    int index = 0;
-
-    for (int y = 0; y < 128; y++)
-    {
-        for (int x = 0; x < 128; x++)
-        {
-            noiseData.push_back( noise.GetNoise((float)x, (float)y));
-            glm::mat4 model = glm::mat4(0.0f);
-            model = glm::translate(model, glm::vec3((float)x, 0.0f, (float)y));
-            model = glm::scale(model, glm::vec3(1.0f));
-            mats.push_back(model);
-            index++;
-        }
-    }
-
-    SceneData Scene;
+    Engine::Scene Scene;
     Scene.LoadObjects(Engine);
+
 
     bool demoWindow = false;
 
@@ -172,9 +145,9 @@ int main()
             ImGui::ShowDemoWindow();
         }
         
-        InfoWindow(msPerFrame, fps);
-        DebugOutputWindow();
-        InspectorWindow(Engine.registry);
+        Engine::InfoWindow(msPerFrame, fps);
+        Engine::DebugOutputWindow();
+        Engine::InspectorWindow(Engine.registry);
 
         ImGui::Begin("Game");
         {
@@ -196,13 +169,7 @@ int main()
         ImGui::EndChild();
         ImGui::End();
 
-        ImGui::Begin("Style");
-        ImGui::ColorEdit4("accent1", accent1);
-        ImGui::ColorEdit4("accent2", accent2);
-        ImGui::ColorEdit4("bg1", bg1);
-        ImGui::ColorEdit4("bg2", bg2);
-        Styling(accent1, accent2, bg1, bg2);
-        ImGui::End();
+        Engine::Styling(accent1, accent2, bg1, bg2);
 
         ImGui::Render();
 
@@ -250,12 +217,12 @@ int main()
         glDepthFunc(GL_LESS);
 
         glBindVertexArray(0);
-        
+
         // rendering to framebuffer
         gameFrameBuffer.Unbind();
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        
+
 
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -269,7 +236,7 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    
+
     // end of process life
     Engine.Cleanup();
     gameFrameBuffer.Cleanup();

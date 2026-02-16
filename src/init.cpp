@@ -6,95 +6,15 @@
 #include <sstream>
 #include <entt/entt.hpp>
 
-#include "components.hpp"
-
 #include "debugging.hpp"
-#include "shader.hpp"
 #include "debugging.hpp"
-#include "primitives.hpp"
-#include "textures.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 
 
-EngineData::EngineData()
-{
-    InitSkybox();
-    InitUBOs();
-}
-
-void EngineData::InitUBOs()
-{
-    glGenBuffers(1, &matricesUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
-    glBufferData(GL_UNIFORM_BUFFER, 128, NULL, GL_STATIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, matricesUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    glGenBuffers(1, &texArrayDataUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, texArrayDataUBO);
-    glBufferData(GL_UNIFORM_BUFFER, 1616, NULL, GL_STATIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 1, texArrayDataUBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
-void EngineData::InitSkybox()
-{
-    glGenVertexArrays(1, &skyboxVAO);
-    glGenBuffers(1, &skyboxVBO);
-    glBindVertexArray(skyboxVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-    std::vector<std::string> skyboxFaces = {
-        "../images/skybox/right.jpg",
-        "../images/skybox/left.jpg",
-        "../images/skybox/top.jpg",
-        "../images/skybox/bottom.jpg",
-        "../images/skybox/front.jpg",
-        "../images/skybox/back.jpg",
-    };
-    skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
-}
-
-void EngineData::Cleanup()
-{
-    glDeleteBuffers(1, &matricesUBO);
-    glDeleteBuffers(1, &texArrayDataUBO);
-    glDeleteVertexArrays(1, &skyboxVAO);
-    glDeleteBuffers(1, &skyboxVBO);
-    
-    objectShader.deleteProgram();
-    lightSourceShader.deleteProgram();
-    skyboxShader.deleteProgram();
-    instancedShader.deleteProgram();
-    grassShader.deleteProgram();
-    unlitShader.deleteProgram();
-}
-
-
-void SceneData::LoadObjects(EngineData& eng)
-{
-    dirt = eng.registry.create();
-    eng.registry.emplace<DisplayName>(dirt, "dirt");
-    eng.registry.emplace<ObjectShader>(dirt, eng.unlitShader);
-    eng.registry.emplace<WorldObject>(dirt);
-    eng.registry.emplace<ObjectModel>(dirt, Model("../models/Dirt/Dirt.obj"), true);
-
-    player = eng.registry.create();
-    eng.registry.emplace<DisplayName>(player, "player");
-    eng.registry.emplace<Transform>(player);
-    eng.registry.emplace<Player>(player);
-    eng.registry.emplace<Velocity>(player);
-}
-
-
-
-bool init(GLFWwindow *&windowID, int width, int height)
+bool Engine::init(GLFWwindow *&windowID, int width, int height)
 {
     glfwInit();
 
@@ -109,7 +29,7 @@ bool init(GLFWwindow *&windowID, int width, int height)
     {
         std::ostringstream oss;
         oss << "(Initialization): Error: Failed to create GLFW window" << std::endl;
-        DebugLog(oss);
+        Engine::DebugLog(oss);
         
         glfwTerminate();
         return false;
@@ -122,7 +42,7 @@ bool init(GLFWwindow *&windowID, int width, int height)
     {
         std::ostringstream oss;
         oss << "(Initialization): Error: Failed to initialize GLAD" << std::endl;
-        DebugLog(oss);
+        Engine::DebugLog(oss);
         return false;
     }
 
@@ -132,14 +52,14 @@ bool init(GLFWwindow *&windowID, int width, int height)
     {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(glDebugOutput, nullptr);
+        glDebugMessageCallback(Engine::glDebugOutput, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
 
     return true;
 }
 
-void ImguiInit(GLFWwindow* window)
+void Engine::ImguiInit(GLFWwindow* window)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
