@@ -11,6 +11,8 @@
 #include "primitives.hpp"
 #include "textures.hpp"
 
+#include <iostream>
+
 
 void Nullity::UtilityKeybinds(GLFWwindow* window, State& engineState)
 {
@@ -35,8 +37,7 @@ void Nullity::UtilityKeybinds(GLFWwindow* window, State& engineState)
     }
 }
 
-Nullity::Data::Data()
-{
+Nullity::Data::Data() {
     InitSkybox();
     InitUBOs();
 }
@@ -90,4 +91,14 @@ void Nullity::Data::Cleanup()
     instancedShader.deleteProgram();
     grassShader.deleteProgram();
     unlitShader.deleteProgram();
+}
+
+void Nullity::UpdateEngine(State& eng)
+{
+    float currentFrame = glfwGetTime();
+    eng.deltaTime = currentFrame - eng.lastFrame;
+    eng.lastFrame = currentFrame;
+    
+    eng.msPerFrame = eng.deltaTime * 1000;
+    eng.fps = 1000 / eng.msPerFrame;
 }

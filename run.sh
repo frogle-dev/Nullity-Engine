@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cmake --build build
+cmake --build build --parallel 8
 ./build/nullity

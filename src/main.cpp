@@ -10,24 +10,15 @@
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 
-#include "shader.hpp"
-#include "keymap.hpp"
-#include "camera.hpp"
-#include "textures.hpp"
 #include "framebuffer.hpp"
 
 #include "engine.hpp"
 #include "engine_gui.hpp"
 
 #include "init.hpp"
-#include "systems.hpp"
 #include "player.hpp"
 #include "render.hpp"
 
-
-void window_size_callback(GLFWwindow* window, int width, int height);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 
 int main()
@@ -42,16 +33,11 @@ int main()
 
 
     GLFWwindow* window;
-    if (!Nullity::init(window, App.initViewRes.x, App.initViewRes.y))
+    if (!Nullity::Init(window, App))
         return -1;
  
-    glfwSetWindowUserPointer(window, &App);
-
-    Framebuffer gameFrameBuffer(App.viewRes.x, App.viewRes.y);
-    glfwSetWindowSizeCallback(window, window_size_callback);
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetKeyCallback(window, key_callback);
-
+    Nullity::Data Engine;
+    Nullity::GUIData GuiData(App);
 
     Nullity::ImguiInit(window);
     ImGuiIO& io = ImGui::GetIO();
@@ -60,9 +46,7 @@ int main()
     float accent2[4] = {251.0f/255, 103.0f/255, 255.0f/255, 100.0f/255};
     float bg1[4] = {60.0f/255, 60.0f/255, 60.0f/255, 255.0f/255};
     float bg2[4] = {0.0f/255, 0.0f/255, 0.0f/255, 84.0f/255};
-
-
-    Nullity::Data Engine;
+    Nullity::Styling(accent1, accent2, bg1, bg2);
 
     reloadConfigKeymaps();
 
@@ -102,78 +86,15 @@ int main()
     Engine.registry.emplace<Velocity>(player);
 
 
-    gameFrameBuffer.Unbind();
+    GuiData.frameBuffer.Unbind();
     
-    bool demoWindow = false;
-
-    float deltaTime = 0.0f;
-    int fps;
-    float msPerFrame;
-    float lastFrame = 0.0f;
     while(!glfwWindowShouldClose(window))
     {
-        float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-        
-        msPerFrame = deltaTime * 1000;
-        fps = 1000 / msPerFrame;
+        Nullity::UpdateEngine(App);
+        Nullity::UpdateEngineGUI(App, GuiData, Engine, window);
 
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-
-        if (ImGui::BeginMainMenuBar())
-        {
-            if (ImGui::BeginMenu("Window"))
-            {
-                if (ImGui::MenuItem("Demo Window")) 
-                {
-                    demoWindow = !demoWindow;
-                }
-
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
-        }
-
-        if (demoWindow)
-        {
-            ImGui::ShowDemoWindow();
-        }
-        
-        Nullity::InfoWindow(msPerFrame, fps);
-        Nullity::DebugOutputWindow();
-        Nullity::InspectorWindow(Engine.registry);
-
-        ImGui::Begin("Game");
-        {
-            ImGui::BeginChild("Render");
-            
-            float width = ImGui::GetContentRegionAvail().x;
-            float height = ImGui::GetContentRegionAvail().y;
-            
-            gameFrameBuffer.Rescale(width, height);
-            window_size_callback(window, width, height);
-
-            ImGui::Image(
-                (ImTextureID)gameFrameBuffer.GetColorTexture(), 
-                ImGui::GetContentRegionAvail(), 
-                ImVec2(0, 1), 
-                ImVec2(1, 0)
-            );
-        }
-        ImGui::EndChild();
-        ImGui::End();
-
-        Nullity::Styling(accent1, accent2, bg1, bg2);
-
-        ImGui::Render();
-
-
-        gameFrameBuffer.Bind();
+        GuiData.frameBuffer.Bind();
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
         glEnable(GL_DEPTH_TEST);
@@ -181,7 +102,7 @@ int main()
 
         // game loop stuff
         Nullity::UtilityKeybinds(window, App);
-        PlayerUpdate(Engine.registry, camera, deltaTime);
+        PlayerUpdate(Engine.registry, camera, App.deltaTime);
         CameraControls(mouseState, App, camera);
 
 
@@ -218,7 +139,7 @@ int main()
         glBindVertexArray(0);
 
         // rendering to framebuffer
-        gameFrameBuffer.Unbind();
+        GuiData.frameBuffer.Unbind();
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -238,7 +159,7 @@ int main()
 
     // end of process life
     Engine.Cleanup();
-    gameFrameBuffer.Cleanup();
+    GuiData.frameBuffer.Cleanup();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -246,43 +167,4 @@ int main()
 
     glfwTerminate();
     return 0;
-}
-
-
-void window_size_callback(GLFWwindow* window, int width, int height)
-{
-    Nullity::State* state = static_cast<Nullity::State*>(glfwGetWindowUserPointer(window));
-
-    // letterbox scaling
-    float aspect = (float)width / height;
-    float targetAspect = (float)state->initViewRes.x / state->initViewRes.y;
-
-    if (aspect > targetAspect)
-    {
-        state->viewRes.y = height;
-        state->viewRes.x = (int)(height * targetAspect);
-    }
-    else
-    {
-        state->viewRes.x = width;
-        state->viewRes.y = (int)(width / targetAspect);
-    }
-
-    int viewX = (width - state->viewRes.x) / 2;
-    int viewY = (height - state->viewRes.y) / 2;
-
-    glViewport(viewX, viewY, state->viewRes.x, state->viewRes.y);
-}
-
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    Nullity::State* state = static_cast<Nullity::State*>(glfwGetWindowUserPointer(window));
-
-    state->mouse->mousePos = glm::dvec2(xpos, ypos);
-}
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    processKeyEvent(scancode, action);
 }
