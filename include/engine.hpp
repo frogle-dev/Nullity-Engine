@@ -5,7 +5,6 @@
 
 #include <entt/entt.hpp>
 
-#include "framebuffer.hpp"
 #include "shader.hpp"
 
 
@@ -27,11 +26,6 @@ namespace Nullity
         bool wireframe = false;
 
         MouseState* mouse;
-
-        float deltaTime = 0.0f;
-        int fps;
-        float msPerFrame;
-        float lastFrame = 0.0f;
     };
 
     void UtilityKeybinds(GLFWwindow* window, State& engineState);
@@ -62,6 +56,4 @@ namespace Nullity
 
         void Cleanup();
     };
-
-    void UpdateEngine(State& eng);
 }

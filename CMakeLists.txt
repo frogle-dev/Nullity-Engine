@@ -55,7 +55,6 @@ src/systems.cpp
 src/textures.cpp
 src/shader.cpp
 src/engine.cpp
-src/callbacks.cpp
 lib/glad.c
 )
 

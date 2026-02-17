@@ -7,15 +7,14 @@
 #include <entt/entt.hpp>
 
 #include "debugging.hpp"
-#include "engine.hpp"
-#include "callbacks.hpp"
+#include "debugging.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 
 
-bool Nullity::Init(GLFWwindow* windowID, State& engState)
+bool Nullity::init(GLFWwindow *&windowID, int width, int height)
 {
     glfwInit();
 
@@ -25,7 +24,7 @@ bool Nullity::Init(GLFWwindow* windowID, State& engState)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    windowID = glfwCreateWindow(engState.initViewRes.x, engState.initViewRes.y, "Nullity Engine", NULL, NULL);
+    windowID = glfwCreateWindow(width, height, "First OpenGL", NULL, NULL);
     if (windowID == NULL)
     {
         std::ostringstream oss;
@@ -56,12 +55,6 @@ bool Nullity::Init(GLFWwindow* windowID, State& engState)
         glDebugMessageCallback(Nullity::glDebugOutput, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
-
-
-    glfwSetWindowUserPointer(windowID, &engState);
-    glfwSetWindowSizeCallback(windowID, WindowSizeCallback);
-    glfwSetCursorPosCallback(windowID, MouseCallback);
-    glfwSetKeyCallback(windowID, KeyCallback);
 
     return true;
 }

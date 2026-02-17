@@ -1,30 +1,20 @@
-#include "glad.h"
-#include <GLFW/glfw3.h>
-
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_opengl3.h"
 
-#include "callbacks.hpp"
 #include "components.hpp"
-#include "engine.hpp"
+
 #include "engine_gui.hpp"
 #include "keymap.hpp"
+
 #include <entt/entt.hpp>
-
-#include <iostream>
-
-
-Nullity::GUIData::GUIData(State& engState)
-    : frameBuffer(engState.initViewRes.x, engState.initViewRes.y)
-{
-}
 
 
 void Nullity::Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
 {
     ImGuiStyle& style = ImGui::GetStyle();
-    ImVec4 accent = ImVec4(_accent[0], _accent[1], _accent[2], _accent[3]); ImVec4 accent2 = ImVec4(_accent2[0], _accent2[1], _accent2[2], _accent2[3]); 
+    ImVec4 accent = ImVec4(_accent[0], _accent[1], _accent[2], _accent[3]);
+    ImVec4 accent2 = ImVec4(_accent2[0], _accent2[1], _accent2[2], _accent2[3]); 
     ImVec4 bg1 = ImVec4(_bg1[0], _bg1[1], _bg1[2], _bg1[3]);
     ImVec4 bg2 = ImVec4(_bg2[0], _bg2[1], _bg2[2], _bg2[3]);
 
@@ -59,6 +49,7 @@ void Nullity::Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
 
     // list
     style.Colors[ImGuiCol_FrameBg] = bg2;
+
     // buttons
     style.Colors[ImGuiCol_Button] = accent;
     style.Colors[ImGuiCol_ButtonActive] = accent2;
@@ -195,59 +186,4 @@ void Nullity::DebugOutputWindow()
     fin.close();
 
     ImGui::End();
-}
-
-void Nullity::UpdateEngineGUI(State& eng, GUIData& guiData, Data& engData, GLFWwindow* window)
-{
-    static bool demoWindow = false;
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-
-    if (ImGui::BeginMainMenuBar())
-    {
-        if (ImGui::BeginMenu("Window"))
-        {
-            if (ImGui::MenuItem("Demo Window")) 
-            {
-                demoWindow = !demoWindow;
-            }
-
-            ImGui::EndMenu();
-        }
-        ImGui::EndMainMenuBar();
-    }
-
-    if (demoWindow)
-    {
-        ImGui::ShowDemoWindow();
-    }
-    
-    InfoWindow(eng.msPerFrame, eng.fps);
-    DebugOutputWindow();
-    InspectorWindow(engData.registry);
-
-    ImGui::Begin("Game");
-    {
-        ImGui::BeginChild("Render");
-        
-        float width = ImGui::GetContentRegionAvail().x;
-        float height = ImGui::GetContentRegionAvail().y;
-        
-        guiData.frameBuffer.Rescale(width, height);
-        WindowSizeCallback(window, width, height);
-
-        ImGui::Image(
-            (ImTextureID)guiData.frameBuffer.GetColorTexture(), 
-            ImGui::GetContentRegionAvail(), 
-            ImVec2(0, 1), 
-            ImVec2(1, 0)
-        );
-    }
-    ImGui::EndChild();
-    ImGui::End();
-
-    ImGui::Render();
 }

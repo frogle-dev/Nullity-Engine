@@ -9,7 +9,7 @@
 
 namespace Nullity
 {
-	bool Init(GLFWwindow* windowID, State& engState);
+	bool init(GLFWwindow *&windowID, int width, int height);
 	void ImguiInit(GLFWwindow* window);
 }
 
