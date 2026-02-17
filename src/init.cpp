@@ -14,7 +14,7 @@
 #include "imgui/backends/imgui_impl_opengl3.h"
 
 
-bool Engine::init(GLFWwindow *&windowID, int width, int height)
+bool Nullity::init(GLFWwindow *&windowID, int width, int height)
 {
     glfwInit();
 
@@ -29,7 +29,7 @@ bool Engine::init(GLFWwindow *&windowID, int width, int height)
     {
         std::ostringstream oss;
         oss << "(Initialization): Error: Failed to create GLFW window" << std::endl;
-        Engine::DebugLog(oss);
+        Nullity::DebugLog(oss);
         
         glfwTerminate();
         return false;
@@ -42,7 +42,7 @@ bool Engine::init(GLFWwindow *&windowID, int width, int height)
     {
         std::ostringstream oss;
         oss << "(Initialization): Error: Failed to initialize GLAD" << std::endl;
-        Engine::DebugLog(oss);
+        Nullity::DebugLog(oss);
         return false;
     }
 
@@ -52,14 +52,14 @@ bool Engine::init(GLFWwindow *&windowID, int width, int height)
     {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(Engine::glDebugOutput, nullptr);
+        glDebugMessageCallback(Nullity::glDebugOutput, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
 
     return true;
 }
 
-void Engine::ImguiInit(GLFWwindow* window)
+void Nullity::ImguiInit(GLFWwindow* window)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

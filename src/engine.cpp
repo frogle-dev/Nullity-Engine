@@ -12,7 +12,7 @@
 #include "textures.hpp"
 
 
-void Engine::UtilityKeybinds(GLFWwindow* window, State& engineState)
+void Nullity::UtilityKeybinds(GLFWwindow* window, State& engineState)
 {
     if (isActionJustPressed("focus"))
     {
@@ -35,13 +35,13 @@ void Engine::UtilityKeybinds(GLFWwindow* window, State& engineState)
     }
 }
 
-Engine::Data::Data()
+Nullity::Data::Data()
 {
     InitSkybox();
     InitUBOs();
 }
 
-void Engine::Data::InitUBOs()
+void Nullity::Data::InitUBOs()
 {
     glGenBuffers(1, &matricesUBO);
     glBindBuffer(GL_UNIFORM_BUFFER, matricesUBO);
@@ -56,7 +56,7 @@ void Engine::Data::InitUBOs()
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void Engine::Data::InitSkybox()
+void Nullity::Data::InitSkybox()
 {
     glGenVertexArrays(1, &skyboxVAO);
     glGenBuffers(1, &skyboxVBO);
@@ -77,7 +77,7 @@ void Engine::Data::InitSkybox()
     skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
 }
 
-void Engine::Data::Cleanup()
+void Nullity::Data::Cleanup()
 {
     glDeleteBuffers(1, &matricesUBO);
     glDeleteBuffers(1, &texArrayDataUBO);
@@ -90,20 +90,4 @@ void Engine::Data::Cleanup()
     instancedShader.deleteProgram();
     grassShader.deleteProgram();
     unlitShader.deleteProgram();
-}
-
-
-void Engine::Scene::LoadObjects(Engine::Data& eng)
-{
-    dirt = eng.registry.create();
-    eng.registry.emplace<DisplayName>(dirt, "dirt");
-    eng.registry.emplace<ObjectShader>(dirt, eng.unlitShader);
-    eng.registry.emplace<WorldObject>(dirt);
-    eng.registry.emplace<ObjectModel>(dirt, Model("models/Dirt/Dirt.obj"), true);
-
-    player = eng.registry.create();
-    eng.registry.emplace<DisplayName>(player, "player");
-    eng.registry.emplace<Transform>(player);
-    eng.registry.emplace<Player>(player);
-    eng.registry.emplace<Velocity>(player);
 }

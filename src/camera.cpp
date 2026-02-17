@@ -59,7 +59,7 @@ void Camera::UpdateCameraVectors()
     straightFront = glm::normalize(glm::cross(right, worldUp));
 }
 
-void CameraControls(Engine::MouseState& mouse, Engine::State& engineState, Camera& camera)
+void CameraControls(Nullity::MouseState& mouse, Nullity::State& engineState, Camera& camera)
 {
     if (mouse.firstMouse)
     {

@@ -52,7 +52,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
         std::ostringstream oss;
         oss << "(Shader): Error: File not succesfully read" << std::endl;
 
-        Engine::DebugLog(oss);
+        Nullity::DebugLog(oss);
     }
     const char* vertexShaderCode = vertexCode.c_str();
     const char* fragmentShaderCode = fragmentCode.c_str();
@@ -133,7 +133,7 @@ GLint Shader::getUniformLoc(const std::string& name) const
     if (loc == -1)
     {
         oss << "(Shader): Error: uniform not found " << name << std::endl;
-        Engine::DebugLog(oss);
+        Nullity::DebugLog(oss);
     } 
 
     return loc;
@@ -153,7 +153,7 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 
             oss << "Error: shader compilation error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 
-            Engine::DebugLog(oss);
+            Nullity::DebugLog(oss);
         }
     }
     else
@@ -165,7 +165,7 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 
             oss << "Error: program linking error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 
-            Engine::DebugLog(oss);
+            Nullity::DebugLog(oss);
         }
     }
 }

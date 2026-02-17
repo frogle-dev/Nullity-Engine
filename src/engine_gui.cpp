@@ -10,7 +10,7 @@
 #include <entt/entt.hpp>
 
 
-void Engine::Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
+void Nullity::Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
 {
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4 accent = ImVec4(_accent[0], _accent[1], _accent[2], _accent[3]);
@@ -56,7 +56,7 @@ void Engine::Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
     style.Colors[ImGuiCol_ButtonHovered] = accent2;
 }
 
-void Engine::KeybindChangePopup()
+void Nullity::KeybindChangePopup()
 {
     static std::string currentActionName;
     static std::vector<int> currentKeycodes;
@@ -128,7 +128,7 @@ void Engine::KeybindChangePopup()
     ImGui::EndChild();
 }
 
-void Engine::InfoWindow(float msPerFrame, int fps)
+void Nullity::InfoWindow(float msPerFrame, int fps)
 {
     ImGui::Begin("Info", NULL, ImGuiWindowFlags_None);
     ImGui::Text("ms per frame: %f", msPerFrame);
@@ -139,7 +139,7 @@ void Engine::InfoWindow(float msPerFrame, int fps)
     ImGui::End();
 }
 
-void Engine::InspectorWindow(entt::registry& registry)
+void Nullity::InspectorWindow(entt::registry& registry)
 {
     static std::string inspectorCurrent = "None";
 
@@ -169,7 +169,7 @@ void Engine::InspectorWindow(entt::registry& registry)
     ImGui::End();
 }
 
-void Engine::DebugOutputWindow()
+void Nullity::DebugOutputWindow()
 {
     ImGui::Begin("Debug Output");
 

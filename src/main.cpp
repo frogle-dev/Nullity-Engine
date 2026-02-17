@@ -32,8 +32,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 int main()
 {
-    Engine::State App;
-    Engine::MouseState mouseState;
+    Nullity::State App;
+    Nullity::MouseState mouseState;
     App.mouse = &mouseState;
 
     mouseState.lastMousePos = App.initViewRes / 2;
@@ -42,7 +42,7 @@ int main()
 
 
     GLFWwindow* window;
-    if (!Engine::init(window, App.initViewRes.x, App.initViewRes.y))
+    if (!Nullity::init(window, App.initViewRes.x, App.initViewRes.y))
         return -1;
  
     glfwSetWindowUserPointer(window, &App);
@@ -53,7 +53,7 @@ int main()
     glfwSetKeyCallback(window, key_callback);
 
 
-    Engine::ImguiInit(window);
+    Nullity::ImguiInit(window);
     ImGuiIO& io = ImGui::GetIO();
 
     float accent1[4] = {251.0f/255, 103.0f/255, 255.0f/255, 255.0f/255};
@@ -62,7 +62,7 @@ int main()
     float bg2[4] = {0.0f/255, 0.0f/255, 0.0f/255, 84.0f/255};
 
 
-    Engine::Data Engine;
+    Nullity::Data Engine;
 
     reloadConfigKeymaps();
 
@@ -88,8 +88,18 @@ int main()
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
     TextureManager::Get().SendSubTexResArrayToShader(Engine.texArrayDataUBO); // send the tex res array to the frag shader
 
-    Engine::Scene Scene;
-    Scene.LoadObjects(Engine);
+
+    auto dirt = Engine.registry.create();
+    Engine.registry.emplace<DisplayName>(dirt, "dirt");
+    Engine.registry.emplace<ObjectShader>(dirt, Engine.unlitShader);
+    Engine.registry.emplace<WorldObject>(dirt);
+    Engine.registry.emplace<ObjectModel>(dirt, Model("models/Dirt/Dirt.obj"), true);
+
+    auto player = Engine.registry.create();
+    Engine.registry.emplace<DisplayName>(player, "player");
+    Engine.registry.emplace<Transform>(player);
+    Engine.registry.emplace<Player>(player);
+    Engine.registry.emplace<Velocity>(player);
 
 
     gameFrameBuffer.Unbind();
@@ -134,9 +144,9 @@ int main()
             ImGui::ShowDemoWindow();
         }
         
-        Engine::InfoWindow(msPerFrame, fps);
-        Engine::DebugOutputWindow();
-        Engine::InspectorWindow(Engine.registry);
+        Nullity::InfoWindow(msPerFrame, fps);
+        Nullity::DebugOutputWindow();
+        Nullity::InspectorWindow(Engine.registry);
 
         ImGui::Begin("Game");
         {
@@ -158,7 +168,7 @@ int main()
         ImGui::EndChild();
         ImGui::End();
 
-        Engine::Styling(accent1, accent2, bg1, bg2);
+        Nullity::Styling(accent1, accent2, bg1, bg2);
 
         ImGui::Render();
 
@@ -170,7 +180,7 @@ int main()
 
 
         // game loop stuff
-        Engine::UtilityKeybinds(window, App);
+        Nullity::UtilityKeybinds(window, App);
         PlayerUpdate(Engine.registry, camera, deltaTime);
         CameraControls(mouseState, App, camera);
 
@@ -241,7 +251,7 @@ int main()
 
 void window_size_callback(GLFWwindow* window, int width, int height)
 {
-    Engine::State* state = static_cast<Engine::State*>(glfwGetWindowUserPointer(window));
+    Nullity::State* state = static_cast<Nullity::State*>(glfwGetWindowUserPointer(window));
 
     // letterbox scaling
     float aspect = (float)width / height;
@@ -267,7 +277,7 @@ void window_size_callback(GLFWwindow* window, int width, int height)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    Engine::State* state = static_cast<Engine::State*>(glfwGetWindowUserPointer(window));
+    Nullity::State* state = static_cast<Nullity::State*>(glfwGetWindowUserPointer(window));
 
     state->mouse->mousePos = glm::dvec2(xpos, ypos);
 }

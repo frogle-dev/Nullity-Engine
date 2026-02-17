@@ -13,7 +13,7 @@
 #include <sstream>
 #include <fstream>
 
-namespace Engine 
+namespace Nullity 
 {
 	void DebugLog(std::ostringstream& oss);
 	void DebugLog(std::string& string);

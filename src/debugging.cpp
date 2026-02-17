@@ -16,19 +16,19 @@
 
 
 std::ofstream fout("DebugLog.txt");
-void Engine::DebugLog(std::ostringstream& oss)
+void Nullity::DebugLog(std::ostringstream& oss)
 {
     fout << "---------------" << std::endl;
     fout << oss.str() << std::endl;
 }
 
-void Engine::DebugLog(std::string& string)
+void Nullity::DebugLog(std::string& string)
 {
     fout << "---------------" << std::endl;
     fout << string << std::endl;
 }
 
-void APIENTRY Engine::glDebugOutput(GLenum source, 
+void APIENTRY Nullity::glDebugOutput(GLenum source, 
                             GLenum type, 
                             unsigned int id, 
                             GLenum severity, 

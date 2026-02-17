@@ -130,7 +130,7 @@ void removeConfigKeymap(const std::string& actionName, int index)
     {
         std::ostringstream oss;
         oss << "Invalid action or index.\n";
-        Engine::DebugLog(oss);
+        Nullity::DebugLog(oss);
     }
 
     std::ofstream out("../game_config/keymaps.json");

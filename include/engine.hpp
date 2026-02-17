@@ -8,7 +8,7 @@
 #include "shader.hpp"
 
 
-namespace Engine 
+namespace Nullity 
 {
     struct MouseState
     {
@@ -55,14 +55,5 @@ namespace Engine
         void InitSkybox();
 
         void Cleanup();
-    };
-
-    class Scene
-    {
-    public:
-        entt::entity dirt;
-        entt::entity player;
-
-        void LoadObjects(Data&);
     };
 }

@@ -24,7 +24,7 @@ Framebuffer::Framebuffer(float width, float height)
     {
         std::ostringstream oss;
         oss << "(Framebuffer): Error: Framebuffer is not complete" << std::endl;
-        Engine::DebugLog(oss);
+        Nullity::DebugLog(oss);
         return;
     }
 
