@@ -1,4 +1,6 @@
 #pragma once
 
-#include "engine_gui.hpp"
-#include "editor_init.hpp"
+#include "include/core.hpp"
+#include "include/engine_gui.hpp"
+#include "include/editor_init.hpp"
+

@@ -4,9 +4,9 @@ add_library(NullityEditor STATIC
 	${editorSource}
 )
 
-target_include_directories(NullityEditor PUBLIC
-	include
-	.
+target_include_directories(NullityEditor
+	PRIVATE include
+	PUBLIC .
 )
 
 target_link_libraries(NullityEditor PUBLIC

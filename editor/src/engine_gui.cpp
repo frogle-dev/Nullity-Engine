@@ -1,4 +1,3 @@
-#include "callbacks.hpp"
 #include "engine.hpp"
 #include "engine_gui.hpp"
 
@@ -6,8 +5,8 @@
 #include <fstream>
 
 
-NullityEditor::State::State(Nullity::State& engState)
-    : framebuffer(engState.initViewRes.x, engState.initViewRes.y) {}
+NullityEditor::State::State(Nullity::Engine& eng)
+    : framebuffer(eng.state.initViewRes.x, eng.state.initViewRes.y) {}
 
 
 void NullityEditor::Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
@@ -31,8 +30,7 @@ void NullityEditor::Styling(float* _accent, float* _accent2, float* _bg1, float*
     style.Colors[ImGuiCol_TabDimmed] = accent;
     style.Colors[ImGuiCol_TabDimmedSelected] = accent;
     style.Colors[ImGuiCol_Tab] = accent;
-    style.Colors[ImGuiCol_TabUnfocused] = accent;
-    style.Colors[ImGuiCol_TabUnfocusedActive] = accent;
+    style.Colors[ImGuiCol_TabUnfocused] = accent; style.Colors[ImGuiCol_TabUnfocusedActive] = accent;
     style.Colors[ImGuiCol_TabSelected] = accent2;
     style.Colors[ImGuiCol_WindowBg] = bg1;
     style.Colors[ImGuiCol_PopupBg] = bg1;
@@ -239,13 +237,4 @@ void NullityEditor::UpdateEditor(State& editorState, Nullity::Data& engData, Nul
     ImGui::End();
 
     ImGui::Render();
-}
-
-void NullityEditor::Cleanup(State& editorState)
-{
-    editorState.framebuffer.Cleanup();
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
 }

@@ -15,7 +15,7 @@ namespace NullityEditor
 		
 		Framebuffer framebuffer;
 		
-		State(Nullity::State& engState);
+		State(Nullity::Engine& engine);
 	};
 
 	void Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2);
@@ -25,7 +25,4 @@ namespace NullityEditor
 	void DebugOutputWindow();
 
 	void UpdateEditor(State& editorState, Nullity::Data& engData, Nullity::State& engState, GLFWwindow* window);
-
-
-	void Cleanup(State& editorState);
 }

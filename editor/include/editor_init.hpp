@@ -7,5 +7,5 @@
 
 namespace NullityEditor
 {
-	void Init(GLFWwindow* window, Nullity::State& engState);
+	void Init(GLFWwindow* window, Nullity::Engine& engine);
 }

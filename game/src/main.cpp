@@ -1,5 +1,4 @@
 #include "engine.hpp"
-#include "engine_gui.hpp"
 
 #ifdef DEBUG // no editor in release mode #include "editor.hpp"
 #include "editor.hpp"
@@ -13,7 +12,7 @@ int main()
     GLFWwindow* window;
     Nullity::Engine Engine(window);
 
-    NullityEditor::Init(window);
+    NullityEditor::Editor(window, Engine);
 
 
     Camera camera;
@@ -100,8 +99,6 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-    NullityEditor::Cleanup(EditorState);
 
     return 0;
 }
