@@ -1,4 +1,5 @@
 #include "engine.hpp"
+#include "engine_gui.hpp"
 
 #ifdef DEBUG // no editor in release mode #include "editor.hpp"
 #include "editor.hpp"
@@ -15,9 +16,6 @@ int main()
 
     mouseState.lastMousePos = App.initViewRes / 2;
 
-    Camera camera;
-
-
     GLFWwindow* window;
     if (!Nullity::Init(window, App))
         return -1;
@@ -25,11 +23,7 @@ int main()
 
     NullityEditor::ImguiInit(window);
     ImGuiIO& io = ImGui::GetIO();
-    //
-    // float accent1[4] = {251.0f/255, 103.0f/255, 255.0f/255, 255.0f/255};
-    // float accent2[4] = {251.0f/255, 103.0f/255, 255.0f/255, 100.0f/255};
-    // float bg1[4] = {60.0f/255, 60.0f/255, 60.0f/255, 255.0f/255};
-    // float bg2[4] = {0.0f/255, 0.0f/255, 0.0f/255, 84.0f/255};
+
 
     NullityEditor::State EditorState(App);
     Nullity::Data Engine;
@@ -38,6 +32,7 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+
 
 
     // textures
@@ -56,6 +51,8 @@ int main()
     TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
     TextureManager::Get().SendSubTexResArrayToShader(Engine.texArrayDataUBO); // send the tex res array to the frag shader
 
+
+    Camera camera;
 
     // auto dirt = Engine.registry.create();
     // Engine.registry.emplace<DisplayName>(dirt, "dirt");
@@ -143,11 +140,8 @@ int main()
 
     // end of process life
     Engine.Cleanup();
-    EditorState.framebuffer.Cleanup();
+    NullityEditor::Cleanup(EditorState);
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;

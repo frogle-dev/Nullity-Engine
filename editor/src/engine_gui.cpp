@@ -240,3 +240,12 @@ void NullityEditor::UpdateEditor(State& editorState, Nullity::Data& engData, Nul
 
     ImGui::Render();
 }
+
+void NullityEditor::Cleanup(State& editorState)
+{
+    editorState.framebuffer.Cleanup();
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+}

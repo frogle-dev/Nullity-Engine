@@ -25,4 +25,7 @@ namespace NullityEditor
 	void DebugOutputWindow();
 
 	void UpdateEditor(State& editorState, Nullity::Data& engData, Nullity::State& engState, GLFWwindow* window);
+
+
+	void Cleanup(State& editorState);
 }
