@@ -12,7 +12,7 @@ int main()
     GLFWwindow* window;
     Nullity::Engine Engine(window);
 
-    NullityEditor::Editor(window, Engine);
+    NullityEditor::Editor Editor(window, Engine);
 
 
     Camera camera;
@@ -30,12 +30,12 @@ int main()
     // Engine.registry.emplace<Velocity>(player);
 
 
-    EditorState.framebuffer.Unbind();
+    Editor.state.framebuffer.Unbind();
 
     while(!glfwWindowShouldClose(window))
     {
-        Nullity::UpdateEngine(App);
-        NullityEditor::UpdateEditor(EditorState, Engine, App, window);
+        Engine.Update();
+        Editor.Update(window, Engine);
 
         EditorState.framebuffer.Bind();
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);

@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "glad.h"
 #include <GLFW/glfw3.h>
 
@@ -33,10 +34,7 @@ namespace Nullity
         MouseState mouse;
     };
 
-
-    void UpdateEngine(State& engState);
     void UtilityKeybinds(GLFWwindow* window, State& engineState);
-
 
     class Data
     {

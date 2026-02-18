@@ -12,7 +12,9 @@ namespace NullityEditor
 		~Editor();
 
 		State state;
-	
+
+		void Update(GLFWwindow* window, Nullity::Engine& eng);
+
 	private:
 		void Cleanup();
 	};

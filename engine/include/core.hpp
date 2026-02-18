@@ -2,6 +2,8 @@
 
 #include "state.hpp"
 
+#include <GLFW/glfw3.h>
+
 
 namespace Nullity
 {
@@ -13,6 +15,8 @@ namespace Nullity
 
 		Data data;
 		State state;
+
+		void Update();
 
 	private:
 

@@ -23,4 +23,12 @@ Nullity::Engine::~Engine()
     glfwTerminate();
 }
 
-
+void Nullity::Engine::Update()
+{
+    float currentFrame = glfwGetTime();
+    state.deltaTime = currentFrame - state.lastFrame;
+    state.lastFrame = currentFrame;
+    
+    state.msPerFrame = state.deltaTime * 1000;
+    state.fps = 1000 / state.msPerFrame;
+}

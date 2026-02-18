@@ -3,6 +3,7 @@
 
 #include <entt/entt.hpp>
 
+#include "core.hpp"
 #include "state.hpp"
 #include "keymap.hpp"
 #include "shader.hpp"
@@ -10,15 +11,6 @@
 #include "textures.hpp"
 
 
-void Nullity::UpdateEngine(State& engState)
-{
-    float currentFrame = glfwGetTime();
-    engState.deltaTime = currentFrame - engState.lastFrame;
-    engState.lastFrame = currentFrame;
-    
-    engState.msPerFrame = engState.deltaTime * 1000;
-    engState.fps = 1000 / engState.msPerFrame;
-}
 
 void Nullity::UtilityKeybinds(GLFWwindow* window, State& engineState)
 {

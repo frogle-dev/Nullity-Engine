@@ -23,6 +23,4 @@ namespace NullityEditor
 	void InfoWindow(float msPerFrame, int fps);
 	void InspectorWindow(entt::registry& registry);
 	void DebugOutputWindow();
-
-	void UpdateEditor(State& editorState, Nullity::Data& engData, Nullity::State& engState, GLFWwindow* window);
 }
