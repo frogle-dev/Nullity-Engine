@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core.hpp"
 #include "camera.hpp"
 #include "components.hpp"
 #include "debugging.hpp"
@@ -14,3 +15,4 @@
 #include "systems.hpp"
 #include "textures.hpp"
 #include "callbacks.hpp"
+

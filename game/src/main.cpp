@@ -10,46 +10,10 @@
 
 int main()
 {
-    Nullity::State App;
-    Nullity::MouseState mouseState;
-    App.mouse = &mouseState;
-
-    mouseState.lastMousePos = App.initViewRes / 2;
-
     GLFWwindow* window;
-    if (!Nullity::Init(window, App))
-        return -1;
+    Nullity::Engine Engine(window);
 
-
-    NullityEditor::ImguiInit(window);
-    ImGuiIO& io = ImGui::GetIO();
-
-
-    NullityEditor::State EditorState(App);
-    Nullity::Data Engine;
-
-    reloadConfigKeymaps();
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-
-
-
-    // textures
-    glActiveTexture(GL_TEXTURE0);
-
-    TextureManager::Get().GenerateTextureArray(4096, 4096, 100, Engine.texArrayDataUBO);
-    
-    GLuint texArrayID = TextureManager::Get().GetTexArrayID();
-
-    Engine.objectShader.use();
-    Engine.objectShader.setFloat("material.emissionStrength", 1.0f);
-    Engine.objectShader.setFloat("material.shininess", 128.0f);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    TextureManager::Get().GenerateMipmaps(); // generate texture array mipmaps once all textures have been loaded in
-    TextureManager::Get().SendSubTexResArrayToShader(Engine.texArrayDataUBO); // send the tex res array to the frag shader
+    NullityEditor::Init(window);
 
 
     Camera camera;
@@ -60,15 +24,14 @@ int main()
     // Engine.registry.emplace<WorldObject>(dirt);
     // Engine.registry.emplace<ObjectModel>(dirt, Model("models/Dirt/Dirt.obj"), true);
 
-    auto player = Engine.registry.create();
-    Engine.registry.emplace<DisplayName>(player, "player");
-    Engine.registry.emplace<Transform>(player);
-    Engine.registry.emplace<Player>(player);
-    Engine.registry.emplace<Velocity>(player);
+    // auto player = Engine.registry.create();
+    // Engine.registry.emplace<DisplayName>(player, "player");
+    // Engine.registry.emplace<Transform>(player);
+    // Engine.registry.emplace<Player>(player);
+    // Engine.registry.emplace<Velocity>(player);
 
 
     EditorState.framebuffer.Unbind();
-    
 
     while(!glfwWindowShouldClose(window))
     {
@@ -138,11 +101,7 @@ int main()
         glfwPollEvents();
     }
 
-    // end of process life
-    Engine.Cleanup();
     NullityEditor::Cleanup(EditorState);
 
-
-    glfwTerminate();
     return 0;
 }

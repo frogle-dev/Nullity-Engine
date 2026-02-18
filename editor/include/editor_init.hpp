@@ -1,8 +1,11 @@
 #pragma once
 
+#include "engine.hpp"
+
 #include <GLFW/glfw3.h>
+
 
 namespace NullityEditor
 {
-	void ImguiInit(GLFWwindow* window);
+	void Init(GLFWwindow* window, Nullity::State& engState);
 }

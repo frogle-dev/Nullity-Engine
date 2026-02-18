@@ -3,7 +3,7 @@
 #include "editor_init.hpp"
 
 
-void NullityEditor::ImguiInit(GLFWwindow* window)
+void NullityEditor::Init(GLFWwindow* window, Nullity::State& engState)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -14,4 +14,6 @@ void NullityEditor::ImguiInit(GLFWwindow* window)
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
+
+    NullityEditor::State EditorState(App);
 }

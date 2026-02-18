@@ -1,10 +1,10 @@
 #pragma once
 
-
 #include "glad.h"
 
 #include <string>
 #include <sstream>
+
 
 namespace Nullity 
 {

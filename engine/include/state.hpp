@@ -30,7 +30,7 @@ namespace Nullity
         float msPerFrame;
         float lastFrame = 0.0f;
 
-        MouseState* mouse;
+        MouseState mouse;
     };
 
 

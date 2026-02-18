@@ -31,7 +31,7 @@ void Nullity::MouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
     State* state = static_cast<State*>(glfwGetWindowUserPointer(window));
 
-    state->mouse->mousePos = glm::dvec2(xpos, ypos);
+    state->mouse.mousePos = glm::dvec2(xpos, ypos);
 }
 
 void Nullity::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

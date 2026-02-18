@@ -8,6 +8,6 @@
 
 namespace Nullity
 {
-	bool Init(GLFWwindow *&windowID, State& engState);
+	bool Init(GLFWwindow* windowID);
 }
 
