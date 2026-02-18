@@ -43,12 +43,12 @@ namespace Nullity
     public:
         Data();
 
-        Shader objectShader = Shader("shaders/lit.vert", "shaders/lit.frag");
-        Shader lightSourceShader = Shader("shaders/light_source.vert", "shaders/light_source.frag");
-        Shader skyboxShader = Shader("shaders/skybox.vert", "shaders/skybox.frag");
-        Shader instancedShader = Shader("shaders/instanced.vert", "shaders/instanced.frag"); 
-        Shader grassShader = Shader("shaders/grass.vert", "shaders/grass.frag");
-        Shader unlitShader = Shader("shaders/unlit.vert", "shaders/unlit.frag");
+        Shader objectShader = Shader("assets/shaders/lit.vert", "assets/shaders/lit.frag");
+        Shader lightSourceShader = Shader("assets/shaders/light_source.vert", "assets/shaders/light_source.frag");
+        Shader skyboxShader = Shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
+        Shader instancedShader = Shader("assets/shaders/instanced.vert", "assets/shaders/instanced.frag"); 
+        Shader grassShader = Shader("assets/shaders/grass.vert", "assets/shaders/grass.frag");
+        Shader unlitShader = Shader("assets/shaders/unlit.vert", "assets/shaders/unlit.frag");
 
         // uniform buffers
         GLuint matricesUBO;

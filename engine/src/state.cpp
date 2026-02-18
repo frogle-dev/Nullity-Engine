@@ -75,12 +75,12 @@ void Nullity::Data::InitSkybox()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
     std::vector<std::string> skyboxFaces = {
-        "images/skybox/right.jpg",
-        "images/skybox/left.jpg",
-        "images/skybox/top.jpg",
-        "images/skybox/bottom.jpg",
-        "images/skybox/front.jpg",
-        "images/skybox/back.jpg",
+        "assets/images/skybox/right.jpg",
+        "assets/images/skybox/left.jpg",
+        "assets/images/skybox/top.jpg",
+        "assets/images/skybox/bottom.jpg",
+        "assets/images/skybox/front.jpg",
+        "assets/images/skybox/back.jpg",
     };
     skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
 }
