@@ -34,8 +34,6 @@ namespace Nullity
         MouseState mouse;
     };
 
-    void UtilityKeybinds(GLFWwindow* window, State& engineState);
-
     class Data
     {
     public:

@@ -3,6 +3,8 @@
 #include "debugging.hpp"
 #include "textures.hpp"
 #include "callbacks.hpp"
+#include "systems.hpp"
+#include "render.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -26,7 +28,7 @@ Nullity::Engine::~Engine()
     glfwTerminate();
 }
 
-void Nullity::Engine::Update()
+void Nullity::Engine::EnterFrame()
 {
     float currentFrame = glfwGetTime();
     state.deltaTime = currentFrame - state.lastFrame;
@@ -34,6 +36,50 @@ void Nullity::Engine::Update()
     
     state.msPerFrame = state.deltaTime * 1000;
     state.fps = 1000 / state.msPerFrame;
+
+    glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Nullity::Engine::Render(Camera& camera)
+{
+    data.objectShader.use();
+    data.objectShader.setVec3("viewPos", camera.position);
+
+    TextureManager::Get().SendSubTexResArrayToShader(data.texArrayDataUBO); // send the tex res array to the frag shader
+
+    glm::mat4 view = camera.GetViewMatrix();
+    glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)state.viewRes.x / state.viewRes.y, 0.1f, 1000.0f);
+
+    SetUniformBufferData(data.matricesUBO, 0, 64, glm::value_ptr(view));
+    SetUniformBufferData(data.matricesUBO, 64, 64, glm::value_ptr(projection));
+    
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, data.skyboxCubemap); // binding skybox for reflections
+
+    WorldObjectSystem(data.registry);
+    DrawSystem(data.registry);
+
+    // skybox
+    glDepthFunc(GL_LEQUAL);
+    data.skyboxShader.use();
+    view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+
+    SetUniformBufferData(data.matricesUBO, 0, 64, glm::value_ptr(view));
+
+    glBindVertexArray(data.skyboxVAO);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, data.skyboxCubemap);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDepthFunc(GL_LESS);
+
+    glBindVertexArray(0);
+}
+
+void Nullity::Engine::ExitFrame()
+{
+    glfwSwapBuffers(window);
+    glfwPollEvents();
 }
 
 

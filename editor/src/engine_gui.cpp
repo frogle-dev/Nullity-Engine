@@ -1,13 +1,39 @@
 #include "engine.hpp"
+#include "include/core.hpp"
 #include "engine_gui.hpp"
 
 #include <entt/entt.hpp>
 #include <fstream>
 
+#include <iostream>
+
 
 NullityEditor::State::State(Nullity::Engine& eng)
     : framebuffer(eng.state.initViewRes.x, eng.state.initViewRes.y) {}
 
+
+void NullityEditor::UtilityKeybinds(Nullity::Engine& eng)
+{
+    if (isActionJustPressed("focus"))
+    {
+        eng.state.focus = !eng.state.focus;
+
+        if (eng.state.focus)
+            glfwSetInputMode(eng.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else
+            glfwSetInputMode(eng.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
+    if (isActionJustPressed("wireframe"))
+    {
+        eng.state.wireframe = !eng.state.wireframe;
+
+        if (eng.state.wireframe)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        else
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+}
 
 void NullityEditor::Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
 {
