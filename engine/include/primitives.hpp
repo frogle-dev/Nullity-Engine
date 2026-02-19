@@ -9,9 +9,7 @@ inline float vertices_cube[] = {
      0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   0.0f,  0.0f, -1.0f, 
     -0.5f, -0.5f, -0.5f,  1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   0.0f,  0.0f, -1.0f,                                    
     -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 1.0f,   0.0f, 1.0f,   0.0f,  0.0f, -1.0f, 
-    // front face
-    -0.5f, -0.5f,  0.5f,  1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   0.0f,  0.0f, 1.0f,
+    // front face -0.5f, -0.5f,  0.5f,  1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   0.0f,  0.0f, 1.0f, 0.5f, -0.5f,  0.5f,  1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   0.0f,  0.0f, 1.0f,
      0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   0.0f,  0.0f, 1.0f,
      0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   0.0f,  0.0f, 1.0f,
     -0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,   0.0f, 1.0f,   0.0f,  0.0f, 1.0f,
@@ -91,7 +89,7 @@ inline float skyboxVertices[] = {
      1.0f, -1.0f,  1.0f
 };
 
-inline float vertices_quad[] = { // used for screen render texture
+inline float vertices_quad[] = {
     // positions   // texCoords
     -1.0f,  1.0f,  0.0f, 1.0f,
     -1.0f, -1.0f,  0.0f, 0.0f,

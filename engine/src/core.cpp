@@ -5,6 +5,7 @@
 #include "callbacks.hpp"
 #include "systems.hpp"
 #include "render.hpp"
+#include "primitives.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -19,17 +20,42 @@ Nullity::Engine::Engine()
         oss << "Engine failed to initialize" << std::endl;
         Nullity::DebugLog(oss);
 	}
+
+    // render texture setup
+    framebuffer = Framebuffer(state.viewRes.x, state.viewRes.y);
+
+    GLuint renderTexVBO;
+    glGenVertexArrays(1, &renderTexVAO);
+    glGenBuffers(1, &renderTexVBO);
+    glBindVertexArray(renderTexVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, renderTexVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_quad), &vertices_quad, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 }
 
 Nullity::Engine::~Engine()
 {
 	data.Cleanup();
+    framebuffer.Cleanup();
 
     glfwTerminate();
 }
 
 void Nullity::Engine::EnterFrame()
 {
+    if (state.focus)
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    else
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+    if (state.wireframe)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    else
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
     float currentFrame = glfwGetTime();
     state.deltaTime = currentFrame - state.lastFrame;
     state.lastFrame = currentFrame;
@@ -37,8 +63,12 @@ void Nullity::Engine::EnterFrame()
     state.msPerFrame = state.deltaTime * 1000;
     state.fps = 1000 / state.msPerFrame;
 
+
+    framebuffer.Bind();
+    glViewport(0,0,state.viewRes.x,state.viewRes.y);
     glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Nullity::Engine::Render(Camera& camera)
@@ -76,14 +106,33 @@ void Nullity::Engine::Render(Camera& camera)
     glBindVertexArray(0);
 }
 
+void Nullity::Engine::RenderFramebufferQuad()
+{
+    data.renderTexShader.use();
+    glBindVertexArray(renderTexVAO);
+    glDisable(GL_DEPTH_TEST);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, framebuffer.GetColorTexture());
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
 void Nullity::Engine::ExitFrame()
 {
+    keysRefresh();
+
+    framebuffer.Unbind();
+    glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glViewport(state.viewOffset.x, state.viewOffset.y, state.viewRes.x, state.viewRes.y);
+    RenderFramebufferQuad();
+
     glfwSwapBuffers(window);
     glfwPollEvents();
 }
 
 
-bool GlfwOpenGLInit(GLFWwindow*& window, Nullity::State& engState)
+bool GlfwOpenGLInit(GLFWwindow*& window, Nullity::Engine& eng)
 {
     glfwInit();
 
@@ -93,9 +142,8 @@ bool GlfwOpenGLInit(GLFWwindow*& window, Nullity::State& engState)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    window = glfwCreateWindow(engState.initViewRes.x, engState.initViewRes.y, "First OpenGL", NULL, NULL);
-    if (window == NULL)
-    {
+    window = glfwCreateWindow(eng.state.initViewRes.x, eng.state.initViewRes.y, "First OpenGL", NULL, NULL);
+    if (window == NULL) {
         std::ostringstream oss;
         oss << "(Initialization): Error: Failed to create GLFW window" << std::endl; Nullity::DebugLog(oss);
         
@@ -124,7 +172,7 @@ bool GlfwOpenGLInit(GLFWwindow*& window, Nullity::State& engState)
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
 
-    glfwSetWindowUserPointer(window, &engState);
+    glfwSetWindowUserPointer(window, &eng);
 
     glfwSetWindowSizeCallback(window, Nullity::WindowSizeCallback);
     glfwSetCursorPosCallback(window, Nullity::MouseCallback);
@@ -155,7 +203,7 @@ bool TexturesInit(Nullity::Data& engData)
 
 bool Nullity::Engine::Init()
 {
-    if (!GlfwOpenGLInit(window, state))
+    if (!GlfwOpenGLInit(window, *this))
         return false;
 
     data.InitData();

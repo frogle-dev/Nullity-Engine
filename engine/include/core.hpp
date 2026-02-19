@@ -1,7 +1,7 @@
 #pragma once
 
 #include "state.hpp"
-
+#include "framebuffer.hpp"
 #include "camera.hpp"
 
 #include <GLFW/glfw3.h>
@@ -16,6 +16,7 @@ namespace Nullity
 		~Engine();
 
 		GLFWwindow* window;
+		Framebuffer framebuffer;
 
 		Data data;
 		State state;
@@ -26,6 +27,9 @@ namespace Nullity
 
 	private:
 		bool Init();
+		void RenderFramebufferQuad();
+
+		GLuint renderTexVAO;
 	};
 }
 

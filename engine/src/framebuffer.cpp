@@ -13,7 +13,7 @@ Framebuffer::Framebuffer(float width, float height)
     glGenTextures(1, &colTex);
     glGenRenderbuffers(1, &rbo);
 
-    GenerateFrameBufferData(width, height);
+    Refresh(width, height);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -38,13 +38,6 @@ GLuint& Framebuffer::GetColorTexture()
     return colTex;
 }
 
-void Framebuffer::Rescale(float width, float height)
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    GenerateFrameBufferData(width, height);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
 void Framebuffer::Bind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -57,8 +50,10 @@ void Framebuffer::Unbind()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::GenerateFrameBufferData(float width, float height)
+void Framebuffer::Refresh(float width, float height)
 {
+    Bind();
+
     // texture assignment to framebuffer
     glBindTexture(GL_TEXTURE_2D, colTex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -73,4 +68,6 @@ void Framebuffer::GenerateFrameBufferData(float width, float height)
     
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    Unbind();
 }

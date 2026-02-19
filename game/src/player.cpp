@@ -55,7 +55,5 @@ void PlayerUpdate(entt::registry& registry, Camera& camera, float deltaTime)
         }
 
         camera.position = glm::vec3(cmp_transform.position.x, cmp_transform.position.y + cmp_player.bodyHeight, cmp_transform.position.z);
-
-        keysRefresh();
     }
 }

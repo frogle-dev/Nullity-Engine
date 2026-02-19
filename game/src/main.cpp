@@ -34,9 +34,10 @@ int main()
     {
         Engine.EnterFrame();
 
-#ifdef DEBUG
-        Editor.EnterFrame();
-#endif
+        Editor.UtilityKeybinds(Engine);
+// #ifdef DEBUG
+//         Editor.EnterFrame();
+// #endif
 
         PlayerUpdate(Engine.data.registry, camera, Engine.state.deltaTime);
         CameraControls(Engine.state.mouse, Engine.state, camera);
@@ -45,10 +46,10 @@ int main()
         Engine.Render(camera);
 
 
-#ifdef DEBUG
-        Editor.Update(Engine);
-        Editor.ExitFrame();
-#endif
+// #ifdef DEBUG
+//         Editor.Update(Engine);
+//         Editor.ExitFrame();
+// #endif
 
         Engine.ExitFrame();
     }

@@ -13,6 +13,7 @@
 #include <vector>
 
 
+
 static std::unordered_map<std::string, std::vector<int>> bindings;
 static std::unordered_map<std::string, ActionState> actions;
 static int currentScancodePress;

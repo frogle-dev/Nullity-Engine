@@ -27,6 +27,7 @@ void Nullity::Data::InitShaders()
     instancedShader = Shader("assets/shaders/instanced.vert", "assets/shaders/instanced.frag"); 
     grassShader = Shader("assets/shaders/grass.vert", "assets/shaders/grass.frag");
     unlitShader = Shader("assets/shaders/unlit.vert", "assets/shaders/unlit.frag");
+    renderTexShader = Shader("assets/shaders/render_texture.vert","assets/shaders/render_texture.frag");
 }
 
 void Nullity::Data::InitUBOs()

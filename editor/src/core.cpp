@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 
+
 NullityEditor::Editor::Editor(Nullity::Engine& engine)
 	: state(engine)
 {
@@ -77,7 +78,7 @@ void NullityEditor::Editor::Update(Nullity::Engine& eng)
         float width = ImGui::GetContentRegionAvail().x;
         float height = ImGui::GetContentRegionAvail().y;
 
-        state.framebuffer.Rescale(width, height);
+        state.framebuffer.Refresh(width, height);
         Nullity::WindowSizeCallback(eng.window, width, height);
 
         ImGui::Image(
@@ -108,5 +109,18 @@ void NullityEditor::Editor::ExitFrame()
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
         glfwMakeContextCurrent(backup_current_context);
+    }
+}
+
+void NullityEditor::Editor::UtilityKeybinds(Nullity::Engine& eng)
+{
+    if (isActionJustPressed("focus"))
+    {
+        eng.state.focus = !eng.state.focus;
+    }
+
+    if (isActionJustPressed("wireframe"))
+    {
+        eng.state.wireframe = !eng.state.wireframe;
     }
 }

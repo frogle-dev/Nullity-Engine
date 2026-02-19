@@ -8,16 +8,15 @@
 class Framebuffer
 {
 public:
+    Framebuffer() = default;
     Framebuffer(float width, float height);
     void Cleanup();
     GLuint& GetColorTexture();
-    void Rescale(float width, float height);
+    void Refresh(float width, float height);
     void Bind();
     void Unbind();
 
 private:
-    void GenerateFrameBufferData(float width, float height);
-
     GLuint fbo;
     GLuint colTex;
     GLuint rbo;

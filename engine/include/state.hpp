@@ -22,9 +22,10 @@ namespace Nullity
     {
         const glm::ivec2 initViewRes = glm::ivec2(1920, 1080); 
         glm::ivec2 viewRes = initViewRes;
+        glm::ivec2 viewOffset;
 
-        bool focus = true;
         bool wireframe = false;
+        bool focus = true;
 
         float deltaTime = 0.0f;
         int fps;
@@ -45,6 +46,7 @@ namespace Nullity
         Shader instancedShader;
         Shader grassShader;
         Shader unlitShader;
+        Shader renderTexShader;
 
         // uniform buffers
         GLuint matricesUBO;

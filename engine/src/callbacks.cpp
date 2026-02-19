@@ -1,13 +1,17 @@
 #include "callbacks.hpp"
+#include "core.hpp"
 
+#include <iostream>
 
 void Nullity::WindowSizeCallback(GLFWwindow* window, int width, int height)
 {
-    State* state = static_cast<State*>(glfwGetWindowUserPointer(window));
+    Engine* eng = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+
+    State* state = &eng->state;
 
     // letterbox scaling
     float aspect = (float)width / height;
-    float targetAspect = (float)state->initViewRes.x / state->initViewRes.y;
+    float targetAspect = (float)state->initViewRes.x / (float)state->initViewRes.y;
 
     if (aspect > targetAspect)
     {
@@ -20,18 +24,20 @@ void Nullity::WindowSizeCallback(GLFWwindow* window, int width, int height)
         state->viewRes.y = (int)(width / targetAspect);
     }
 
-    int viewX = (width - state->viewRes.x) / 2;
-    int viewY = (height - state->viewRes.y) / 2;
+    state->viewOffset.x = (width - state->viewRes.x) / 2;
+    state->viewOffset.y = (height - state->viewRes.y) / 2;
 
-    glViewport(viewX, viewY, state->viewRes.x, state->viewRes.y);
+    glViewport(state->viewOffset.x, state->viewOffset.y, state->viewRes.x, state->viewRes.y);
+
+    eng->framebuffer.Refresh(state->viewRes.x, state->viewRes.y);
 }
 
 
 void Nullity::MouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    State* state = static_cast<State*>(glfwGetWindowUserPointer(window));
+    Engine* eng = static_cast<Engine*>(glfwGetWindowUserPointer(window));
 
-    state->mouse.mousePos = glm::dvec2(xpos, ypos);
+    eng->state.mouse.mousePos = glm::dvec2(xpos, ypos);
 }
 
 void Nullity::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

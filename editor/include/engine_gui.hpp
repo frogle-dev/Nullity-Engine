@@ -19,8 +19,6 @@ namespace NullityEditor
 		State(Nullity::Engine& engine);
 	};
 
-    void UtilityKeybinds(Nullity::Engine& eng);
-
 	void Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2);
 	void KeybindChangePopup();
 	void InfoWindow(float msPerFrame, int fps);
