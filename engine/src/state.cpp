@@ -35,10 +35,21 @@ void Nullity::UtilityKeybinds(GLFWwindow* window, State& engineState)
     }
 }
 
-Nullity::Data::Data()
+void Nullity::Data::InitData()
 {
+    InitShaders();
     InitSkybox();
     InitUBOs();
+}
+
+void Nullity::Data::InitShaders()
+{
+    objectShader = Shader("assets/shaders/lit.vert", "assets/shaders/lit.frag");
+    lightSourceShader = Shader("assets/shaders/light_source.vert", "assets/shaders/light_source.frag");
+    skyboxShader = Shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
+    instancedShader = Shader("assets/shaders/instanced.vert", "assets/shaders/instanced.frag"); 
+    grassShader = Shader("assets/shaders/grass.vert", "assets/shaders/grass.frag");
+    unlitShader = Shader("assets/shaders/unlit.vert", "assets/shaders/unlit.frag");
 }
 
 void Nullity::Data::InitUBOs()

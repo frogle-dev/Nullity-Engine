@@ -8,12 +8,12 @@ namespace NullityEditor
 	class Editor
 	{
 	public:
-		Editor(GLFWwindow* window, Nullity::Engine& engine);
+		Editor(Nullity::Engine& engine);
 		~Editor();
 
 		State state;
 
-		void Update(GLFWwindow* window, Nullity::Engine& eng);
+		void Update(Nullity::Engine& eng);
 
 	private:
 		void Cleanup();

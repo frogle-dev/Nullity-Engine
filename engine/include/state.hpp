@@ -39,14 +39,14 @@ namespace Nullity
     class Data
     {
     public:
-        Data();
+        void InitData();
 
-        Shader objectShader = Shader("assets/shaders/lit.vert", "assets/shaders/lit.frag");
-        Shader lightSourceShader = Shader("assets/shaders/light_source.vert", "assets/shaders/light_source.frag");
-        Shader skyboxShader = Shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
-        Shader instancedShader = Shader("assets/shaders/instanced.vert", "assets/shaders/instanced.frag"); 
-        Shader grassShader = Shader("assets/shaders/grass.vert", "assets/shaders/grass.frag");
-        Shader unlitShader = Shader("assets/shaders/unlit.vert", "assets/shaders/unlit.frag");
+        Shader objectShader;
+        Shader lightSourceShader;
+        Shader skyboxShader;
+        Shader instancedShader;
+        Shader grassShader;
+        Shader unlitShader;
 
         // uniform buffers
         GLuint matricesUBO;
@@ -56,6 +56,7 @@ namespace Nullity
 
         entt::registry registry;
 
+        void InitShaders();
         void InitUBOs();
         void InitSkybox();
 

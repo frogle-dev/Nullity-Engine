@@ -5,7 +5,6 @@
 #include "include/components.hpp"
 #include "include/debugging.hpp"
 #include "include/framebuffer.hpp"
-#include "include/init.hpp"
 #include "include/keymap.hpp"
 #include "include/models.hpp"
 #include "include/primitives.hpp"

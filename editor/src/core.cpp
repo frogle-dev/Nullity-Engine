@@ -5,10 +5,10 @@
 #include <GLFW/glfw3.h>
 
 
-NullityEditor::Editor::Editor(GLFWwindow* window, Nullity::Engine& engine)
+NullityEditor::Editor::Editor(Nullity::Engine& engine)
 	: state(engine)
 {
-	Init(window, engine);
+	Init(engine.window);
 }
 
 NullityEditor::Editor::~Editor()
@@ -25,7 +25,7 @@ void NullityEditor::Editor::Cleanup()
     ImGui::DestroyContext();
 }
 
-void NullityEditor::Editor::Update(GLFWwindow* window, Nullity::Engine& eng)
+void NullityEditor::Editor::Update(Nullity::Engine& eng)
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -63,7 +63,7 @@ void NullityEditor::Editor::Update(GLFWwindow* window, Nullity::Engine& eng)
         float height = ImGui::GetContentRegionAvail().y;
 
         state.framebuffer.Rescale(width, height);
-        Nullity::WindowSizeCallback(window, width, height);
+        Nullity::WindowSizeCallback(eng.window, width, height);
 
         ImGui::Image(
             (ImTextureID)state.framebuffer.GetColorTexture(), 

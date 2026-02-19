@@ -10,8 +10,10 @@ namespace Nullity
 	class Engine
 	{
 	public:
-		Engine(GLFWwindow* window);
+		Engine();
 		~Engine();
+
+		GLFWwindow* window;
 
 		Data data;
 		State state;
@@ -19,7 +21,7 @@ namespace Nullity
 		void Update();
 
 	private:
-
+		bool Init();
 	};
 }
 

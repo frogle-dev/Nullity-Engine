@@ -6,14 +6,15 @@
 
 #include "player.hpp"
 
+#include <iostream>
+
 
 int main()
 {
-    GLFWwindow* window;
-    Nullity::Engine Engine(window);
+    Nullity::Engine Engine;
+    NullityEditor::Editor Editor(Engine);
 
-    NullityEditor::Editor Editor(window, Engine);
-
+    ImGuiIO& io = ImGui::GetIO();
 
     Camera camera;
 
@@ -32,57 +33,57 @@ int main()
 
     Editor.state.framebuffer.Unbind();
 
-    while(!glfwWindowShouldClose(window))
+    while(!glfwWindowShouldClose(Engine.window))
     {
         Engine.Update();
-        Editor.Update(window, Engine);
+        Editor.Update(Engine);
 
-        EditorState.framebuffer.Bind();
+        Editor.state.framebuffer.Bind();
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //clear color + depth buffer
         glEnable(GL_DEPTH_TEST);
 
 
         // game loop stuff
-        Nullity::UtilityKeybinds(window, App);
-        PlayerUpdate(Engine.registry, camera, App.deltaTime);
-        CameraControls(mouseState, App, camera);
+        Nullity::UtilityKeybinds(Engine.window, Engine.state);
+        PlayerUpdate(Engine.data.registry, camera, Engine.state.deltaTime);
+        CameraControls(Engine.state.mouse, Engine.state, camera);
 
 
-        Engine.objectShader.use();
-        Engine.objectShader.setVec3("viewPos", camera.position);
+        Engine.data.objectShader.use();
+        Engine.data.objectShader.setVec3("viewPos", camera.position);
 
-        TextureManager::Get().SendSubTexResArrayToShader(Engine.texArrayDataUBO); // send the tex res array to the frag shader
+        TextureManager::Get().SendSubTexResArrayToShader(Engine.data.texArrayDataUBO); // send the tex res array to the frag shader
 
         glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)App.viewRes.x / App.viewRes.y, 0.1f, 1000.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)Engine.state.viewRes.x / Engine.state.viewRes.y, 0.1f, 1000.0f);
 
-        SetUniformBufferData(Engine.matricesUBO, 0, 64, glm::value_ptr(view));
-        SetUniformBufferData(Engine.matricesUBO, 64, 64, glm::value_ptr(projection));
+        SetUniformBufferData(Engine.data.matricesUBO, 0, 64, glm::value_ptr(view));
+        SetUniformBufferData(Engine.data.matricesUBO, 64, 64, glm::value_ptr(projection));
         
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, Engine.skyboxCubemap); // binding skybox for reflections
+        glBindTexture(GL_TEXTURE_CUBE_MAP, Engine.data.skyboxCubemap); // binding skybox for reflections
 
-        WorldObjectSystem(Engine.registry);
-        DrawSystem(Engine.registry);
+        WorldObjectSystem(Engine.data.registry);
+        DrawSystem(Engine.data.registry);
 
         // skybox
         glDepthFunc(GL_LEQUAL);
-        Engine.skyboxShader.use();
+        Engine.data.skyboxShader.use();
         view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 
-        SetUniformBufferData(Engine.matricesUBO, 0, 64, glm::value_ptr(view));
+        SetUniformBufferData(Engine.data.matricesUBO, 0, 64, glm::value_ptr(view));
 
-        glBindVertexArray(Engine.skyboxVAO);
+        glBindVertexArray(Engine.data.skyboxVAO);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, Engine.skyboxCubemap);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, Engine.data.skyboxCubemap);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glDepthFunc(GL_LESS);
 
         glBindVertexArray(0);
 
         // rendering to framebuffer
-        EditorState.framebuffer.Unbind();
+        Editor.state.framebuffer.Unbind();
         glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -96,7 +97,7 @@ int main()
             glfwMakeContextCurrent(backup_current_context);
         }
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(Engine.window);
         glfwPollEvents();
     }
 

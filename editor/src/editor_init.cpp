@@ -3,7 +3,7 @@
 #include "editor_init.hpp"
 
 
-void NullityEditor::Init(GLFWwindow* window, Nullity::Engine& engine)
+void NullityEditor::Init(GLFWwindow* window)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
