@@ -39,18 +39,20 @@ int main()
 
 
         Engine.Render(camera);
-
+        
 #ifdef DEBUG
         Editor.EnterFrame();
 #endif
 
-        Engine.ExitFrame();
+        Engine.RenderFramebuffer();
 
 #ifdef DEBUG
         Editor.Update(Engine);
         Editor.ExitFrame();
 #endif
 
+
+        Engine.ExitFrame();
     }
 
     return 0;

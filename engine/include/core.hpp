@@ -24,11 +24,12 @@ namespace Nullity
 		void EnterFrame();
 		void Render(Camera& camera);
 		void ExitFrame();
+		void RenderFramebuffer();
+
 
 	private:
 		bool Init();
 		void UtilityKeybinds();
-		void RenderFramebufferQuad();
 
 		GLuint renderTexVAO;
 	};

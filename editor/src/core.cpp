@@ -2,6 +2,7 @@
 #include "engine_gui.hpp"
 
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 
 
@@ -10,10 +11,10 @@ NullityEditor::Editor::Editor(Nullity::Engine& engine)
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    io = &ImGui::GetIO();
-    io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    io->ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; 
-    io->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; 
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     ImGui_ImplGlfw_InitForOpenGL(engine.window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
@@ -102,13 +103,14 @@ void NullityEditor::Editor::ExitFrame()
     glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    ImGuiIO& io = ImGui::GetIO();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    if (io->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
-        GLFWwindow* backup_current_context = glfwGetCurrentContext();
+        GLFWwindow* backupCurrentContext = glfwGetCurrentContext();
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
-        glfwMakeContextCurrent(backup_current_context);
+        glfwMakeContextCurrent(backupCurrentContext);
     }
 }
 

@@ -11,8 +11,6 @@ namespace NullityEditor
 		Editor(Nullity::Engine& engine);
 		~Editor();
 
-		ImGuiIO* io;
-
 		State state;
 
 		void EnterFrame();

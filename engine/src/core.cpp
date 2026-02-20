@@ -114,10 +114,18 @@ void Nullity::Engine::Render(Camera& camera)
     glDepthFunc(GL_LESS);
 
     glBindVertexArray(0);
+
+
+    framebuffer.Unbind();
 }
 
-void Nullity::Engine::RenderFramebufferQuad()
+void Nullity::Engine::RenderFramebuffer()
 {
+    glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glViewport(state.viewOffset.x, state.viewOffset.y, state.viewRes.x, state.viewRes.y);
+
     data.renderTexShader.use();
     glBindVertexArray(renderTexVAO);
     glDisable(GL_DEPTH_TEST);
@@ -129,14 +137,6 @@ void Nullity::Engine::RenderFramebufferQuad()
 void Nullity::Engine::ExitFrame()
 {
     keysRefresh();
-
-    framebuffer.Unbind();
-    glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glViewport(state.viewOffset.x, state.viewOffset.y, state.viewRes.x, state.viewRes.y);
-    RenderFramebufferQuad();
-
     glfwSwapBuffers(window);
     glfwPollEvents();
 }
