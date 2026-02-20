@@ -17,24 +17,6 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
 
-add_library(imgui
-    # main imgui stuff
-    lib/imgui/imgui.cpp
-    lib/imgui/imgui.h
-    lib/imgui/imgui_draw.cpp
-    lib/imgui/imgui_tables.cpp
-    lib/imgui/imgui_widgets.cpp
-    lib/imgui/imgui_demo.cpp
-    # glfw + opengl backends
-    lib/imgui/backends/imgui_impl_glfw.cpp
-    lib/imgui/backends/imgui_impl_glfw.h
-    lib/imgui/backends/imgui_impl_opengl3.cpp
-    lib/imgui/backends/imgui_impl_opengl3.h
-)
-
-target_link_libraries(imgui PUBLIC glfw OpenGL::GL)
-target_include_directories(imgui PUBLIC lib/imgui/ lib/imgui/backends/)
-
 
 add_subdirectory(engine)
 
