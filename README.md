@@ -15,7 +15,7 @@ int main()
 {
     Nullity::Engine Engine; // Create the engine
 
-    while(!glfwWindowShouldClose(Engine.window)) // Game loop
+    while(Engine.Running()) // Game loop
     {
         Engine.EnterFrame();
 
@@ -41,7 +41,7 @@ int main()
     Nullity::Engine Engine;
     NullityEditor::Editor Editor(Engine); // Create the editor
 
-    while(!glfwWindowShouldClose(Engine.window))
+    while(Engine.Running())
     {
         Engine.EnterFrame();
 
