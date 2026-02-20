@@ -12,13 +12,13 @@ Requirements:
 
 int main()
 {
-    Nullity::Engine Engine;
+    Nullity::Engine Engine; // Create the engine
 
-    while(!glfwWindowShouldClose(Engine.window))
+    while(!glfwWindowShouldClose(Engine.window)) // Game loop
     {
         Engine.EnterFrame();
 
-
+        // Add your game updates here
 
         Engine.Render(camera);
         Engine.RenderFramebuffer();
