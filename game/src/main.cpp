@@ -1,6 +1,6 @@
 #include "engine.hpp"
 
-#ifdef DEBUG // no editor in release mode #include "editor.hpp"
+#ifdef USE_EDITOR // no editor in release mode #include "editor.hpp"
 #include "editor.hpp"
 #endif
 
@@ -11,7 +11,7 @@ int main()
 {
     Nullity::Engine Engine;
 
-#ifdef DEBUG 
+#ifdef USE_EDITOR 
     NullityEditor::Editor Editor(Engine);
 #endif
 
@@ -40,13 +40,13 @@ int main()
 
         Engine.Render(camera);
         
-#ifdef DEBUG
+#ifdef USE_EDITOR
         Editor.EnterFrame();
 #endif
 
         Engine.RenderFramebuffer();
 
-#ifdef DEBUG
+#ifdef USE_EDITOR
         Editor.Update(Engine);
         Editor.ExitFrame();
 #endif

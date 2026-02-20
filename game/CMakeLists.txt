@@ -10,7 +10,7 @@ target_include_directories(Game PRIVATE
 
 target_link_libraries(Game PRIVATE Nullity)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(USE_EDITOR)
 	target_link_libraries(Game PRIVATE NullityEditor)
-	add_compile_definitions(DEBUG)
+	target_compile_definitions(Game PRIVATE USE_EDITOR)
 endif()

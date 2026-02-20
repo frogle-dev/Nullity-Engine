@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake -B build -DUSE_EDITOR=ON
 cmake --build build --parallel 8
 ./build/game/Game

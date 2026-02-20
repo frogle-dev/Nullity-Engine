@@ -18,9 +18,11 @@ find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
 
 
+option(USE_EDITOR "use the editor" OFF)
+
 add_subdirectory(engine)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(USE_EDITOR)
     add_subdirectory(editor)
 endif()
 
