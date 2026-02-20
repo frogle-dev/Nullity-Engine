@@ -5,7 +5,8 @@ Requirements:
 - assimp
 - hardware that supports opengl 4.6
 
-### How to use
+
+### Using the engine
 
 ```c++
 #include "engine.hpp"
@@ -18,10 +19,43 @@ int main()
     {
         Engine.EnterFrame();
 
-        // Add your game updates here
+        // Game updates
 
         Engine.Render(camera);
         Engine.RenderFramebuffer();
+        Engine.ExitFrame();
+    }
+
+    return 0;
+}
+```
+
+### Using the editor
+
+```c++
+#include "engine.hpp"
+#include "editor.hpp"
+
+int main()
+{
+    Nullity::Engine Engine;
+    NullityEditor::Editor Editor(Engine); // Create the editor
+
+    while(!glfwWindowShouldClose(Engine.window))
+    {
+        Engine.EnterFrame();
+
+        // Game updates
+
+        Engine.Render(camera);
+        
+        Editor.EnterFrame();
+
+        Engine.RenderFramebuffer();
+
+        Editor.Update(Engine);
+        Editor.ExitFrame();
+
         Engine.ExitFrame();
     }
 
