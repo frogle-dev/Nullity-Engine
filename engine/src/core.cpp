@@ -44,6 +44,14 @@ Nullity::Engine::~Engine()
     glfwTerminate();
 }
 
+void Nullity::Engine::UtilityKeybinds()
+{
+    if (isActionJustPressed("focus"))
+    {
+        state.focus = !state.focus;
+    }
+}
+
 void Nullity::Engine::EnterFrame()
 {
     if (state.focus)
@@ -69,6 +77,8 @@ void Nullity::Engine::EnterFrame()
     glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+
+    UtilityKeybinds();
 }
 
 void Nullity::Engine::Render(Camera& camera)
@@ -142,7 +152,7 @@ bool GlfwOpenGLInit(GLFWwindow*& window, Nullity::Engine& eng)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
-    window = glfwCreateWindow(eng.state.initViewRes.x, eng.state.initViewRes.y, "First OpenGL", NULL, NULL);
+    window = glfwCreateWindow(eng.state.initViewRes.x, eng.state.initViewRes.y, "Nullity Test", NULL, NULL);
     if (window == NULL) {
         std::ostringstream oss;
         oss << "(Initialization): Error: Failed to create GLFW window" << std::endl; Nullity::DebugLog(oss);

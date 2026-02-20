@@ -27,6 +27,7 @@ namespace Nullity
 
 	private:
 		bool Init();
+		void UtilityKeybinds();
 		void RenderFramebufferQuad();
 
 		GLuint renderTexVAO;

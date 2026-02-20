@@ -20,9 +20,9 @@ namespace Nullity
 
     struct State
     {
-        const glm::ivec2 initViewRes = glm::ivec2(1920, 1080); 
+        const glm::ivec2 initViewRes = glm::ivec2(1280, 720); 
         glm::ivec2 viewRes = initViewRes;
-        glm::ivec2 viewOffset;
+        glm::ivec2 viewOffset = glm::ivec2(0, 0);
 
         bool wireframe = false;
         bool focus = true;

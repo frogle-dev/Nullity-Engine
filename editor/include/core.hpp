@@ -19,9 +19,8 @@ namespace NullityEditor
 		void Update(Nullity::Engine& eng);
 		void ExitFrame();
 
-		void UtilityKeybinds(Nullity::Engine& eng);
 	private:
-
+		void UtilityKeybinds(Nullity::Engine& eng);
 		void Cleanup();
 	};
 }

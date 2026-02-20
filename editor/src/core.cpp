@@ -52,7 +52,7 @@ void NullityEditor::Editor::Update(Nullity::Engine& eng)
     {
         if (ImGui::BeginMenu("Window"))
         {
-            if (ImGui::MenuItem("Imgui Demo Window")) 
+            if (ImGui::MenuItem("Imgui Demo Window"))
             {
                 state.demoWindow = !state.demoWindow;
             }
@@ -114,11 +114,6 @@ void NullityEditor::Editor::ExitFrame()
 
 void NullityEditor::Editor::UtilityKeybinds(Nullity::Engine& eng)
 {
-    if (isActionJustPressed("focus"))
-    {
-        eng.state.focus = !eng.state.focus;
-    }
-
     if (isActionJustPressed("wireframe"))
     {
         eng.state.wireframe = !eng.state.wireframe;

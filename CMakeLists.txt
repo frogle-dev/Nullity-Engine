@@ -37,5 +37,9 @@ target_include_directories(imgui PUBLIC lib/imgui/ lib/imgui/backends/)
 
 
 add_subdirectory(engine)
-add_subdirectory(editor)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_subdirectory(editor)
+endif()
+
 add_subdirectory(game)

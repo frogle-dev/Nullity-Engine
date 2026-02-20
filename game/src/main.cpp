@@ -34,24 +34,23 @@ int main()
     {
         Engine.EnterFrame();
 
-        Editor.UtilityKeybinds(Engine);
-// #ifdef DEBUG
-//         Editor.EnterFrame();
-// #endif
-
         PlayerUpdate(Engine.data.registry, camera, Engine.state.deltaTime);
         CameraControls(Engine.state.mouse, Engine.state, camera);
 
 
         Engine.Render(camera);
 
-
-// #ifdef DEBUG
-//         Editor.Update(Engine);
-//         Editor.ExitFrame();
-// #endif
+#ifdef DEBUG
+        Editor.EnterFrame();
+#endif
 
         Engine.ExitFrame();
+
+#ifdef DEBUG
+        Editor.Update(Engine);
+        Editor.ExitFrame();
+#endif
+
     }
 
     return 0;
