@@ -6,6 +6,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <entt/entt.hpp>
+
 
 namespace Nullity
 {
@@ -17,6 +19,9 @@ namespace Nullity
 
 		GLFWwindow* window;
 		Framebuffer framebuffer;
+
+        entt::registry registry;
+
 
 		Data data;
 		State state;

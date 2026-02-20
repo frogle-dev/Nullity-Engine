@@ -97,8 +97,8 @@ void Nullity::Engine::Render(Camera& camera)
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_CUBE_MAP, data.skyboxCubemap); // binding skybox for reflections
 
-    WorldObjectSystem(data.registry);
-    DrawSystem(data.registry);
+    WorldObjectSystem(registry);
+    DrawSystem(registry);
 
     // skybox
     glDepthFunc(GL_LEQUAL);

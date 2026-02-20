@@ -70,7 +70,7 @@ void NullityEditor::Editor::Update(Nullity::Engine& eng)
 
     InfoWindow(eng.state.msPerFrame, eng.state.fps);
     DebugOutputWindow();
-    InspectorWindow(eng.data.registry);
+    InspectorWindow(eng.registry);
 
     ImGui::Begin("Game");
     {

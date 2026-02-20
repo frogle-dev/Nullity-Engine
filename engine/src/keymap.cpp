@@ -74,7 +74,7 @@ void processKeyEvent(int scancode, int action)
 }
 
 
-static std::ifstream keymapJson("game_config/keymaps.json");
+static std::ifstream keymapJson("config/keymaps.json");
 static nlohmann::json data = nlohmann::json::parse(keymapJson);
 // returns all keymaps that have been set from "reloadConfigKeymaps()"
 std::unordered_map<std::string, std::vector<int>>& getConfigKeymaps()

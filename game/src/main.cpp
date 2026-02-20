@@ -17,11 +17,11 @@ int main()
 
     Camera camera;
 
-    // auto dirt = Engine.registry.create();
-    // Engine.registry.emplace<DisplayName>(dirt, "dirt");
-    // Engine.registry.emplace<ObjectShader>(dirt, Engine.unlitShader);
-    // Engine.registry.emplace<WorldObject>(dirt);
-    // Engine.registry.emplace<ObjectModel>(dirt, Model("models/Dirt/Dirt.obj"), true);
+    auto dirt = Engine.registry.create();
+    Engine.registry.emplace<DisplayName>(dirt, "dirt");
+    Engine.registry.emplace<ObjectShader>(dirt, Engine.data.unlitShader);
+    Engine.registry.emplace<WorldObject>(dirt);
+    Engine.registry.emplace<ObjectModel>(dirt, Model("assets/models/Dirt/Dirt.obj"), true);
 
     // auto player = Engine.registry.create();
     // Engine.registry.emplace<DisplayName>(player, "player");
@@ -34,7 +34,7 @@ int main()
     {
         Engine.EnterFrame();
 
-        PlayerUpdate(Engine.data.registry, camera, Engine.state.deltaTime);
+        PlayerUpdate(Engine.registry, camera, Engine.state.deltaTime);
         CameraControls(Engine.state.mouse, Engine.state, camera);
 
 

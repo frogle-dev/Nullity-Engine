@@ -54,8 +54,6 @@ namespace Nullity
         GLuint skyboxVAO, skyboxVBO;
         GLuint skyboxCubemap;
 
-        entt::registry registry;
-
         void InitShaders();
         void InitUBOs();
         void InitSkybox();
