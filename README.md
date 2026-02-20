@@ -7,7 +7,7 @@ Requirements:
 
 ### How to use
 
-```
+```c++
 #include "engine.hpp"
 
 int main()
