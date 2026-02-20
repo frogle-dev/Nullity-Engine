@@ -26,11 +26,12 @@ namespace Nullity
 		Data data;
 		State state;
 
+		bool Running();
+
 		void EnterFrame();
 		void Render(Camera& camera);
 		void ExitFrame();
 		void RenderFramebuffer();
-
 
 	private:
 		bool Init();

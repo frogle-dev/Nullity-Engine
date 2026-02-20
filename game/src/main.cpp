@@ -31,7 +31,7 @@ int main()
     Engine.registry.emplace<Velocity>(player);
 
 
-    while(!glfwWindowShouldClose(Engine.window))
+    while(Engine.Running())
     {
         Engine.EnterFrame();
 

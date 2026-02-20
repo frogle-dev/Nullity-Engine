@@ -44,6 +44,11 @@ Nullity::Engine::~Engine()
     glfwTerminate();
 }
 
+bool Nullity::Engine::Running()
+{
+    return !glfwWindowShouldClose(window);
+}
+
 void Nullity::Engine::UtilityKeybinds()
 {
     if (isActionJustPressed("focus"))
