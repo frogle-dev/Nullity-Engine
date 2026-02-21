@@ -9,6 +9,8 @@
 
 #include "state.hpp"
 
+using namespace Nullity;
+
 
 Camera::Camera(glm::vec3 _position, glm::vec3 _up, float _yaw, float _pitch)
 {
@@ -57,22 +59,4 @@ void Camera::UpdateCameraVectors()
     up = glm::normalize(glm::cross(right, front));
 
     straightFront = glm::normalize(glm::cross(right, worldUp));
-}
-
-void CameraControls(Nullity::MouseState& mouse, Nullity::State& engineState, Camera& camera)
-{
-    if (mouse.firstMouse)
-    {
-        mouse.lastMousePos = mouse.mousePos;
-        mouse.firstMouse = false;
-    } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
-
-    if (engineState.focus)
-    {
-        float xOffset = mouse.mousePos.x - mouse.lastMousePos.x;
-        float yOffset = mouse.lastMousePos.y - mouse.mousePos.y;
-        mouse.lastMousePos = mouse.mousePos;
-    
-        camera.ProcessMouseMovement(xOffset, yOffset);
-    }
 }

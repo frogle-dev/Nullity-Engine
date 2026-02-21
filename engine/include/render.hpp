@@ -2,4 +2,7 @@
 
 #include <entt/entt.hpp>
 
-void DrawSystem(entt::registry& registry);
+namespace Nullity
+{
+	void DrawSystem(entt::registry& registry);
+}

@@ -16,6 +16,8 @@
 #include <vector>
 #include <string>
 
+using namespace Nullity;
+
 
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures)
     : vertices(vertices), indices(indices), textures(textures)
@@ -35,7 +37,7 @@ void Mesh::Draw(Shader &shader)
 {
     shader.use();
 
-    GLuint texArrayID = TextureManager::Get().GetTexArrayID();
+    GLuint texArrayID = textureManager.GetTexArrayID();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
@@ -98,7 +100,7 @@ void Mesh::DrawInstanced(Shader &shader)
 
     if (textures.size() > 0)
     {
-        GLuint texArrayID = TextureManager::Get().GetTexArrayID();
+        GLuint texArrayID = textureManager.GetTexArrayID();
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
@@ -234,7 +236,7 @@ void Model::LoadModel(std::string path)
         std::ostringstream oss;
         oss << "(Assimp): Error: " << importer.GetErrorString() << std::endl;
 
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
         return;
     }
     directory = path.substr(0, path.find_last_of('/')); //get the directory the model is in
@@ -356,7 +358,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType 
         if(!skip)
         { // load texture if it hasnt already been loaded
             Texture texture;
-            texture.layer = TextureManager::Get().LoadTextureIntoTexArray(str.C_Str(), directory);
+            texture.layer = textureManager.LoadTextureIntoTexArray(str.C_Str(), directory);
             texture.type = internalType;
             texture.path = str.C_Str();
             textures.push_back(texture);

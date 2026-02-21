@@ -7,43 +7,46 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "debugging.hpp"
+
 #include <string>
 #include <vector>
 
 
-// singleton
-class TextureManager
+namespace Nullity
 {
-public:
-    static TextureManager& Get();
-    
-    GLuint GetTexArrayID() const;
+    class Textures
+    {
+    public:
+        Textures();
 
-    auto& GetTexSubTexResArray() const;
+        GLuint GetTexArrayID() const;
 
-    void GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, int _maxTextures, GLuint ubo);
+        auto& GetTexSubTexResArray() const;
 
-    GLuint LoadStandaloneTexture(std::string path);
+        void GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, int _maxTextures, GLuint ubo);
 
-    int LoadTextureIntoTexArray(std::string path, std::string directoryPath);
+        GLuint LoadStandaloneTexture(std::string path);
 
-    GLuint LoadCubemap(std::vector<std::string> faces);
+        int LoadTextureIntoTexArray(std::string path, std::string directoryPath);
 
-    void GenerateMipmaps();
+        GLuint LoadCubemap(std::vector<std::string> faces);
 
-    void SendSubTexResArrayToShader(GLuint ubo);
+        void GenerateMipmaps();
 
-private:
-    // private constructor so other instances cant be made
-    TextureManager();
+        void SendSubTexResArrayToShader(GLuint ubo);
 
-    GLuint texArrayID;
-    std::vector<glm::vec2> subTexRes;
-    int maxTexWidth;
-    int maxTexHeight;
-    
-    int mipLevels;
+    private:
+        GLuint texArrayID;
+        std::vector<glm::vec2> subTexRes;
+        int maxTexWidth;
+        int maxTexHeight;
+        
+        int mipLevels;
 
-    int maxTexLayers;
-    int nextTexLayer;
-};
+        int maxTexLayers;
+        int nextTexLayer;
+    };
+
+    extern Textures textureManager;
+}

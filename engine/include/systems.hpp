@@ -2,5 +2,7 @@
 
 #include <entt/entt.hpp>
 
-
-void WorldObjectSystem(entt::registry& registry);
+namespace Nullity
+{
+	void WorldObjectSystem(entt::registry& registry);
+}

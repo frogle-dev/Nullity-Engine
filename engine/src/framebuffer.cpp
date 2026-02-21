@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 
-Framebuffer::Framebuffer(float width, float height)
+Nullity::Framebuffer::Framebuffer(float width, float height)
 {
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -19,38 +19,38 @@ Framebuffer::Framebuffer(float width, float height)
     {
         std::ostringstream oss;
         oss << "(Framebuffer): Error: Framebuffer is not complete" << std::endl;
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
         return;
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::Cleanup()
+void Nullity::Framebuffer::Cleanup()
 {
     glDeleteFramebuffers(1, &fbo);
     glDeleteTextures(1, &colTex);
     glDeleteRenderbuffers(1, &rbo);
 }
 
-GLuint& Framebuffer::GetColorTexture()
+GLuint& Nullity::Framebuffer::GetColorTexture()
 {
     return colTex;
 }
 
-void Framebuffer::Bind()
+void Nullity::Framebuffer::Bind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Framebuffer::Unbind()
+void Nullity::Framebuffer::Unbind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Framebuffer::Refresh(float width, float height)
+void Nullity::Framebuffer::Refresh(float width, float height)
 {
     Bind();
 

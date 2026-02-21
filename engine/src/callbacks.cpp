@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+
 void Nullity::WindowSizeCallback(GLFWwindow* window, int width, int height)
 {
     Engine* eng = static_cast<Engine*>(glfwGetWindowUserPointer(window));
@@ -42,5 +43,7 @@ void Nullity::MouseCallback(GLFWwindow* window, double xpos, double ypos)
 
 void Nullity::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    processKeyEvent(scancode, action);
+    Engine* eng = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+
+    eng->input.processKeyEvent(scancode, action);
 }

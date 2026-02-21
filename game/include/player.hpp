@@ -12,4 +12,5 @@ struct Player
     glm::vec3 moveDir;
 };
 
-void PlayerUpdate(entt::registry& registry, Camera& camera, float deltaTime);
+void PlayerUpdate(entt::registry& registry, Nullity::Camera& camera, float deltaTime, Nullity::Input& input);
+void CameraControls(Nullity::MouseState& mouse, Nullity::State& engineState, Nullity::Camera& camera);

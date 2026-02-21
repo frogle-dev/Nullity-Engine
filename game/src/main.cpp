@@ -6,6 +6,8 @@
 
 #include "player.hpp"
 
+using namespace Nullity::Components;
+
 
 int main()
 {
@@ -14,14 +16,14 @@ int main()
     NullityEditor::Editor Editor(Engine);
 #endif
 
-    Camera camera;
+    Nullity::Camera camera;
 
     Nullity::Entity dirt(Engine.registry);
     dirt.Add<DisplayName>("dirt")
         .Add<ObjectShader>(Engine.data.unlitShader)
         .Add<Transform>()
         .Add<WorldObject>()
-        .Add<ObjectModel>(Model("assets/models/Dirt/Dirt.obj"), true);
+        .Add<ObjectModel>(Nullity::Model("assets/models/Dirt/Dirt.obj"), true);
 
     Nullity::Entity player(Engine.registry);
     player.Add<DisplayName>("player")
@@ -33,7 +35,7 @@ int main()
     {
         Engine.EnterFrame();
 
-        PlayerUpdate(Engine.registry, camera, Engine.state.deltaTime);
+        PlayerUpdate(Engine.registry, camera, Engine.time.deltaTime, Engine.input);
         CameraControls(Engine.state.mouse, Engine.state, camera);
 
         Engine.Render(camera);

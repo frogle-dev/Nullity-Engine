@@ -1,23 +1,25 @@
 #pragma once
 
-
 #include "glad.h"
 #include <GLFW/glfw3.h>
 
 
-class Framebuffer
+namespace Nullity
 {
-public:
-    Framebuffer() = default;
-    Framebuffer(float width, float height);
-    void Cleanup();
-    GLuint& GetColorTexture();
-    void Refresh(float width, float height);
-    void Bind();
-    void Unbind();
+    class Framebuffer
+    {
+    public:
+        Framebuffer() = default;
+        Framebuffer(float width, float height);
+        void Cleanup();
+        GLuint& GetColorTexture();
+        void Refresh(float width, float height);
+        void Bind();
+        void Unbind();
 
-private:
-    GLuint fbo;
-    GLuint colTex;
-    GLuint rbo;
-};
+    private:
+        GLuint fbo;
+        GLuint colTex;
+        GLuint rbo;
+    };
+}

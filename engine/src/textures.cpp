@@ -11,23 +11,25 @@
 #include <iostream>
 
 
-TextureManager& TextureManager::Get()
+namespace Nullity
 {
-    static TextureManager instance;
-    return instance;
+    Textures textureManager;
 }
 
-GLuint TextureManager::GetTexArrayID() const 
+Nullity::Textures::Textures()
+    : texArrayID(0), maxTexWidth(0), maxTexHeight(0), maxTexLayers(0), nextTexLayer(0), mipLevels(0) {}
+
+GLuint Nullity::Textures::GetTexArrayID() const 
 {
     return texArrayID; 
 }
 
-auto& TextureManager::GetTexSubTexResArray() const
+auto& Nullity::Textures::GetTexSubTexResArray() const
 {
     return subTexRes;
 }
 
-void TextureManager::GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, int _maxTextures, GLuint ubo)
+void Nullity::Textures::GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, int _maxTextures, GLuint ubo)
 {
     maxTexLayers = _maxTextures;
     maxTexWidth = _maxTexWidth;
@@ -57,7 +59,7 @@ void TextureManager::GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, i
 }
 
 
-GLuint TextureManager::LoadStandaloneTexture(std::string path)
+GLuint Nullity::Textures::LoadStandaloneTexture(std::string path)
 {
     int width, height, numChannels;
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
@@ -67,7 +69,7 @@ GLuint TextureManager::LoadStandaloneTexture(std::string path)
         std::ostringstream oss;
         oss << "(Texture Manager): Texture Error: Failed to load texture" << std::endl;
 
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
 
         return -1;
     }
@@ -89,14 +91,14 @@ GLuint TextureManager::LoadStandaloneTexture(std::string path)
     return texture;
 }
 
-int TextureManager::LoadTextureIntoTexArray(std::string path, std::string directoryPath)
+int Nullity::Textures::LoadTextureIntoTexArray(std::string path, std::string directoryPath)
 {
     if (nextTexLayer >= maxTexLayers)
     {
         std::ostringstream oss;
         oss << "(Texture Manager): Texture Array Error: cant have more textures than max specified for texture array" << std::endl;
 
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
         return -1;
     }
 
@@ -109,7 +111,7 @@ int TextureManager::LoadTextureIntoTexArray(std::string path, std::string direct
         std::ostringstream oss;
         oss << "(Texture Manager): Texture Array Error: Failed to load texture" << std::endl;
 
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
         return -1;
     }
     
@@ -118,7 +120,7 @@ int TextureManager::LoadTextureIntoTexArray(std::string path, std::string direct
         std::ostringstream oss;
         oss << "(Texture Manager): Texture Array Error: width and height are larger than texture array width and height" << std::endl;
 
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
         return -1;
     }
 
@@ -128,7 +130,7 @@ int TextureManager::LoadTextureIntoTexArray(std::string path, std::string direct
         oss << "(Texture Manager): Texture Array Warning: width and height do not match texture array width and height, "
         "texture will still be inserted but will not take up the full resolution." << std::endl;
 
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
     }
 
 
@@ -159,7 +161,7 @@ int TextureManager::LoadTextureIntoTexArray(std::string path, std::string direct
 }
 
 
-GLuint TextureManager::LoadCubemap(std::vector<std::string> faces)
+GLuint Nullity::Textures::LoadCubemap(std::vector<std::string> faces)
 {
     GLuint cubemap;
     glGenTextures(1, &cubemap);
@@ -174,7 +176,7 @@ GLuint TextureManager::LoadCubemap(std::vector<std::string> faces)
             std::ostringstream oss;
             oss << "(Texture Manager): Texture Error: Failed to load cubemap" << std::endl;
 
-            Nullity::DebugLog(oss);
+            debug.Log(oss);
             stbi_image_free(data);
 
             return -1;
@@ -195,14 +197,14 @@ GLuint TextureManager::LoadCubemap(std::vector<std::string> faces)
     return cubemap;
 }
 
-void TextureManager::GenerateMipmaps()
+void Nullity::Textures::GenerateMipmaps()
 {
     glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
 
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 }
 
-void TextureManager::SendSubTexResArrayToShader(GLuint ubo)
+void Nullity::Textures::SendSubTexResArrayToShader(GLuint ubo)
 {
     std::vector<float> packed;
     packed.reserve(subTexRes.size() * 4);
@@ -218,4 +220,3 @@ void TextureManager::SendSubTexResArrayToShader(GLuint ubo)
     SetUniformBufferData(ubo, 16, sizeof(float) * packed.size(), packed.data());
 }
 
-TextureManager::TextureManager() : texArrayID(0), maxTexWidth(0), maxTexHeight(0), maxTexLayers(0), nextTexLayer(0), mipLevels(0) {}

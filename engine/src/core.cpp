@@ -14,11 +14,11 @@
 
 Nullity::Engine::Engine()
 {
-	if(!Init())
+    if(!Init())
 	{
         std::ostringstream oss;
         oss << "Engine failed to initialize" << std::endl;
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
 	}
 
     // render texture setup
@@ -51,7 +51,7 @@ bool Nullity::Engine::Running()
 
 void Nullity::Engine::UtilityKeybinds()
 {
-    if (isActionJustPressed("focus"))
+    if (input.isActionJustPressed("focus"))
     {
         state.focus = !state.focus;
     }
@@ -70,11 +70,11 @@ void Nullity::Engine::EnterFrame()
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     float currentFrame = glfwGetTime();
-    state.deltaTime = currentFrame - state.lastFrame;
-    state.lastFrame = currentFrame;
+    time.deltaTime = currentFrame - time.lastFrame;
+    time.lastFrame = currentFrame;
     
-    state.msPerFrame = state.deltaTime * 1000;
-    state.fps = 1000 / state.msPerFrame;
+    time.msPerFrame = time.deltaTime * 1000;
+    time.fps = 1000 / time.msPerFrame;
 
 
     framebuffer.Bind();
@@ -91,7 +91,7 @@ void Nullity::Engine::Render(Camera& camera)
     data.objectShader.use();
     data.objectShader.setVec3("viewPos", camera.position);
 
-    TextureManager::Get().SendSubTexResArrayToShader(data.texArrayDataUBO); // send the tex res array to the frag shader
+    textureManager.SendSubTexResArrayToShader(data.texArrayDataUBO); // send the tex res array to the frag shader
 
     glm::mat4 view = camera.GetViewMatrix();
     glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)state.viewRes.x / state.viewRes.y, 0.1f, 1000.0f);
@@ -141,7 +141,7 @@ void Nullity::Engine::RenderFramebuffer()
 
 void Nullity::Engine::ExitFrame()
 {
-    keysRefresh();
+    input.keysRefresh();
     glfwSwapBuffers(window);
     glfwPollEvents();
 }
@@ -156,24 +156,25 @@ bool GlfwOpenGLInit(GLFWwindow*& window, Nullity::Engine& eng)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    
+
     window = glfwCreateWindow(eng.state.initViewRes.x, eng.state.initViewRes.y, "Nullity Test", NULL, NULL);
     if (window == NULL) {
         std::ostringstream oss;
-        oss << "(Initialization): Error: Failed to create GLFW window" << std::endl; Nullity::DebugLog(oss);
-        
+        oss << "(Initialization): Error: Failed to create GLFW window" << std::endl; 
+        Nullity::debug.Log(oss);
+
         glfwTerminate();
         return false;
     }
     glfwMakeContextCurrent(window);
-    
+
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    
+
     if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::ostringstream oss;
         oss << "(Initialization): Error: Failed to initialize GLAD" << std::endl;
-        Nullity::DebugLog(oss);
+        Nullity::debug.Log(oss);
         return false;
     }
 
@@ -183,7 +184,7 @@ bool GlfwOpenGLInit(GLFWwindow*& window, Nullity::Engine& eng)
     {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(Nullity::glDebugOutput, nullptr);
+        glDebugMessageCallback(Nullity::debug.glDebugOutput, &Nullity::debug);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
 
@@ -196,22 +197,22 @@ bool GlfwOpenGLInit(GLFWwindow*& window, Nullity::Engine& eng)
     return true;
 }
 
-bool TexturesInit(Nullity::Data& engData)
+bool TexturesInit(Nullity::Engine& eng)
 {
     glActiveTexture(GL_TEXTURE0);
 
-    TextureManager::Get().GenerateTextureArray(4096, 4096, 100, engData.texArrayDataUBO);
+    Nullity::textureManager.GenerateTextureArray(4096, 4096, 100, eng.data.texArrayDataUBO);
     
-    GLuint texArrayID = TextureManager::Get().GetTexArrayID();
+    GLuint texArrayID = Nullity::textureManager.GetTexArrayID();
 
-    engData.objectShader.use();
-    engData.objectShader.setFloat("material.emissionStrength", 1.0f);
-    engData.objectShader.setFloat("material.shininess", 128.0f);
+    eng.data.objectShader.use();
+    eng.data.objectShader.setFloat("material.emissionStrength", 1.0f);
+    eng.data.objectShader.setFloat("material.shininess", 128.0f);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    TextureManager::Get().GenerateMipmaps();
-    TextureManager::Get().SendSubTexResArrayToShader(engData.texArrayDataUBO);
+    Nullity::textureManager.GenerateMipmaps();
+    Nullity::textureManager.SendSubTexResArrayToShader(eng.data.texArrayDataUBO);
 
     return true;
 }
@@ -223,12 +224,12 @@ bool Nullity::Engine::Init()
 
     data.InitData();
 
-    reloadConfigKeymaps();
+    input.reloadConfigKeymaps();
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    TexturesInit(data);
+    TexturesInit(*this);
 
     return true;
 }

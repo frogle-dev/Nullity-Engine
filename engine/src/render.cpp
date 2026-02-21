@@ -3,8 +3,9 @@
 
 #include <entt/entt.hpp>
 
+using namespace Nullity::Components;
 
-void DrawSystem(entt::registry& registry)
+void Nullity::DrawSystem(entt::registry& registry)
 {
     auto view = registry.view<ObjectModel, ObjectShader>();
 

@@ -10,8 +10,10 @@
 
 #include <entt/entt.hpp>
 
+using namespace Nullity::Components;
 
-void WorldObjectSystem(entt::registry& registry)
+
+void Nullity::WorldObjectSystem(entt::registry& registry)
 {
     auto view = registry.view<WorldObject, Transform, ObjectShader>();
 

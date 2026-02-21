@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "glad.h"
 #include <GLFW/glfw3.h>
 
@@ -26,11 +25,6 @@ namespace Nullity
 
         bool wireframe = false;
         bool focus = true;
-
-        float deltaTime = 0.0f;
-        int fps;
-        float msPerFrame;
-        float lastFrame = 0.0f;
 
         MouseState mouse;
     };

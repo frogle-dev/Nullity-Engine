@@ -68,7 +68,7 @@ void NullityEditor::Editor::Update(Nullity::Engine& eng)
         ImGui::ShowDemoWindow();
     }
 
-    InfoWindow(eng.state.msPerFrame, eng.state.fps);
+    InfoWindow(eng.time.msPerFrame, eng.time.fps, eng.input);
     DebugOutputWindow();
     InspectorWindow(eng.registry);
 
@@ -116,7 +116,7 @@ void NullityEditor::Editor::ExitFrame()
 
 void NullityEditor::Editor::UtilityKeybinds(Nullity::Engine& eng)
 {
-    if (isActionJustPressed("wireframe"))
+    if (eng.input.isActionJustPressed("wireframe"))
     {
         eng.state.wireframe = !eng.state.wireframe;
     }

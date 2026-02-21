@@ -15,90 +15,92 @@
 #include "shader.hpp"
 
 
-
-struct Vertex
+namespace Nullity
 {
-    glm::vec3 position;
-    glm::vec3 normal;
-    glm::vec2 texCoords;
-    glm::vec4 color;
-    float useTex;
-};
+    struct Vertex
+    {
+        glm::vec3 position;
+        glm::vec3 normal;
+        glm::vec2 texCoords;
+        glm::vec4 color;
+        float useTex;
+    };
 
-enum class TextureType
-{
-    DIFFUSE,
-    SPECULAR,
-    EMISSION
-};
+    enum class TextureType
+    {
+        DIFFUSE,
+        SPECULAR,
+        EMISSION
+    };
 
-struct Texture
-{
-    unsigned int layer;
-    TextureType type;
-    std::string path;
-};
-
-
-class Mesh
-{
-public:
-    unsigned int instanceCount = 0;
-    std::vector<glm::mat4> instanceMatrices;
-
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    struct Texture
+    {
+        unsigned int layer;
+        TextureType type;
+        std::string path;
+    };
 
 
-    Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures);
- 
-    Mesh(unsigned int instanceCount, std::vector<glm::mat4>& instanceMatrices, 
-        std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures);
-    
+    class Mesh
+    {
+    public:
+        unsigned int instanceCount = 0;
+        std::vector<glm::mat4> instanceMatrices;
 
-    void Draw(Shader &shader);
-
-    void DrawInstanced(Shader &shader);
-
-
-private:
-    // render buffers
-    GLuint VAO, VBO, EBO; // vertex array object, vertex buffer object, element buffer object
-
-    void SetupMesh();
-
-    void SetupMeshInstanced();
-};
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        std::vector<Texture> textures;
 
 
-class Model
-{
-public:
+        Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures);
+     
+        Mesh(unsigned int instanceCount, std::vector<glm::mat4>& instanceMatrices, 
+            std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures);
+        
 
-    Model(std::string path);
+        void Draw(Shader &shader);
 
-    Model(std::string path, unsigned int instanceCount, std::vector<glm::mat4>& instanceMatrices);
- 
-
-    void Draw(Shader &shader);
-
-
-private:
-    unsigned int instanceCount = 0;
-    std::vector<glm::mat4> instanceMatrices;
-
-    std::vector<Mesh> meshes;
-    std::string directory;
-
-    std::vector<Texture> textures_loaded;
+        void DrawInstanced(Shader &shader);
 
 
-    void LoadModel(std::string path);
+    private:
+        // render buffers
+        GLuint VAO, VBO, EBO; // vertex array object, vertex buffer object, element buffer object
 
-    void ProcessNode(aiNode *node, const aiScene *scene);
+        void SetupMesh();
 
-    Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
-    
-    std::vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, TextureType internalType);
-};
+        void SetupMeshInstanced();
+    };
+
+
+    class Model
+    {
+    public:
+
+        Model(std::string path);
+
+        Model(std::string path, unsigned int instanceCount, std::vector<glm::mat4>& instanceMatrices);
+     
+
+        void Draw(Shader &shader);
+
+
+    private:
+        unsigned int instanceCount = 0;
+        std::vector<glm::mat4> instanceMatrices;
+
+        std::vector<Mesh> meshes;
+        std::string directory;
+
+        std::vector<Texture> textures_loaded;
+
+
+        void LoadModel(std::string path);
+
+        void ProcessNode(aiNode *node, const aiScene *scene);
+
+        Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
+        
+        std::vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, TextureType internalType);
+    };
+}

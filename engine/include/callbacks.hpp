@@ -1,7 +1,7 @@
 #pragma once
 
 #include "state.hpp"
-#include "keymap.hpp"
+#include "input.hpp"
 
 
 namespace Nullity

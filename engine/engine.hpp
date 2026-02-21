@@ -5,7 +5,7 @@
 #include "include/components.hpp"
 #include "include/debugging.hpp"
 #include "include/framebuffer.hpp"
-#include "include/keymap.hpp"
+#include "include/input.hpp"
 #include "include/models.hpp"
 #include "include/primitives.hpp"
 #include "include/render.hpp"
@@ -15,3 +15,4 @@
 #include "include/textures.hpp"
 #include "include/callbacks.hpp"
 #include "include/entity.hpp"
+#include "include/time.hpp"

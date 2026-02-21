@@ -10,21 +10,27 @@
 #include <fstream>
 
 
+namespace Nullity
+{
+    Nullity::Debug debug;
+}
 
-std::ofstream fout("DebugLog.txt");
-void Nullity::DebugLog(std::ostringstream& oss)
+Nullity::Debug::Debug()
+    : fout("DebugLog.txt") {}
+
+void Nullity::Debug::Log(const std::ostringstream& oss)
 {
     fout << "---------------" << std::endl;
     fout << oss.str() << std::endl;
 }
 
-void Nullity::DebugLog(std::string& string)
+void Nullity::Debug::Log(const std::string& string)
 {
     fout << "---------------" << std::endl;
     fout << string << std::endl;
 }
 
-void APIENTRY Nullity::glDebugOutput(GLenum source, 
+void APIENTRY Nullity::Debug::glDebugOutput(GLenum source, 
                             GLenum type, 
                             unsigned int id, 
                             GLenum severity, 
@@ -79,5 +85,6 @@ void APIENTRY Nullity::glDebugOutput(GLenum source,
     oss << typeText << std::endl;
     oss << severityText << std::endl;
 
-    DebugLog(oss);
+    Debug* debug = (Debug*)userParam;
+    debug->Log(oss);
 }

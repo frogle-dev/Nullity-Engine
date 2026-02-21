@@ -13,14 +13,14 @@
 #include <iostream>
 
 
-void SetUniformBufferData(GLuint ubo, unsigned int offset, unsigned int size, const void* data)
+void Nullity::SetUniformBufferData(GLuint ubo, unsigned int offset, unsigned int size, const void* data)
 {
     glBindBuffer(GL_UNIFORM_BUFFER, ubo);
     glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath)
+Nullity::Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
     // 1) retrieve vertex/fragment source code from filePath
     std::string vertexCode;
@@ -51,7 +51,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
         std::ostringstream oss;
         oss << "(Shader): Error: File not succesfully read" << std::endl;
 
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
     }
     const char* vertexShaderCode = vertexCode.c_str();
     const char* fragmentShaderCode = fragmentCode.c_str();
@@ -83,48 +83,48 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
     glDeleteShader(fragment);
 }
 // use/activate the shader program
-void Shader::use()
+void Nullity::Shader::use()
 {
     glUseProgram(shaderProgramID);
 }
 
 // delete shader program
-void Shader::deleteProgram()
+void Nullity::Shader::deleteProgram()
 {
     glDeleteProgram(shaderProgramID);
 }
 // utility uniform functions
-void Shader::setInt(const std::string &name, int value) const
+void Nullity::Shader::setInt(const std::string &name, int value) const
 {
     glUniform1i(getUniformLoc(name), value);
 }
-void Shader::setIVec2(const std::string &name, int value1, int value2) const
+void Nullity::Shader::setIVec2(const std::string &name, int value1, int value2) const
 {
     glUniform2i(getUniformLoc(name), value1, value2);
 }
-void Shader::setFloat(const std::string &name, float value) const
+void Nullity::Shader::setFloat(const std::string &name, float value) const
 {
     glUniform1f(getUniformLoc(name), value);
 }
-void Shader::setMat4(const std::string &name, glm::mat4 value) const
+void Nullity::Shader::setMat4(const std::string &name, glm::mat4 value) const
 {
     glUniformMatrix4fv(getUniformLoc(name), 1, GL_FALSE, glm::value_ptr(value));
 }
-void Shader::setMat3(const std::string &name, glm::mat3 value) const
+void Nullity::Shader::setMat3(const std::string &name, glm::mat3 value) const
 {
     glUniformMatrix3fv(getUniformLoc(name), 1, GL_FALSE, glm::value_ptr(value));
 }
-void Shader::setVec3(const std::string &name, glm::vec3 value) const
+void Nullity::Shader::setVec3(const std::string &name, glm::vec3 value) const
 {
     glUniform3f(getUniformLoc(name), value.x, value.y, value.z);
 }
-void Shader::setVec2(const std::string &name, glm::vec2 value) const
+void Nullity::Shader::setVec2(const std::string &name, glm::vec2 value) const
 {
     glUniform2f(getUniformLoc(name), value.x, value.y);
 }
 
 
-GLint Shader::getUniformLoc(const std::string& name) const
+GLint Nullity::Shader::getUniformLoc(const std::string& name) const
 {
     GLint loc = glGetUniformLocation(shaderProgramID, name.c_str());
 
@@ -132,13 +132,13 @@ GLint Shader::getUniformLoc(const std::string& name) const
     if (loc == -1)
     {
         oss << "(Shader): Error: uniform not found " << name << std::endl;
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
     } 
 
     return loc;
 }
 
-void Shader::checkCompileErrors(unsigned int shader, std::string type)
+void Nullity::Shader::checkCompileErrors(unsigned int shader, std::string type)
 {
     int success;
     char infoLog[1024];
@@ -152,7 +152,7 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 
             oss << "Error: shader compilation error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 
-            Nullity::DebugLog(oss);
+            debug.Log(oss);
         }
     }
     else
@@ -164,7 +164,7 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type)
 
             oss << "Error: program linking error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 
-            Nullity::DebugLog(oss);
+            debug.Log(oss);
         }
     }
 }

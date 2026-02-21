@@ -1,9 +1,10 @@
 #include "engine.hpp"
-
 #include "player.hpp"
 
+using namespace Nullity::Components;
 
-void PlayerUpdate(entt::registry& registry, Camera& camera, float deltaTime)
+
+void PlayerUpdate(entt::registry& registry, Nullity::Camera& camera, float deltaTime, Nullity::Input& input)
 {
     auto view = registry.view<Transform, Velocity, Player>();
 
@@ -12,19 +13,19 @@ void PlayerUpdate(entt::registry& registry, Camera& camera, float deltaTime)
         cmp_player.moveDir = glm::vec3(0.0f);
         cmp_velocity.velocity = glm::vec3(0.0f, cmp_velocity.velocity.y, 0.0f);
 
-        if (isActionPressed("forward"))
+        if (input.isActionPressed("forward"))
         {
             cmp_player.moveDir -= camera.straightFront;
         }
-        if (isActionPressed("backward"))
+        if (input.isActionPressed("backward"))
         {
             cmp_player.moveDir += camera.straightFront;
         }
-        if (isActionPressed("left"))
+        if (input.isActionPressed("left"))
         {
             cmp_player.moveDir -= camera.right;
         }
-        if (isActionPressed("right"))
+        if (input.isActionPressed("right"))
         {
             cmp_player.moveDir += camera.right;
         }
@@ -36,7 +37,7 @@ void PlayerUpdate(entt::registry& registry, Camera& camera, float deltaTime)
             cmp_velocity.velocity.z = cmp_player.moveDir.z * cmp_player.speed;
         }
 
-        if (isActionPressed("jump") && cmp_player.grounded)
+        if (input.isActionPressed("jump") && cmp_player.grounded)
         {
             cmp_player.grounded = false;
             cmp_velocity.velocity.y = cmp_player.jumpForce;
@@ -57,5 +58,23 @@ void PlayerUpdate(entt::registry& registry, Camera& camera, float deltaTime)
         }
 
         camera.position = glm::vec3(cmp_transform.position.x, cmp_transform.position.y + cmp_player.bodyHeight, cmp_transform.position.z);
+    }
+}
+
+void CameraControls(Nullity::MouseState& mouse, Nullity::State& engineState, Nullity::Camera& camera)
+{
+    if (mouse.firstMouse)
+    {
+        mouse.lastMousePos = mouse.mousePos;
+        mouse.firstMouse = false;
+    } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
+
+    if (engineState.focus)
+    {
+        float xOffset = mouse.mousePos.x - mouse.lastMousePos.x;
+        float yOffset = mouse.lastMousePos.y - mouse.mousePos.y;
+        mouse.lastMousePos = mouse.mousePos;
+    
+        camera.ProcessMouseMovement(xOffset, yOffset);
     }
 }

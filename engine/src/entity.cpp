@@ -1,4 +1,5 @@
 #include "entity.hpp"
+
 using namespace Nullity;
 
 

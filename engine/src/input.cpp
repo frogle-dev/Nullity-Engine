@@ -1,11 +1,10 @@
-
 #include "glad.h"
 #include <GLFW/glfw3.h>
 
 #include "json.hpp"
 #include <fstream>
 
-#include "keymap.hpp"
+#include "input.hpp"
 #include "debugging.hpp"
 
 #include <sstream>
@@ -13,12 +12,14 @@
 #include <vector>
 
 
+Nullity::Input::Input()
+    : keymapJson("config/keymaps.json")
+{
+    data = nlohmann::json::parse(keymapJson);
+}
 
-static std::unordered_map<std::string, std::vector<int>> bindings;
-static std::unordered_map<std::string, ActionState> actions;
-static int currentScancodePress;
 
-void keysRefresh() 
+void Nullity::Input::keysRefresh() 
 {
     for (auto& [name, state] : actions) 
     {
@@ -28,23 +29,23 @@ void keysRefresh()
 }
 
 
-bool isActionPressed(const std::string& actionName) 
+bool Nullity::Input::isActionPressed(const std::string& actionName) 
 {
     return actions[actionName].pressed;
 }
 
-bool isActionJustPressed(const std::string& actionName) 
+bool Nullity::Input::isActionJustPressed(const std::string& actionName) 
 {
     return actions[actionName].justPressed;
 }
 
-bool isActionReleased(const std::string& actionName) 
+bool Nullity::Input::isActionReleased(const std::string& actionName) 
 {
     return actions[actionName].released;
 }
 
 // called by glfw key callback thing
-void processKeyEvent(int scancode, int action) 
+void Nullity::Input::processKeyEvent(int scancode, int action) 
 {
     currentScancodePress = scancode;
 
@@ -73,22 +74,17 @@ void processKeyEvent(int scancode, int action)
     }
 }
 
-
-static std::ifstream keymapJson("config/keymaps.json");
-static nlohmann::json data = nlohmann::json::parse(keymapJson);
-// returns all keymaps that have been set from "reloadConfigKeymaps()"
-std::unordered_map<std::string, std::vector<int>>& getConfigKeymaps()
+std::unordered_map<std::string, std::vector<int>>& Nullity::Input::getConfigKeymaps()
 {
     return bindings;
 }
 
-int getCurrentScancodePressed()
+int Nullity::Input::getCurrentScancodePressed()
 {
     return currentScancodePress;
 }
 
-// reads and loads all keymaps from keymaps.json (run whenever keymaps.json is changed)
-void reloadConfigKeymaps()
+void Nullity::Input::reloadConfigKeymaps()
 {
     bindings.clear();
     for (auto& [actionName, keycodes] : data.items())
@@ -102,9 +98,7 @@ void reloadConfigKeymaps()
     }
 }
 
-// sets an already existing mapping to another key, or creates a new one in keymaps.json. 
-//bool 'addkeycode' = true, adds the keycode to the json file, as false it changes a keycode at 'index'
-void setConfigKeymap(const std::string& actionName, bool addKeycode, int keycode, int index)
+void Nullity::Input::setConfigKeymap(const std::string& actionName, bool addKeycode, int keycode, int index)
 {
     if (addKeycode)
     {
@@ -119,8 +113,7 @@ void setConfigKeymap(const std::string& actionName, bool addKeycode, int keycode
     out << data.dump(4);
 }
 
-// removes an already existing mapping in keymaps.json. 
-void removeConfigKeymap(const std::string& actionName, int index)
+void Nullity::Input::removeConfigKeymap(const std::string& actionName, int index)
 {
     // check if the action name exists
     if (data.contains(actionName) && index >= 0 && index < data[actionName].size()) 
@@ -132,7 +125,7 @@ void removeConfigKeymap(const std::string& actionName, int index)
     {
         std::ostringstream oss;
         oss << "Invalid action or index.\n";
-        Nullity::DebugLog(oss);
+        debug.Log(oss);
     }
 
     std::ofstream out("../game_config/keymaps.json");

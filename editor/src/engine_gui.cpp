@@ -57,7 +57,7 @@ void NullityEditor::Styling(float* _accent, float* _accent2, float* _bg1, float*
     style.Colors[ImGuiCol_ButtonHovered] = accent2;
 }
 
-void NullityEditor::KeybindChangePopup()
+void NullityEditor::KeybindChangePopup(Nullity::Input& input)
 {
     static std::string currentActionName;
     static std::vector<int> currentKeycodes;
@@ -66,7 +66,7 @@ void NullityEditor::KeybindChangePopup()
     ImGui::Separator();
     ImGui::Text("Keymaps");
     ImGui::BeginChild("Keymaps");
-    auto& bindings = getConfigKeymaps();
+    auto& bindings = input.getConfigKeymaps();
     for (auto& [actionName, keycodes] : bindings)
     {
         if (ImGui::Button(actionName.c_str()))
@@ -87,7 +87,7 @@ void NullityEditor::KeybindChangePopup()
         ImGui::Text("Press a key, then click 'add' or 'change' to assign the currently pressed key to that slot");
         
         ImGui::Separator();
-        ImGui::Text("Press any key: %i", getCurrentScancodePressed());
+        ImGui::Text("Press any key: %i", input.getCurrentScancodePressed());
 
         if(ImGui::BeginListBox("Current assigned keycodes"))
         {
@@ -100,21 +100,21 @@ void NullityEditor::KeybindChangePopup()
                 ImGui::PushID(key + i);
                 if (ImGui::Button("Change"))
                 {
-                    setConfigKeymap(currentActionName, false, getCurrentScancodePressed(), i);
-                    reloadConfigKeymaps();
+                    input.setConfigKeymap(currentActionName, false, input.getCurrentScancodePressed(), i);
+                    input.reloadConfigKeymaps();
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Remove"))
                 {
-                    removeConfigKeymap(currentActionName, i);
-                    reloadConfigKeymaps();
+                    input.removeConfigKeymap(currentActionName, i);
+                    input.reloadConfigKeymaps();
                 }
                 ImGui::PopID();
             }
             if(ImGui::Button("Add"))
             {
-                setConfigKeymap(currentActionName, true, getCurrentScancodePressed());
-                reloadConfigKeymaps();
+                input.setConfigKeymap(currentActionName, true, input.getCurrentScancodePressed());
+                input.reloadConfigKeymaps();
             }
             ImGui::EndListBox();
         }
@@ -129,13 +129,13 @@ void NullityEditor::KeybindChangePopup()
     ImGui::EndChild();
 }
 
-void NullityEditor::InfoWindow(float msPerFrame, int fps)
+void NullityEditor::InfoWindow(float msPerFrame, int fps, Nullity::Input& input)
 {
     ImGui::Begin("Info", NULL, ImGuiWindowFlags_None);
     ImGui::Text("ms per frame: %f", msPerFrame);
     ImGui::Text("fps: %i", fps);
 
-    KeybindChangePopup();
+    KeybindChangePopup(input);
 
     ImGui::End();
 }
@@ -148,7 +148,7 @@ void NullityEditor::InspectorWindow(entt::registry& registry)
 
     ImGui::Text("Entity: ");
     
-    auto view = registry.view<DisplayName>();
+    auto view = registry.view<Nullity::Components::DisplayName>();
     if (ImGui::BeginCombo("##", inspectorCurrent.c_str()))
     {
         for (auto [entity, cmp_name] : view.each())

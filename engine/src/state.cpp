@@ -5,11 +5,10 @@
 
 #include "core.hpp"
 #include "state.hpp"
-#include "keymap.hpp"
+#include "input.hpp"
 #include "shader.hpp"
 #include "primitives.hpp"
 #include "textures.hpp"
-
 
 
 void Nullity::Data::InitData()
@@ -63,7 +62,7 @@ void Nullity::Data::InitSkybox()
         "assets/images/skybox/front.jpg",
         "assets/images/skybox/back.jpg",
     };
-    skyboxCubemap = TextureManager::Get().LoadCubemap(skyboxFaces);
+    skyboxCubemap = textureManager.LoadCubemap(skyboxFaces);
 }
 
 void Nullity::Data::Cleanup()

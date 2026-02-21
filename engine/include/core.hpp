@@ -3,6 +3,10 @@
 #include "state.hpp"
 #include "framebuffer.hpp"
 #include "camera.hpp"
+#include "input.hpp"
+#include "debugging.hpp"
+#include "textures.hpp"
+#include "time.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -22,9 +26,10 @@ namespace Nullity
 
         entt::registry registry;
 
-
 		Data data;
 		State state;
+		Time time;
+		Input input;
 
 		bool Running();
 
