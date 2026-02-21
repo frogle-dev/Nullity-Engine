@@ -1,5 +1,7 @@
 #include "engine.hpp"
 
+#include "player.hpp"
+
 
 void PlayerUpdate(entt::registry& registry, Camera& camera, float deltaTime)
 {
