@@ -61,19 +61,19 @@ void PlayerUpdate(entt::registry& registry, Nullity::Camera& camera, float delta
     }
 }
 
-void CameraControls(Nullity::MouseState& mouse, Nullity::State& engineState, Nullity::Camera& camera)
+void CameraControls(Nullity::Input& input, Nullity::State& engineState, Nullity::Camera& camera)
 {
-    if (mouse.firstMouse)
+    if (input.firstMouse)
     {
-        mouse.lastMousePos = mouse.mousePos;
-        mouse.firstMouse = false;
+        input.lastMousePos = input.mousePos;
+        input.firstMouse = false;
     } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
 
     if (engineState.focus)
     {
-        float xOffset = mouse.mousePos.x - mouse.lastMousePos.x;
-        float yOffset = mouse.lastMousePos.y - mouse.mousePos.y;
-        mouse.lastMousePos = mouse.mousePos;
+        float xOffset = input.mousePos.x - input.lastMousePos.x;
+        float yOffset = input.lastMousePos.y - input.mousePos.y;
+        input.lastMousePos = input.mousePos;
     
         camera.ProcessMouseMovement(xOffset, yOffset);
     }

@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "json.hpp"
+#include "glm/glm.hpp"
 
 #include <unordered_map>
 #include <vector>
@@ -24,6 +25,11 @@ namespace Nullity
     {
     public:
         Input();
+
+        glm::vec2 lastMousePos;
+        bool firstMouse = true;
+        glm::dvec2 mousePos;
+
 
         void keysRefresh(); 
         bool isActionPressed(const std::string& actionName); 
@@ -50,4 +56,7 @@ namespace Nullity
         std::ifstream keymapJson;
         nlohmann::json data;
     };
+
+    void MouseCallback(GLFWwindow* window, double xpos, double ypos);
+    void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 }

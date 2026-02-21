@@ -6,6 +6,7 @@
 
 #include "input.hpp"
 #include "debugging.hpp"
+#include "core.hpp"
 
 #include <sstream>
 #include <unordered_map>
@@ -130,4 +131,19 @@ void Nullity::Input::removeConfigKeymap(const std::string& actionName, int index
 
     std::ofstream out("../game_config/keymaps.json");
     out << data.dump(4);
+}
+
+
+void Nullity::MouseCallback(GLFWwindow* window, double xpos, double ypos)
+{
+    Engine* eng = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+
+    eng->input.mousePos = glm::dvec2(xpos, ypos);
+}
+
+void Nullity::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    Engine* eng = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+
+    eng->input.processKeyEvent(scancode, action);
 }

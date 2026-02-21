@@ -32,18 +32,3 @@ void Nullity::WindowSizeCallback(GLFWwindow* window, int width, int height)
 
     eng->framebuffer.Refresh(state->viewRes.x, state->viewRes.y);
 }
-
-
-void Nullity::MouseCallback(GLFWwindow* window, double xpos, double ypos)
-{
-    Engine* eng = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-
-    eng->state.mouse.mousePos = glm::dvec2(xpos, ypos);
-}
-
-void Nullity::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    Engine* eng = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-
-    eng->input.processKeyEvent(scancode, action);
-}

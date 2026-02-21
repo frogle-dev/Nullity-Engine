@@ -10,13 +10,6 @@
 
 namespace Nullity 
 {
-    struct MouseState
-    {
-        glm::vec2 lastMousePos;
-        bool firstMouse = true;
-        glm::dvec2 mousePos;
-    };
-
     struct State
     {
         const glm::ivec2 initViewRes = glm::ivec2(1280, 720); 
@@ -25,8 +18,6 @@ namespace Nullity
 
         bool wireframe = false;
         bool focus = true;
-
-        MouseState mouse;
     };
 
     class Data

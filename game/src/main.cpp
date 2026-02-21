@@ -36,7 +36,7 @@ int main()
         Engine.EnterFrame();
 
         PlayerUpdate(Engine.registry, camera, Engine.time.deltaTime, Engine.input);
-        CameraControls(Engine.state.mouse, Engine.state, camera);
+        CameraControls(Engine.input, Engine.state, camera);
 
         Engine.Render(camera);
 #ifdef USE_EDITOR

@@ -13,4 +13,4 @@ struct Player
 };
 
 void PlayerUpdate(entt::registry& registry, Nullity::Camera& camera, float deltaTime, Nullity::Input& input);
-void CameraControls(Nullity::MouseState& mouse, Nullity::State& engineState, Nullity::Camera& camera);
+void CameraControls(Nullity::Input& input, Nullity::State& engineState, Nullity::Camera& camera);
