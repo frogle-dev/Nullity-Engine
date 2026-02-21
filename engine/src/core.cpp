@@ -2,7 +2,6 @@
 #include "state.hpp"
 #include "debugging.hpp"
 #include "textures.hpp"
-#include "callbacks.hpp"
 #include "systems.hpp"
 #include "render.hpp"
 #include "primitives.hpp"

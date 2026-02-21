@@ -13,6 +13,5 @@
 #include "include/state.hpp"
 #include "include/systems.hpp"
 #include "include/textures.hpp"
-#include "include/callbacks.hpp"
 #include "include/entity.hpp"
 #include "include/time.hpp"

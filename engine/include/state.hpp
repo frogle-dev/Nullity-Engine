@@ -45,4 +45,6 @@ namespace Nullity
 
         void Cleanup();
     };
+
+	void WindowSizeCallback(GLFWwindow* window, int width, int height);
 }
