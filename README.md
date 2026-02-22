@@ -5,6 +5,20 @@ Requirements:
 - assimp
 - hardware that supports opengl 4.6
 
+### Installation
+
+<details>
+<summary>Linux</summary>
+<br>
+d
+</details>
+
+<details>
+<summary>Windows</summary>
+<br>
+d
+</details>
+
 ### Game
 
 Use the game folder as a template to work off of
