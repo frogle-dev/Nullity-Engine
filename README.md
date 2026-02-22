@@ -16,11 +16,16 @@ d
 <details>
 <summary>Windows</summary>
 <br>
-d
+
+Install [visual studio](https://visualstudio.microsoft.com/) or [vs build tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+
+Install git at [git](https://git-scm.com/)
+Install cmake at: [https://cmake.org/](https://cmake.org/)
+
+
 </details>
 
 ### Game
-
 Use the game folder as a template to work off of
 
 ### Using the engine
