@@ -5,6 +5,9 @@ Requirements:
 - assimp
 - hardware that supports opengl 4.6
 
+### Game
+
+Use the game folder as a template to work off of
 
 ### Using the engine
 
