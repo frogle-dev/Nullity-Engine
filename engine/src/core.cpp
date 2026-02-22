@@ -20,7 +20,6 @@ Nullity::Engine::Engine()
         debug.Log(oss);
 	}
 
-    // render texture setup
     framebuffer = Framebuffer(state.viewRes.x, state.viewRes.y);
 
     GLuint renderTexVBO;

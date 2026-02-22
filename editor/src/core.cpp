@@ -1,5 +1,6 @@
 #include "core.hpp"
 #include "engine_gui.hpp"
+#include "engine.hpp"
 
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -76,15 +77,14 @@ void NullityEditor::Editor::Update(Nullity::Engine& eng)
     {
         ImGui::BeginChild("Render");
 
-        float width = ImGui::GetContentRegionAvail().x;
-        float height = ImGui::GetContentRegionAvail().y;
+        ImVec2 reg = ImGui::GetContentRegionAvail();
 
-        state.framebuffer.Refresh(width, height);
-        Nullity::WindowSizeCallback(eng.window, width, height);
+        Nullity::WindowSizeCallback(eng.window, reg.x, reg.y);
+        state.framebuffer.Refresh(reg.x, reg.y);
 
         ImGui::Image(
             (ImTextureID)state.framebuffer.GetColorTexture(), 
-            ImGui::GetContentRegionAvail(), 
+            reg, 
             ImVec2(0, 1), 
             ImVec2(1, 0)
         );
