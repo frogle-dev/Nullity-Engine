@@ -17,13 +17,27 @@ d
 <summary>Windows</summary>
 <br>
 
-Install [visual studio](https://visualstudio.microsoft.com/) or [vs build tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+- Install [visual studio](https://visualstudio.microsoft.com/downloads/) or the vs build tools that are at the bottom of the page under "Tools for visual studio"
+    - Choose "Desktop development with c++" in the installer 
+- Install cmake at: [https://cmake.org/](https://cmake.org/) (make sure add to path is on during the installation)
+- Install [git](https://git-scm.com/)
 
-Install git at [git](https://git-scm.com/)
-Install cmake at: [https://cmake.org/](https://cmake.org/)
+If you are using Visual Studio, open "x64 Native Tools Command Prompt for VS"
 
+If using vs build tools open a normal terminal
+
+
+Run:
+```
+git clone https://github.com/frogle-dev/Nullity-Engine.git
+cd Nullity-Engine
+```
+
+And then you can run the ```run.bat``` script to build the engine
 
 </details>
+
+-------------
 
 ### Game
 Use the game folder as a template to work off of
