@@ -10,26 +10,31 @@
 
 #include <iostream>
 
+namespace N = Nullity;
 
-namespace Nullity
-{
-    Textures textureManager;
-}
 
-Nullity::Textures::Textures()
-    : texArrayID(0), maxTexWidth(0), maxTexHeight(0), maxTexLayers(0), nextTexLayer(0), mipLevels(0) {}
+GLuint texArrayID = 0;
+std::vector<glm::vec2> subTexRes;
+int maxTexWidth = 0;
+int maxTexHeight = 0;
 
-GLuint Nullity::Textures::GetTexArrayID() const 
+int mipLevels = 0;
+
+int maxTexLayers = 0;
+int nextTexLayer = 0;
+
+
+GLuint N::Textures::TexArrayID() 
 {
     return texArrayID; 
 }
 
-auto& Nullity::Textures::GetTexSubTexResArray() const
+const std::vector<glm::vec2>& N::Textures::TexSubTexResArray()
 {
     return subTexRes;
 }
 
-void Nullity::Textures::GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, int _maxTextures, GLuint ubo)
+void N::Textures::GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, int _maxTextures, GLuint ubo)
 {
     maxTexLayers = _maxTextures;
     maxTexWidth = _maxTexWidth;
@@ -59,7 +64,7 @@ void Nullity::Textures::GenerateTextureArray(int _maxTexWidth, int _maxTexHeight
 }
 
 
-GLuint Nullity::Textures::LoadStandaloneTexture(std::string path)
+GLuint N::Textures::LoadStandaloneTexture(std::string path)
 {
     int width, height, numChannels;
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &numChannels, STBI_rgb_alpha);
@@ -91,7 +96,7 @@ GLuint Nullity::Textures::LoadStandaloneTexture(std::string path)
     return texture;
 }
 
-int Nullity::Textures::LoadTextureIntoTexArray(std::string path, std::string directoryPath)
+int N::Textures::LoadTextureIntoTexArray(std::string path, std::string directoryPath)
 {
     if (nextTexLayer >= maxTexLayers)
     {
@@ -161,7 +166,7 @@ int Nullity::Textures::LoadTextureIntoTexArray(std::string path, std::string dir
 }
 
 
-GLuint Nullity::Textures::LoadCubemap(std::vector<std::string> faces)
+GLuint N::Textures::LoadCubemap(std::vector<std::string> faces)
 {
     GLuint cubemap;
     glGenTextures(1, &cubemap);
@@ -197,14 +202,14 @@ GLuint Nullity::Textures::LoadCubemap(std::vector<std::string> faces)
     return cubemap;
 }
 
-void Nullity::Textures::GenerateMipmaps()
+void N::Textures::GenerateMipmaps()
 {
     glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
 
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 }
 
-void Nullity::Textures::SendSubTexResArrayToShader(GLuint ubo)
+void N::Textures::SendSubTexResArrayToShader(GLuint ubo)
 {
     std::vector<float> packed;
     packed.reserve(subTexRes.size() * 4);

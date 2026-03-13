@@ -15,38 +15,16 @@
 
 namespace Nullity
 {
-    class Textures
+    namespace Textures
     {
-    public:
-        Textures();
-
-        GLuint GetTexArrayID() const;
-
-        auto& GetTexSubTexResArray() const;
+        GLuint TexArrayID();
+        const std::vector<glm::vec2>& TexSubTexResArray();
 
         void GenerateTextureArray(int _maxTexWidth, int _maxTexHeight, int _maxTextures, GLuint ubo);
-
         GLuint LoadStandaloneTexture(std::string path);
-
         int LoadTextureIntoTexArray(std::string path, std::string directoryPath);
-
         GLuint LoadCubemap(std::vector<std::string> faces);
-
         void GenerateMipmaps();
-
         void SendSubTexResArrayToShader(GLuint ubo);
-
-    private:
-        GLuint texArrayID;
-        std::vector<glm::vec2> subTexRes;
-        int maxTexWidth;
-        int maxTexHeight;
-        
-        int mipLevels;
-
-        int maxTexLayers;
-        int nextTexLayer;
     };
-
-    extern Textures textureManager;
 }

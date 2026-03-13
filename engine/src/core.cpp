@@ -12,6 +12,11 @@
 
 namespace N = Nullity;
 
+GLFWwindow* window;
+N::Framebuffer framebuffer;
+entt::registry registry;
+
+
 void N::EngineClose()
 {
     Data::Cleanup();
@@ -20,10 +25,11 @@ void N::EngineClose()
     glfwTerminate();
 }
 
-bool N::Running()
-{
-    return !glfwWindowShouldClose(window);
-}
+const GLFWwindow* N::GetWindow() { return window; }
+const N::Framebuffer& N::GetFramebuffer() { return framebuffer; }
+entt::registry& N::GetRegistry() { return registry; }
+bool N::Running() { return !glfwWindowShouldClose(window); }
+
 
 void N::UtilityKeybinds()
 {
@@ -67,7 +73,7 @@ void N::Render(Camera& camera)
     Data::objectShader.use();
     Data::objectShader.setVec3("viewPos", camera.position);
 
-    textureManager.SendSubTexResArrayToShader(Data::texArrayDataUBO); // send the tex res array to the frag shader
+    Textures::SendSubTexResArrayToShader(Data::texArrayDataUBO); // send the tex res array to the frag shader
 
     glm::mat4 view = camera.GetViewMatrix();
     glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)viewRes.x / viewRes.y, 0.1f, 1000.0f);
@@ -167,9 +173,9 @@ bool TexturesInit()
 {
     glActiveTexture(GL_TEXTURE0);
 
-    N::textureManager.GenerateTextureArray(4096, 4096, 100, N::Data::texArrayDataUBO);
+    N::Textures::GenerateTextureArray(4096, 4096, 100, N::Data::texArrayDataUBO);
     
-    GLuint texArrayID = N::textureManager.GetTexArrayID();
+    GLuint texArrayID = N::Textures::TexArrayID();
 
     N::Data::objectShader.use();
     N::Data::objectShader.setFloat("material.emissionStrength", 1.0f);
@@ -177,15 +183,15 @@ bool TexturesInit()
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    N::textureManager.GenerateMipmaps();
-    N::textureManager.SendSubTexResArrayToShader(N::Data::texArrayDataUBO);
+    N::Textures::GenerateMipmaps();
+    N::Textures::SendSubTexResArrayToShader(N::Data::texArrayDataUBO);
 
     return true;
 }
 
 bool Init()
 {
-    if (!GlfwOpenGLInit(N::window))
+    if (!GlfwOpenGLInit(window))
         return false;
 
     N::Data::InitData();
@@ -276,7 +282,7 @@ void N::Data::InitSkybox()
         "assets/images/skybox/front.jpg",
         "assets/images/skybox/back.jpg",
     };
-    skyboxCubemap = textureManager.LoadCubemap(skyboxFaces);
+    skyboxCubemap = Textures::LoadCubemap(skyboxFaces);
 }
 
 void N::Data::Cleanup()

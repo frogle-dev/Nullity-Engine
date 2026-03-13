@@ -1,5 +1,6 @@
 #pragma once
 
+#include "entt/entity/fwd.hpp"
 #include "framebuffer.hpp"
 #include "camera.hpp"
 #include "shader.hpp"
@@ -14,11 +15,9 @@ namespace Nullity
 	void EngineInit();
 	void EngineClose();
 
-	inline GLFWwindow* window;
-	inline Framebuffer framebuffer;
-
-	inline entt::registry registry;
-
+    const GLFWwindow* GetWindow();
+    const Framebuffer& GetFramebuffer();
+    entt::registry& GetRegistry();
 	bool Running();
 
 	void EnterFrame();

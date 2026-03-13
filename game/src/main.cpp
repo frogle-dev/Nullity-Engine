@@ -18,14 +18,14 @@ int main()
 
     N::Camera camera;
 
-    N::Entity dirt(N::registry);
+    N::Entity dirt(N::GetRegistry());
     dirt.Add<DisplayName>("dirt")
         .Add<ObjectShader>(N::Data::unlitShader)
         .Add<Transform>()
         .Add<WorldObject>()
         .Add<ObjectModel>(N::Model("assets/models/Dirt/Dirt.obj"), true);
 
-    N::Entity player(N::registry);
+    N::Entity player(N::GetRegistry());
     player.Add<DisplayName>("player")
           .Add<Transform>()
           .Add<Player>()
@@ -35,7 +35,7 @@ int main()
     {
         N::EnterFrame();
 
-        PlayerUpdate(N::registry, camera);
+        PlayerUpdate(N::GetRegistry(), camera);
         CameraControls(camera);
 
         N::Render(camera);

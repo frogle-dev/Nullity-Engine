@@ -34,7 +34,7 @@ void Mesh::Draw(Shader &shader)
 {
     shader.use();
 
-    GLuint texArrayID = textureManager.GetTexArrayID();
+    GLuint texArrayID = Nullity::Textures::TexArrayID();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
@@ -97,7 +97,7 @@ void Mesh::DrawInstanced(Shader &shader)
 
     if (textures.size() > 0)
     {
-        GLuint texArrayID = textureManager.GetTexArrayID();
+        GLuint texArrayID = Nullity::Textures::TexArrayID();
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, texArrayID);
@@ -355,7 +355,7 @@ std::vector<Texture> Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType 
         if(!skip)
         { // load texture if it hasnt already been loaded
             Texture texture;
-            texture.layer = textureManager.LoadTextureIntoTexArray(str.C_Str(), directory);
+            texture.layer = Nullity::Textures::LoadTextureIntoTexArray(str.C_Str(), directory);
             texture.type = internalType;
             texture.path = str.C_Str();
             textures.push_back(texture);
