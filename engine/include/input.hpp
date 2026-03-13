@@ -25,7 +25,7 @@ namespace Nullity
         inline glm::dvec2 mousePos = glm::dvec2(0);
         // called by glfw key callback
         // returns all keymaps that have been set from "ReloadConfigKeymaps()"
-        const std::unordered_map<std::string, std::vector<int>>& GetConfigKeymaps();
+        std::unordered_map<std::string, std::vector<int>>& GetConfigKeymaps();
         int CurrentScancodePressed();
 
 

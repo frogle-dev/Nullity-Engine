@@ -1,24 +1,19 @@
 #pragma once
 
-#include "engine_gui.hpp"
-
+#include "engine.hpp"
 
 namespace NullityEditor
 {
-	class Editor
-	{
-	public:
-		Editor(Nullity::Engine& engine);
-		~Editor();
+	void EditorInit();
+	void EditorExit();
 
-		State state;
+	inline bool demoWindow = false;
+	inline Nullity::Framebuffer framebuffer;
 
-		void EnterFrame();
-		void Update(Nullity::Engine& eng);
-		void ExitFrame();
+	void EnterFrame();
+	void Update();
+	void ExitFrame();
 
-	private:
-		void UtilityKeybinds(Nullity::Engine& eng);
-		void Cleanup();
-	};
+	void UtilityKeybinds();
+	void Cleanup();
 }

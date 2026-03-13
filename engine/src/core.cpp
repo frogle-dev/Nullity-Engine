@@ -12,12 +12,10 @@
 
 namespace N = Nullity;
 
-GLFWwindow* window;
 N::Framebuffer framebuffer;
-entt::registry registry;
+GLuint renderTexVAO;
 
-
-void N::EngineClose()
+void N::EngineExit()
 {
     Data::Cleanup();
     framebuffer.Cleanup();
@@ -25,9 +23,7 @@ void N::EngineClose()
     glfwTerminate();
 }
 
-const GLFWwindow* N::GetWindow() { return window; }
 const N::Framebuffer& N::GetFramebuffer() { return framebuffer; }
-entt::registry& N::GetRegistry() { return registry; }
 bool N::Running() { return !glfwWindowShouldClose(window); }
 
 
@@ -162,7 +158,7 @@ bool GlfwOpenGLInit(GLFWwindow*& window)
 
     N::Debug::DebugInit();
 
-    glfwSetWindowSizeCallback(window, N::WindowSizeCallback); // NOTE: try framebuffer size callback
+    glfwSetFramebufferSizeCallback(window, N::WindowSizeCallback);
     glfwSetCursorPosCallback(window, N::Input::MouseCallback);
     glfwSetKeyCallback(window, N::Input::KeyCallback);
 
@@ -191,7 +187,7 @@ bool TexturesInit()
 
 bool Init()
 {
-    if (!GlfwOpenGLInit(window))
+    if (!GlfwOpenGLInit(N::window))
         return false;
 
     N::Data::InitData();

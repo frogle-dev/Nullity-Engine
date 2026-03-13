@@ -2,17 +2,17 @@
 #include "include/core.hpp"
 #include "engine_gui.hpp"
 
+#include "imgui/imgui.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
+
 #include <entt/entt.hpp>
 #include <fstream>
 
-#include <iostream>
+namespace N = Nullity;
+namespace NE = NullityEditor;
 
-
-NullityEditor::State::State(Nullity::Engine& eng)
-    : framebuffer(eng.state.initViewRes.x, eng.state.initViewRes.y) {}
-
-
-void NullityEditor::Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
+void NE::Styling(float* _accent, float* _accent2, float* _bg1, float* _bg2)
 {
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4 accent = ImVec4(_accent[0], _accent[1], _accent[2], _accent[3]);
@@ -24,7 +24,7 @@ void NullityEditor::Styling(float* _accent, float* _accent2, float* _bg1, float*
     style.ChildRounding = 2.5f;
     style.FrameRounding = 2.5f;
     style.TabBarOverlineSize = 0.0f;
-    
+
     // windows
     style.Colors[ImGuiCol_TitleBg] = bg2;
     style.Colors[ImGuiCol_TitleBgActive] = bg2;
@@ -57,7 +57,7 @@ void NullityEditor::Styling(float* _accent, float* _accent2, float* _bg1, float*
     style.Colors[ImGuiCol_ButtonHovered] = accent2;
 }
 
-void NullityEditor::KeybindChangePopup(Nullity::Input& input)
+void NE::KeybindChangePopup()
 {
     static std::string currentActionName;
     static std::vector<int> currentKeycodes;
@@ -66,7 +66,7 @@ void NullityEditor::KeybindChangePopup(Nullity::Input& input)
     ImGui::Separator();
     ImGui::Text("Keymaps");
     ImGui::BeginChild("Keymaps");
-    auto& bindings = input.getConfigKeymaps();
+    auto& bindings = N::Input::GetConfigKeymaps();
     for (auto& [actionName, keycodes] : bindings)
     {
         if (ImGui::Button(actionName.c_str()))
@@ -87,7 +87,7 @@ void NullityEditor::KeybindChangePopup(Nullity::Input& input)
         ImGui::Text("Press a key, then click 'add' or 'change' to assign the currently pressed key to that slot");
         
         ImGui::Separator();
-        ImGui::Text("Press any key: %i", input.getCurrentScancodePressed());
+        ImGui::Text("Press any key: %i", N::Input::CurrentScancodePressed());
 
         if(ImGui::BeginListBox("Current assigned keycodes"))
         {
@@ -100,21 +100,21 @@ void NullityEditor::KeybindChangePopup(Nullity::Input& input)
                 ImGui::PushID(key + i);
                 if (ImGui::Button("Change"))
                 {
-                    input.setConfigKeymap(currentActionName, false, input.getCurrentScancodePressed(), i);
-                    input.reloadConfigKeymaps();
+                    N::Input::SetConfigKeymap(currentActionName, false, N::Input::CurrentScancodePressed(), i);
+                    N::Input::ReloadConfigKeymaps();
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Remove"))
                 {
-                    input.removeConfigKeymap(currentActionName, i);
-                    input.reloadConfigKeymaps();
+                    N::Input::RemoveConfigKeymap(currentActionName, i);
+                    N::Input::ReloadConfigKeymaps();
                 }
                 ImGui::PopID();
             }
             if(ImGui::Button("Add"))
             {
-                input.setConfigKeymap(currentActionName, true, input.getCurrentScancodePressed());
-                input.reloadConfigKeymaps();
+                N::Input::SetConfigKeymap(currentActionName, true, N::Input::CurrentScancodePressed());
+                N::Input::ReloadConfigKeymaps();
             }
             ImGui::EndListBox();
         }
@@ -129,18 +129,18 @@ void NullityEditor::KeybindChangePopup(Nullity::Input& input)
     ImGui::EndChild();
 }
 
-void NullityEditor::InfoWindow(float msPerFrame, int fps, Nullity::Input& input)
+void NE::InfoWindow(float msPerFrame, int fps)
 {
     ImGui::Begin("Info", NULL, ImGuiWindowFlags_None);
     ImGui::Text("ms per frame: %f", msPerFrame);
     ImGui::Text("fps: %i", fps);
 
-    KeybindChangePopup(input);
+    KeybindChangePopup();
 
     ImGui::End();
 }
 
-void NullityEditor::InspectorWindow(entt::registry& registry)
+void NE::InspectorWindow()
 {
     static std::string inspectorCurrent = "None";
 
@@ -148,7 +148,7 @@ void NullityEditor::InspectorWindow(entt::registry& registry)
 
     ImGui::Text("Entity: ");
     
-    auto view = registry.view<Nullity::Components::DisplayName>();
+    auto view = N::registry.view<Nullity::Components::DisplayName>();
     if (ImGui::BeginCombo("##", inspectorCurrent.c_str()))
     {
         for (auto [entity, cmp_name] : view.each())
@@ -170,7 +170,7 @@ void NullityEditor::InspectorWindow(entt::registry& registry)
     ImGui::End();
 }
 
-void NullityEditor::DebugOutputWindow()
+void NE::DebugOutputWindow()
 {
     ImGui::Begin("Debug Output");
 

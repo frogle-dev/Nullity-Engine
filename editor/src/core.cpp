@@ -1,14 +1,17 @@
 #include "core.hpp"
 #include "engine_gui.hpp"
-#include "engine.hpp"
+
+#include "imgui/imgui.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_opengl3.h"
 
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+namespace N = Nullity;
+namespace NE = NullityEditor;
 
-
-NullityEditor::Editor::Editor(Nullity::Engine& engine)
-	: state(engine)
+void NE::EditorInit()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -17,33 +20,30 @@ NullityEditor::Editor::Editor(Nullity::Engine& engine)
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; 
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-    ImGui_ImplGlfw_InitForOpenGL(engine.window, true);
+    ImGui_ImplGlfw_InitForOpenGL(N::window, true);
     ImGui_ImplOpenGL3_Init("#version 460");
+
+    framebuffer = N::Framebuffer(N::initViewRes.x, N::initViewRes.y);
 }
 
-NullityEditor::Editor::~Editor()
+void NE::EditorExit()
 {
-	Cleanup();
-}
-
-void NullityEditor::Editor::Cleanup()
-{
-    state.framebuffer.Cleanup();
+    framebuffer.Cleanup();
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 }
 
-void NullityEditor::Editor::EnterFrame()
+void NE::EnterFrame()
 {
-    state.framebuffer.Bind();
+    framebuffer.Bind();
     glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 }
 
-void NullityEditor::Editor::Update(Nullity::Engine& eng)
+void NE::Update()
 {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -56,7 +56,7 @@ void NullityEditor::Editor::Update(Nullity::Engine& eng)
         {
             if (ImGui::MenuItem("Imgui Demo Window"))
             {
-                state.demoWindow = !state.demoWindow;
+                demoWindow = !demoWindow;
             }
 
             ImGui::EndMenu();
@@ -64,14 +64,14 @@ void NullityEditor::Editor::Update(Nullity::Engine& eng)
         ImGui::EndMainMenuBar();
     }
 
-    if (state.demoWindow)
+    if (demoWindow)
     {
         ImGui::ShowDemoWindow();
     }
 
-    InfoWindow(eng.time.msPerFrame, eng.time.fps, eng.input);
+    InfoWindow(N::Time::msPerFrame, N::Time::fps);
     DebugOutputWindow();
-    InspectorWindow(eng.registry);
+    InspectorWindow();
 
     ImGui::Begin("Game");
     {
@@ -79,11 +79,11 @@ void NullityEditor::Editor::Update(Nullity::Engine& eng)
 
         ImVec2 reg = ImGui::GetContentRegionAvail();
 
-        Nullity::WindowSizeCallback(eng.window, reg.x, reg.y);
-        state.framebuffer.Refresh(reg.x, reg.y);
+        Nullity::WindowSizeCallback(N::window, reg.x, reg.y);
+        framebuffer.Refresh(reg.x, reg.y);
 
         ImGui::Image(
-            (ImTextureID)state.framebuffer.GetColorTexture(), 
+            (ImTextureID)framebuffer.GetColorTexture(), 
             reg, 
             ImVec2(0, 1), 
             ImVec2(1, 0)
@@ -94,12 +94,12 @@ void NullityEditor::Editor::Update(Nullity::Engine& eng)
 
     ImGui::Render();
 
-    UtilityKeybinds(eng);
+    UtilityKeybinds();
 }
 
-void NullityEditor::Editor::ExitFrame()
+void NE::ExitFrame()
 {
-    state.framebuffer.Unbind();
+    framebuffer.Unbind();
     glClearColor(0.2f, 0.3f, 0.6f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -114,10 +114,10 @@ void NullityEditor::Editor::ExitFrame()
     }
 }
 
-void NullityEditor::Editor::UtilityKeybinds(Nullity::Engine& eng)
+void NE::UtilityKeybinds()
 {
-    if (eng.input.isActionJustPressed("wireframe"))
+    if (N::Input::IsActionJustPressed("wireframe"))
     {
-        eng.state.wireframe = !eng.state.wireframe;
+        N::wireframe = !N::wireframe;
     }
 }

@@ -12,13 +12,20 @@
 
 namespace Nullity
 {
-	void EngineInit();
-	void EngineClose();
-
-    const GLFWwindow* GetWindow();
+    inline entt::registry registry;
+    inline GLFWwindow* window;
     const Framebuffer& GetFramebuffer();
-    entt::registry& GetRegistry();
 	bool Running();
+
+	const glm::ivec2 initViewRes = glm::ivec2(1280, 720);
+	inline glm::ivec2 viewRes = initViewRes;
+	inline glm::ivec2 viewOffset = glm::ivec2(0, 0);
+
+	inline bool wireframe = false;
+	inline bool focused = true;
+
+	void EngineInit();
+	void EngineExit();
 
 	void EnterFrame();
 	void Render(Camera& camera);
@@ -28,17 +35,6 @@ namespace Nullity
 	void UtilityKeybinds();
 
 	void WindowSizeCallback(GLFWwindow* window, int width, int height);
-
-	inline GLuint renderTexVAO;
-
-
-	const glm::ivec2 initViewRes = glm::ivec2(1280, 720);
-	inline glm::ivec2 viewRes = initViewRes;
-	inline glm::ivec2 viewOffset = glm::ivec2(0, 0);
-
-	inline bool wireframe = false;
-	inline bool focused = true;
-
 
 	namespace Time
 	{

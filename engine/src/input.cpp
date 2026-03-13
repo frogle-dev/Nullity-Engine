@@ -27,7 +27,7 @@ void N::Input::InputInit()
     data = nlohmann::json::parse(keymapJson);
 }
 
-const std::unordered_map<std::string, std::vector<int>>& N::Input::GetConfigKeymaps() { return bindings; }
+std::unordered_map<std::string, std::vector<int>>& N::Input::GetConfigKeymaps() { return bindings; }
 int N::Input::CurrentScancodePressed() { return currentScancodePress; }
 
 void N::Input::KeysRefresh() 

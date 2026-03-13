@@ -2,6 +2,7 @@
 
 #ifdef USE_EDITOR
 #include "editor.hpp"
+namespace NE = NullityEditor;
 #endif
 
 #include "player.hpp"
@@ -13,19 +14,19 @@ int main()
 {
     N::EngineInit();
 #ifdef USE_EDITOR
-    NullityEditor::Editor Editor(Engine);
+    NE::EditorInit();
 #endif
 
     N::Camera camera;
 
-    N::Entity dirt(N::GetRegistry());
+    N::Entity dirt(N::registry);
     dirt.Add<DisplayName>("dirt")
         .Add<ObjectShader>(N::Data::unlitShader)
         .Add<Transform>()
         .Add<WorldObject>()
         .Add<ObjectModel>(N::Model("assets/models/Dirt/Dirt.obj"), true);
 
-    N::Entity player(N::GetRegistry());
+    N::Entity player(N::registry);
     player.Add<DisplayName>("player")
           .Add<Transform>()
           .Add<Player>()
@@ -35,23 +36,26 @@ int main()
     {
         N::EnterFrame();
 
-        PlayerUpdate(N::GetRegistry(), camera);
+        PlayerUpdate(N::registry, camera);
         CameraControls(camera);
 
         N::Render(camera);
 #ifdef USE_EDITOR
-        Editor.EnterFrame();
+        NE::EnterFrame();
 #endif
 
         N::RenderFramebuffer();
 #ifdef USE_EDITOR
-        Editor.Update(Engine);
-        Editor.ExitFrame();
+        NE::Update();
+        NE::ExitFrame();
 #endif
 
         N::ExitFrame();
     }
 
-    N::EngineClose();
+#ifdef USE_EDITOR
+    NE::EditorExit();
+#endif
+    N::EngineExit();
     return 0;
 }
