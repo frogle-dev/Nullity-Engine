@@ -1,6 +1,7 @@
 #pragma once
 
-#include "state.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 namespace Nullity
 {
@@ -12,18 +13,18 @@ namespace Nullity
     class Camera
     {
     public:
-        glm::vec3 position;
-        glm::vec3 front;
-        glm::vec3 straightFront; // follows yaw movement but not pitch, used for purely horizontal movement
-        glm::vec3 up;
-        glm::vec3 right;
-        glm::vec3 worldUp;
+        glm::vec3 position = glm::vec3(0);
+        glm::vec3 front = glm::vec3(0);
+        glm::vec3 straightFront = glm::vec3(0); // follows yaw movement but not pitch, used for purely horizontal movement
+        glm::vec3 up = glm::vec3(0);
+        glm::vec3 right = glm::vec3(0);
+        glm::vec3 worldUp = glm::vec3(0);
 
-        float yaw;
-        float pitch;
+        float yaw = 0;
+        float pitch = 0;
 
-        float sensitivity;
-        float fov;
+        float sensitivity = 0;
+        float fov = 0;
 
         Camera(glm::vec3 _position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 _up = glm::vec3(0.0f, 1.0f, 0.0f), float _yaw = def_yaw, float _pitch = def_pitch);
         glm::mat4 GetViewMatrix();

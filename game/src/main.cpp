@@ -6,51 +6,52 @@
 
 #include "player.hpp"
 
-using namespace Nullity::Components;
-
+namespace N = Nullity;
+using namespace N::Components;
 
 int main()
 {
-    Nullity::Engine Engine;
+    N::EngineInit();
 #ifdef USE_EDITOR
     NullityEditor::Editor Editor(Engine);
 #endif
 
-    Nullity::Camera camera;
+    N::Camera camera;
 
-    Nullity::Entity dirt(Engine.registry);
+    N::Entity dirt(N::registry);
     dirt.Add<DisplayName>("dirt")
-        .Add<ObjectShader>(Engine.data.unlitShader)
+        .Add<ObjectShader>(N::Data::unlitShader)
         .Add<Transform>()
         .Add<WorldObject>()
-        .Add<ObjectModel>(Nullity::Model("assets/models/Dirt/Dirt.obj"), true);
+        .Add<ObjectModel>(N::Model("assets/models/Dirt/Dirt.obj"), true);
 
-    Nullity::Entity player(Engine.registry);
+    N::Entity player(N::registry);
     player.Add<DisplayName>("player")
-        .Add<Transform>()
-        .Add<Player>()
-        .Add<Velocity>();
+          .Add<Transform>()
+          .Add<Player>()
+          .Add<Velocity>();
 
-    while(Engine.Running())
+    while(N::Running())
     {
-        Engine.EnterFrame();
+        N::EnterFrame();
 
-        PlayerUpdate(Engine.registry, camera, Engine.time.deltaTime, Engine.input);
-        CameraControls(Engine.input, Engine.state, camera);
+        PlayerUpdate(N::registry, camera);
+        CameraControls(camera);
 
-        Engine.Render(camera);
+        N::Render(camera);
 #ifdef USE_EDITOR
         Editor.EnterFrame();
 #endif
 
-        Engine.RenderFramebuffer();
+        N::RenderFramebuffer();
 #ifdef USE_EDITOR
         Editor.Update(Engine);
         Editor.ExitFrame();
 #endif
 
-        Engine.ExitFrame();
+        N::ExitFrame();
     }
 
+    N::EngineClose();
     return 0;
 }

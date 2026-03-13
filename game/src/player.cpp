@@ -1,10 +1,10 @@
-#include "engine.hpp"
 #include "player.hpp"
 
+namespace N = Nullity;
 using namespace Nullity::Components;
 
 
-void PlayerUpdate(entt::registry& registry, Nullity::Camera& camera, float deltaTime, Nullity::Input& input)
+void PlayerUpdate(entt::registry& registry, Nullity::Camera& camera)
 {
     auto view = registry.view<Transform, Velocity, Player>();
 
@@ -13,19 +13,19 @@ void PlayerUpdate(entt::registry& registry, Nullity::Camera& camera, float delta
         cmp_player.moveDir = glm::vec3(0.0f);
         cmp_velocity.velocity = glm::vec3(0.0f, cmp_velocity.velocity.y, 0.0f);
 
-        if (input.isActionPressed("forward"))
+        if (N::Input::IsActionPressed("forward"))
         {
             cmp_player.moveDir -= camera.straightFront;
         }
-        if (input.isActionPressed("backward"))
+        if (N::Input::IsActionPressed("backward"))
         {
             cmp_player.moveDir += camera.straightFront;
         }
-        if (input.isActionPressed("left"))
+        if (N::Input::IsActionPressed("left"))
         {
             cmp_player.moveDir -= camera.right;
         }
-        if (input.isActionPressed("right"))
+        if (N::Input::IsActionPressed("right"))
         {
             cmp_player.moveDir += camera.right;
         }
@@ -37,14 +37,14 @@ void PlayerUpdate(entt::registry& registry, Nullity::Camera& camera, float delta
             cmp_velocity.velocity.z = cmp_player.moveDir.z * cmp_player.speed;
         }
 
-        if (input.isActionPressed("jump") && cmp_player.grounded)
+        if (N::Input::IsActionPressed("jump") && cmp_player.grounded)
         {
             cmp_player.grounded = false;
             cmp_velocity.velocity.y = cmp_player.jumpForce;
         }
 
-        cmp_velocity.velocity.y += cmp_player.gravity * deltaTime;
-        cmp_transform.position += cmp_velocity.velocity * deltaTime;
+        cmp_velocity.velocity.y += cmp_player.gravity * N::Time::deltaTime;
+        cmp_transform.position += cmp_velocity.velocity * N::Time::deltaTime;
 
         if (cmp_transform.position.y <= 1.0f)
         {
@@ -61,20 +61,20 @@ void PlayerUpdate(entt::registry& registry, Nullity::Camera& camera, float delta
     }
 }
 
-void CameraControls(Nullity::Input& input, Nullity::State& engineState, Nullity::Camera& camera)
+void CameraControls(Nullity::Camera& camera)
 {
-    if (input.firstMouse)
+    if (N::Input::firstMouse)
     {
-        input.lastMousePos = input.mousePos;
-        input.firstMouse = false;
+        N::Input::lastMousePos = N::Input::mousePos;
+        N::Input::firstMouse = false;
     } // this is so when mouse initially moves, it doesnt make a large jkittery motion to that position
 
-    if (engineState.focus)
+    if (N::focused)
     {
-        float xOffset = input.mousePos.x - input.lastMousePos.x;
-        float yOffset = input.lastMousePos.y - input.mousePos.y;
-        input.lastMousePos = input.mousePos;
-    
+        float xOffset = N::Input::mousePos.x - N::Input::lastMousePos.x;
+        float yOffset = N::Input::lastMousePos.y - N::Input::mousePos.y;
+        N::Input::lastMousePos = N::Input::mousePos;
+
         camera.ProcessMouseMovement(xOffset, yOffset);
     }
 }

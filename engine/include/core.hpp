@@ -1,12 +1,8 @@
 #pragma once
 
-#include "state.hpp"
 #include "framebuffer.hpp"
 #include "camera.hpp"
-#include "input.hpp"
-#include "debugging.hpp"
-#include "textures.hpp"
-#include "time.hpp"
+#include "shader.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -15,34 +11,67 @@
 
 namespace Nullity
 {
-	class Engine
+	void EngineInit();
+	void EngineClose();
+
+	inline GLFWwindow* window;
+	inline Framebuffer framebuffer;
+
+	inline entt::registry registry;
+
+	bool Running();
+
+	void EnterFrame();
+	void Render(Camera& camera);
+	void ExitFrame();
+	void RenderFramebuffer();
+
+	void UtilityKeybinds();
+
+	void WindowSizeCallback(GLFWwindow* window, int width, int height);
+
+	inline GLuint renderTexVAO;
+
+
+	const glm::ivec2 initViewRes = glm::ivec2(1280, 720);
+	inline glm::ivec2 viewRes = initViewRes;
+	inline glm::ivec2 viewOffset = glm::ivec2(0, 0);
+
+	inline bool wireframe = false;
+	inline bool focused = true;
+
+
+	namespace Time
 	{
-	public:
-		Engine();
-		~Engine();
+        inline float deltaTime = 0.0f;
+        inline int fps;
+        inline float msPerFrame;
+        inline float lastFrame = 0.0f;
+	}
 
-		GLFWwindow* window;
-		Framebuffer framebuffer;
+    namespace Data
+    {
+        void InitData();
 
-        entt::registry registry;
+        inline Shader objectShader;
+        inline Shader lightSourceShader;
+        inline Shader skyboxShader;
+        inline Shader instancedShader;
+        inline Shader grassShader;
+        inline Shader unlitShader;
+        inline Shader renderTexShader;
 
-		Data data;
-		State state;
-		Time time;
-		Input input;
+        // uniform buffers
+        inline GLuint matricesUBO;
+        inline GLuint texArrayDataUBO;
+        inline GLuint skyboxVAO, skyboxVBO;
+        inline GLuint skyboxCubemap;
 
-		bool Running();
+        void InitShaders();
+        void InitUBOs();
+        void InitSkybox();
 
-		void EnterFrame();
-		void Render(Camera& camera);
-		void ExitFrame();
-		void RenderFramebuffer();
-
-	private:
-		bool Init();
-		void UtilityKeybinds();
-
-		GLuint renderTexVAO;
-	};
+        void Cleanup();
+    }
 }
 

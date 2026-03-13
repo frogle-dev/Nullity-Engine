@@ -1,62 +1,51 @@
 #pragma once
 
-#include "debugging.hpp"
 #include <GLFW/glfw3.h>
-
-#include "json.hpp"
 #include "glm/glm.hpp"
 
 #include <unordered_map>
 #include <vector>
 #include <string>
-#include <fstream>
-
 
 namespace Nullity
 {
-    struct ActionState 
+    namespace Input
     {
-        bool pressed = false;
-        bool justPressed = false;
-        bool released = false;
-    };
+        struct ActionState 
+        {
+            bool pressed = false;
+            bool justPressed = false;
+            bool released = false;
+        };
 
-    class Input
-    {
-    public:
-        Input();
+        void InputInit();
 
-        glm::vec2 lastMousePos;
-        bool firstMouse = true;
-        glm::dvec2 mousePos;
+        inline glm::vec2 lastMousePos = glm::vec2(0);
+        inline bool firstMouse = true;
+        inline glm::dvec2 mousePos = glm::dvec2(0);
+        // called by glfw key callback
+        // returns all keymaps that have been set from "ReloadConfigKeymaps()"
+        const std::unordered_map<std::string, std::vector<int>>& GetConfigKeymaps();
+        int CurrentScancodePressed();
 
 
-        void keysRefresh(); 
-        bool isActionPressed(const std::string& actionName); 
-        bool isActionJustPressed(const std::string& actionName);
-        bool isActionReleased(const std::string& actionName);
-        // called by glfw key callback thing
-        void processKeyEvent(int scancode, int action);
-        // returns all keymaps that have been set from "reloadConfigKeymaps()"
-        std::unordered_map<std::string, std::vector<int>>& getConfigKeymaps();
-        int getCurrentScancodePressed();
+        void KeysRefresh(); 
+        bool IsActionPressed(const std::string& actionName); 
+        bool IsActionJustPressed(const std::string& actionName);
+        bool IsActionReleased(const std::string& actionName);
+        void ProcessKeyEvent(int scancode, int action); 
         // reads and loads all keymaps from keymaps.json (run whenever keymaps.json is changed)
-        void reloadConfigKeymaps();
+        void ReloadConfigKeymaps();
         // sets an already existing mapping to another key, or creates a new one in keymaps.json. 
         //bool 'addkeycode' = true, adds the keycode to the json file, as false it changes a keycode at 'index'
-        void setConfigKeymap(const std::string& actionName, bool addKeycode, int keycode, int index = 0);
+        void SetConfigKeymap(const std::string& actionName, bool addKeycode, int keycode, int index = 0);
         // removes an already existing mapping in keymaps.json. 
-        void removeConfigKeymap(const std::string& actionName, int index);
+        void RemoveConfigKeymap(const std::string& actionName, int index);
 
-    private:
-        std::unordered_map<std::string, std::vector<int>> bindings;
-        std::unordered_map<std::string, ActionState> actions;
-        int currentScancodePress;
 
-        std::ifstream keymapJson;
-        nlohmann::json data;
+        // Processes mouse inputs
+        void MouseCallback(GLFWwindow* window, double xpos, double ypos);
+        // Processes key inputs
+        void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     };
-
-    void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-    void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 }

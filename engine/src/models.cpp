@@ -1,8 +1,5 @@
 #include "glad.h"
 #include <GLFW/glfw3.h>
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -236,7 +233,7 @@ void Model::LoadModel(std::string path)
         std::ostringstream oss;
         oss << "(Assimp): Error: " << importer.GetErrorString() << std::endl;
 
-        debug.Log(oss);
+        Debug::Log(oss);
         return;
     }
     directory = path.substr(0, path.find_last_of('/')); //get the directory the model is in

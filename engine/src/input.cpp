@@ -6,21 +6,31 @@
 
 #include "input.hpp"
 #include "debugging.hpp"
-#include "core.hpp"
 
 #include <sstream>
 #include <unordered_map>
 #include <vector>
 
+namespace N = Nullity;
 
-Nullity::Input::Input()
-    : keymapJson("config/keymaps.json")
+
+std::unordered_map<std::string, std::vector<int>> bindings;
+std::unordered_map<std::string, N::Input::ActionState> actions;
+int currentScancodePress;
+
+std::ifstream keymapJson;
+nlohmann::json data;
+
+void N::Input::InputInit()
 {
+    keymapJson.open("config/keymaps.json");
     data = nlohmann::json::parse(keymapJson);
 }
 
+const std::unordered_map<std::string, std::vector<int>>& N::Input::GetConfigKeymaps() { return bindings; }
+int N::Input::CurrentScancodePressed() { return currentScancodePress; }
 
-void Nullity::Input::keysRefresh() 
+void N::Input::KeysRefresh() 
 {
     for (auto& [name, state] : actions) 
     {
@@ -30,23 +40,23 @@ void Nullity::Input::keysRefresh()
 }
 
 
-bool Nullity::Input::isActionPressed(const std::string& actionName) 
+bool N::Input::IsActionPressed(const std::string& actionName) 
 {
     return actions[actionName].pressed;
 }
 
-bool Nullity::Input::isActionJustPressed(const std::string& actionName) 
+bool N::Input::IsActionJustPressed(const std::string& actionName) 
 {
     return actions[actionName].justPressed;
 }
 
-bool Nullity::Input::isActionReleased(const std::string& actionName) 
+bool N::Input::IsActionReleased(const std::string& actionName) 
 {
     return actions[actionName].released;
 }
 
 // called by glfw key callback thing
-void Nullity::Input::processKeyEvent(int scancode, int action) 
+void N::Input::ProcessKeyEvent(int scancode, int action) 
 {
     currentScancodePress = scancode;
 
@@ -75,17 +85,7 @@ void Nullity::Input::processKeyEvent(int scancode, int action)
     }
 }
 
-std::unordered_map<std::string, std::vector<int>>& Nullity::Input::getConfigKeymaps()
-{
-    return bindings;
-}
-
-int Nullity::Input::getCurrentScancodePressed()
-{
-    return currentScancodePress;
-}
-
-void Nullity::Input::reloadConfigKeymaps()
+void N::Input::ReloadConfigKeymaps()
 {
     bindings.clear();
     for (auto& [actionName, keycodes] : data.items())
@@ -99,7 +99,7 @@ void Nullity::Input::reloadConfigKeymaps()
     }
 }
 
-void Nullity::Input::setConfigKeymap(const std::string& actionName, bool addKeycode, int keycode, int index)
+void N::Input::SetConfigKeymap(const std::string& actionName, bool addKeycode, int keycode, int index)
 {
     if (addKeycode)
     {
@@ -114,7 +114,7 @@ void Nullity::Input::setConfigKeymap(const std::string& actionName, bool addKeyc
     out << data.dump(4);
 }
 
-void Nullity::Input::removeConfigKeymap(const std::string& actionName, int index)
+void N::Input::RemoveConfigKeymap(const std::string& actionName, int index)
 {
     // check if the action name exists
     if (data.contains(actionName) && index >= 0 && index < data[actionName].size()) 
@@ -126,7 +126,7 @@ void Nullity::Input::removeConfigKeymap(const std::string& actionName, int index
     {
         std::ostringstream oss;
         oss << "Invalid action or index.\n";
-        debug.Log(oss);
+        Debug::Log(oss);
     }
 
     std::ofstream out("../game_config/keymaps.json");
@@ -134,16 +134,12 @@ void Nullity::Input::removeConfigKeymap(const std::string& actionName, int index
 }
 
 
-void Nullity::MouseCallback(GLFWwindow* window, double xpos, double ypos)
+void N::Input::MouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
-    Engine* eng = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-
-    eng->input.mousePos = glm::dvec2(xpos, ypos);
+    mousePos = glm::dvec2(xpos, ypos);
 }
 
-void Nullity::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void N::Input::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    Engine* eng = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-
-    eng->input.processKeyEvent(scancode, action);
+    ProcessKeyEvent(scancode, action);
 }

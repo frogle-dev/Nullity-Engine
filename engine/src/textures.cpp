@@ -69,7 +69,7 @@ GLuint Nullity::Textures::LoadStandaloneTexture(std::string path)
         std::ostringstream oss;
         oss << "(Texture Manager): Texture Error: Failed to load texture" << std::endl;
 
-        debug.Log(oss);
+        Debug::Log(oss);
 
         return -1;
     }
@@ -98,7 +98,7 @@ int Nullity::Textures::LoadTextureIntoTexArray(std::string path, std::string dir
         std::ostringstream oss;
         oss << "(Texture Manager): Texture Array Error: cant have more textures than max specified for texture array" << std::endl;
 
-        debug.Log(oss);
+        Debug::Log(oss);
         return -1;
     }
 
@@ -111,7 +111,7 @@ int Nullity::Textures::LoadTextureIntoTexArray(std::string path, std::string dir
         std::ostringstream oss;
         oss << "(Texture Manager): Texture Array Error: Failed to load texture" << std::endl;
 
-        debug.Log(oss);
+        Debug::Log(oss);
         return -1;
     }
     
@@ -120,7 +120,7 @@ int Nullity::Textures::LoadTextureIntoTexArray(std::string path, std::string dir
         std::ostringstream oss;
         oss << "(Texture Manager): Texture Array Error: width and height are larger than texture array width and height" << std::endl;
 
-        debug.Log(oss);
+        Debug::Log(oss);
         return -1;
     }
 
@@ -130,7 +130,7 @@ int Nullity::Textures::LoadTextureIntoTexArray(std::string path, std::string dir
         oss << "(Texture Manager): Texture Array Warning: width and height do not match texture array width and height, "
         "texture will still be inserted but will not take up the full resolution." << std::endl;
 
-        debug.Log(oss);
+        Debug::Log(oss);
     }
 
 
@@ -176,7 +176,7 @@ GLuint Nullity::Textures::LoadCubemap(std::vector<std::string> faces)
             std::ostringstream oss;
             oss << "(Texture Manager): Texture Error: Failed to load cubemap" << std::endl;
 
-            debug.Log(oss);
+            Debug::Log(oss);
             stbi_image_free(data);
 
             return -1;

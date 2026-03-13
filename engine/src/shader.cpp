@@ -1,10 +1,6 @@
 
 #include "glad.h"
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-
 #include "shader.hpp"
 #include "debugging.hpp"
 
@@ -51,7 +47,7 @@ Nullity::Shader::Shader(const char* vertexPath, const char* fragmentPath)
         std::ostringstream oss;
         oss << "(Shader): Error: File not succesfully read" << std::endl;
 
-        debug.Log(oss);
+        Debug::Log(oss);
     }
     const char* vertexShaderCode = vertexCode.c_str();
     const char* fragmentShaderCode = fragmentCode.c_str();
@@ -132,7 +128,7 @@ GLint Nullity::Shader::getUniformLoc(const std::string& name) const
     if (loc == -1)
     {
         oss << "(Shader): Error: uniform not found " << name << std::endl;
-        debug.Log(oss);
+        Debug::Log(oss);
     } 
 
     return loc;
@@ -152,7 +148,7 @@ void Nullity::Shader::checkCompileErrors(unsigned int shader, std::string type)
 
             oss << "Error: shader compilation error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 
-            debug.Log(oss);
+            Debug::Log(oss);
         }
     }
     else
@@ -164,7 +160,7 @@ void Nullity::Shader::checkCompileErrors(unsigned int shader, std::string type)
 
             oss << "Error: program linking error of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
 
-            debug.Log(oss);
+            Debug::Log(oss);
         }
     }
 }

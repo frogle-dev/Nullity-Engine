@@ -2,17 +2,13 @@
 
 #include "glad.h"
 #include <GLFW/glfw3.h>
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
 
 #include <algorithm>
 
-#include "state.hpp"
-
-using namespace Nullity;
+namespace N = Nullity;
 
 
-Camera::Camera(glm::vec3 _position, glm::vec3 _up, float _yaw, float _pitch)
+N::Camera::Camera(glm::vec3 _position, glm::vec3 _up, float _yaw, float _pitch)
 {
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     sensitivity = def_sensitivity;
@@ -25,7 +21,7 @@ Camera::Camera(glm::vec3 _position, glm::vec3 _up, float _yaw, float _pitch)
     UpdateCameraVectors();
 }
 
-glm::mat4 Camera::GetViewMatrix()
+glm::mat4 N::Camera::GetViewMatrix()
 {
     return glm::lookAt(
         position,
@@ -34,7 +30,7 @@ glm::mat4 Camera::GetViewMatrix()
     );
 }
 
-void Camera::ProcessMouseMovement(float xOffset, float yOffset)
+void N::Camera::ProcessMouseMovement(float xOffset, float yOffset)
 {
     xOffset *= sensitivity;
     yOffset *= sensitivity;
@@ -47,7 +43,7 @@ void Camera::ProcessMouseMovement(float xOffset, float yOffset)
     UpdateCameraVectors();
 }
 
-void Camera::UpdateCameraVectors()
+void N::Camera::UpdateCameraVectors()
 {
     glm::vec3 direction;
     direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));

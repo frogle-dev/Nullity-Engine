@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.10.0)
-project(opengl_game VERSION 0.1.0 LANGUAGES C CXX)
+project(opengl_game VERSION 0.1.0)
 cmake_policy(SET CMP0072 NEW) #make sure "new" opengl is used
 
+
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 

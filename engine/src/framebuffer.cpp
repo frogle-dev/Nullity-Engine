@@ -19,7 +19,7 @@ Nullity::Framebuffer::Framebuffer(float width, float height)
     {
         std::ostringstream oss;
         oss << "(Framebuffer): Error: Framebuffer is not complete" << std::endl;
-        debug.Log(oss);
+        Debug::Log(oss);
         return;
     }
 

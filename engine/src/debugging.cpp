@@ -9,28 +9,24 @@
 #include <sstream>
 #include <fstream>
 
+namespace N = Nullity;
 
-namespace Nullity
-{
-    Nullity::Debug debug;
-}
 
-Nullity::Debug::Debug()
-    : fout("DebugLog.txt") {}
+std::ofstream fout;
 
-void Nullity::Debug::Log(const std::ostringstream& oss)
+void N::Debug::Log(const std::ostringstream& oss)
 {
     fout << "---------------" << std::endl;
     fout << oss.str() << std::endl;
 }
 
-void Nullity::Debug::Log(const std::string& string)
+void N::Debug::Log(const std::string& string)
 {
     fout << "---------------" << std::endl;
     fout << string << std::endl;
 }
 
-void APIENTRY Nullity::Debug::glDebugOutput(GLenum source, 
+void APIENTRY glDebugOutput(GLenum source, 
                             GLenum type, 
                             unsigned int id, 
                             GLenum severity, 
@@ -85,6 +81,20 @@ void APIENTRY Nullity::Debug::glDebugOutput(GLenum source,
     oss << typeText << std::endl;
     oss << severityText << std::endl;
 
-    Debug* debug = (Debug*)userParam;
-    debug->Log(oss);
+    N::Debug::Log(oss);
+}
+
+void N::Debug::DebugInit()
+{
+    int flags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+    {
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(glDebugOutput, NULL);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    }
+
+    fout.open("DebugLog.txt");
 }
