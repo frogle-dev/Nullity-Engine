@@ -17,7 +17,10 @@ int main()
     NE::EditorInit();
 #endif
 
-    N::Camera camera;
+    N::Entity camera(N::registry);
+    camera.Add<N::Camera>()
+          .Add<Transform>()
+          .Add<Camera_Controller>();
 
     N::Entity dirt(N::registry);
     dirt.Add<DisplayName>("dirt")
@@ -32,14 +35,18 @@ int main()
           .Add<Player>()
           .Add<Velocity>();
 
+
+    N::sys_Camera c;
+    N::sys_Render r;
     while(N::Running())
     {
         N::EnterFrame();
 
-        PlayerUpdate(N::registry, camera);
-        CameraControls(camera);
+        PlayerUpdate();
+        CameraControls();
 
-        N::Render(camera);
+        c.Update();
+        r.Update();
 #ifdef USE_EDITOR
         NE::EnterFrame();
 #endif

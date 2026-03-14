@@ -7,12 +7,10 @@
 #include "input.hpp"
 
 #include <GLFW/glfw3.h>
-
 #include <iostream>
 
 namespace N = Nullity;
 
-N::Framebuffer framebuffer;
 GLuint renderTexVAO;
 
 void N::EngineExit()
@@ -23,7 +21,6 @@ void N::EngineExit()
     glfwTerminate();
 }
 
-const N::Framebuffer& N::GetFramebuffer() { return framebuffer; }
 bool N::Running() { return !glfwWindowShouldClose(window); }
 
 
@@ -62,44 +59,6 @@ void N::EnterFrame()
     glEnable(GL_DEPTH_TEST);
 
     UtilityKeybinds();
-}
-
-void N::Render(Camera& camera)
-{
-    Data::objectShader.use();
-    Data::objectShader.setVec3("viewPos", camera.position);
-
-    Textures::SendSubTexResArrayToShader(Data::texArrayDataUBO); // send the tex res array to the frag shader
-
-    glm::mat4 view = camera.GetViewMatrix();
-    glm::mat4 projection = glm::perspective(glm::radians(80.0f), (float)viewRes.x / viewRes.y, 0.1f, 1000.0f);
-
-    SetUniformBufferData(Data::matricesUBO, 0, 64, glm::value_ptr(view));
-    SetUniformBufferData(Data::matricesUBO, 64, 64, glm::value_ptr(projection));
-    
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, Data::skyboxCubemap); // binding skybox for reflections
-
-    WorldObjectSystem(registry);
-    DrawSystem(registry);
-
-    // skybox
-    glDepthFunc(GL_LEQUAL);
-    Data::skyboxShader.use();
-    view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-
-    SetUniformBufferData(Data::matricesUBO, 0, 64, glm::value_ptr(view));
-
-    glBindVertexArray(Data::skyboxVAO);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, Data::skyboxCubemap);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glDepthFunc(GL_LESS);
-
-    glBindVertexArray(0);
-
-
-    framebuffer.Unbind();
 }
 
 void N::RenderFramebuffer()

@@ -13,8 +13,8 @@
 namespace Nullity
 {
     inline entt::registry registry;
+    inline Framebuffer framebuffer;
     inline GLFWwindow* window;
-    const Framebuffer& GetFramebuffer();
 	bool Running();
 
 	const glm::ivec2 initViewRes = glm::ivec2(1280, 720);
@@ -28,7 +28,6 @@ namespace Nullity
 	void EngineExit();
 
 	void EnterFrame();
-	void Render(Camera& camera);
 	void ExitFrame();
 	void RenderFramebuffer();
 

@@ -12,5 +12,10 @@ struct Player
     glm::vec3 moveDir;
 };
 
-void PlayerUpdate(entt::registry& registry, Nullity::Camera& camera);
-void CameraControls(Nullity::Camera& camera);
+struct Camera_Controller
+{
+    float sensitivity = 0.1f;
+};
+
+void PlayerUpdate();
+void CameraControls();

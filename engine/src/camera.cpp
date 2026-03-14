@@ -1,58 +1,57 @@
 #include "camera.hpp"
+#include "engine.hpp"
 
 #include "glad.h"
 #include <GLFW/glfw3.h>
 
-#include <algorithm>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 namespace N = Nullity;
 
-
-N::Camera::Camera(glm::vec3 _position, glm::vec3 _up, float _yaw, float _pitch)
+void N::sys_Camera::Update()
 {
-    front = glm::vec3(0.0f, 0.0f, -1.0f);
-    sensitivity = def_sensitivity;
-    fov = def_fov;
+    auto view = N::registry.view<Camera, Components::Transform>();
 
-    position = _position;
-    worldUp = _up;
-    yaw = _yaw;
-    pitch = _pitch;
-    UpdateCameraVectors();
+    for (auto [entity, cam, t] : view.each())
+    {
+        glm::vec3 direction;
+        direction.x = cos(glm::radians(t.rotation.y)) * cos(glm::radians(t.rotation.x));
+        direction.y = sin(glm::radians(t.rotation.x));
+        direction.z = sin(glm::radians(t.rotation.y)) * cos(glm::radians(t.rotation.x));
+        cam.front = glm::normalize(direction);
+
+        cam.right = glm::normalize(glm::cross(cam.front, cam.worldUp));
+        cam.up = glm::normalize(glm::cross(cam.right, cam.front));
+
+        cam.straightFront = glm::normalize(glm::cross(cam.right, cam.worldUp));
+    }
 }
 
-glm::mat4 N::Camera::GetViewMatrix()
+glm::mat4 N::GetCameraViewMatrix(const Camera& cam, const Components::Transform& t)
 {
     return glm::lookAt(
-        position,
-        position + front,
-        up
+        t.position,
+        t.position + cam.front,
+        cam.up
     );
 }
 
-void N::Camera::ProcessMouseMovement(float xOffset, float yOffset)
-{
-    xOffset *= sensitivity;
-    yOffset *= sensitivity;
+// N::Camera::Camera(glm::vec3 _position, glm::vec3 _up, float _yaw, float _pitch)
+// {
+//     front = glm::vec3(0.0f, 0.0f, -1.0f);
+//     sensitivity = def_sensitivity;
+//     fov = def_fov;
+//
+//     position = _position;
+//     worldUp = _up;
+//     yaw = _yaw;
+//     pitch = _pitch;
+//     UpdateCameraVectors();
+// }
 
-    yaw += xOffset;
-    pitch += yOffset;
 
-    pitch = std::clamp(pitch, -89.0f, 89.0f);
 
-    UpdateCameraVectors();
-}
 
-void N::Camera::UpdateCameraVectors()
-{
-    glm::vec3 direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front = glm::normalize(direction);
 
-    right = glm::normalize(glm::cross(front, worldUp));
-    up = glm::normalize(glm::cross(right, front));
-
-    straightFront = glm::normalize(glm::cross(right, worldUp));
-}

@@ -4,5 +4,9 @@
 
 namespace Nullity
 {
-	void WorldObjectSystem(entt::registry& registry);
+	class System 
+	{
+	public:
+		virtual void Update() = 0;
+	};
 }
