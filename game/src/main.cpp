@@ -17,10 +17,11 @@ int main()
     NE::EditorInit();
 #endif
 
-    N::Entity camera(N::registry);
-    camera.Add<N::Camera>()
-          .Add<Transform>()
-          .Add<Camera_Controller>();
+    // N::Entity camera(N::registry);
+    // camera.Add<DisplayName>("camera")
+    //       .Add<Camera>()
+    //       .Add<Transform>()
+    //       .Add<Camera_Controller>();
 
     N::Entity dirt(N::registry);
     dirt.Add<DisplayName>("dirt")
@@ -33,7 +34,9 @@ int main()
     player.Add<DisplayName>("player")
           .Add<Transform>()
           .Add<Player>()
-          .Add<Velocity>();
+          .Add<Velocity>()
+          .Add<Camera>()
+          .Add<Camera_Controller>();
 
 
     N::sys_Camera c;

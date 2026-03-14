@@ -6,9 +6,9 @@ using namespace Nullity::Components;
 
 void PlayerUpdate()
 {
-    auto view = N::registry.view<Transform, Velocity, Player, N::Camera, Transform>();
+    auto view = N::registry.view<Transform, Velocity, Player, Camera, Camera_Controller>();
 
-    for (auto [entity, cmp_transform, cmp_velocity, cmp_player, cam, cam_tform] : view.each())
+    for (auto [entity, cmp_transform, cmp_velocity, cmp_player, cam, cam_control] : view.each())
     {
         cmp_player.moveDir = glm::vec3(0.0f);
         cmp_velocity.velocity = glm::vec3(0.0f, cmp_velocity.velocity.y, 0.0f);
@@ -46,10 +46,10 @@ void PlayerUpdate()
         cmp_velocity.velocity.y += cmp_player.gravity * N::Time::deltaTime;
         cmp_transform.position += cmp_velocity.velocity * N::Time::deltaTime;
 
-        if (cmp_transform.position.y <= 1.0f)
+        if (cmp_transform.position.y - cmp_player.bodyHeight <= 1.0f)
         {
             cmp_player.grounded = true;
-            cmp_transform.position.y = 1.0f;
+            cmp_transform.position.y = 1.0f + cmp_player.bodyHeight;
             cmp_velocity.velocity.y = 0.0f;
         }
         else
@@ -57,7 +57,7 @@ void PlayerUpdate()
             cmp_player.grounded = false;
         }
 
-        cam_tform.position = glm::vec3(cmp_transform.position.x, cmp_transform.position.y + cmp_player.bodyHeight, cmp_transform.position.z);
+        // cam_tform.position = glm::vec3(cmp_transform.position.x, cmp_transform.position.y + cmp_player.bodyHeight, cmp_transform.position.z);
     }
 }
 
@@ -74,7 +74,7 @@ void ProcessCameraMovement(float xOffset, float yOffset, Camera_Controller& cam_
 
 void CameraControls()
 {
-    auto view = N::registry.view<Transform, Camera_Controller, N::Camera>();
+    auto view = N::registry.view<Transform, Camera_Controller, Camera>();
     
     for (auto [entity, cam_tform, cam_control, cam] : view.each())
     {

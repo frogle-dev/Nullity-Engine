@@ -51,7 +51,6 @@ void N::EnterFrame()
     Time::msPerFrame = Time::deltaTime * 1000;
     Time::fps = 1000 / Time::msPerFrame;
 
-
     framebuffer.Bind();
     glViewport(0,0, viewRes.x, viewRes.y);
     glClearColor(0.2f, 0.3f, 0.6f, 1.0f);

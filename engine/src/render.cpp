@@ -1,10 +1,12 @@
 #include "render.hpp"
 #include "camera.hpp"
-#include "engine.hpp"
+#include "core.hpp"
+#include "textures.hpp"
 #include "components.hpp"
 
 #include <entt/entt.hpp>
 
+#include <iostream>
 namespace N = Nullity;
 using namespace Nullity::Components;
 
@@ -28,7 +30,7 @@ void N::WorldObjectSystem()
     for (auto [entity, cmp_object, cmp_transform, cmp_shader] : view.each())
     {
         cmp_shader.shader.use();
-        
+
         cmp_object.modelMatrix = glm::mat4(1.0f);
         cmp_object.modelMatrix = glm::translate(cmp_object.modelMatrix, cmp_transform.position);
         cmp_object.modelMatrix = glm::rotate(cmp_object.modelMatrix, glm::radians(cmp_transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));

@@ -12,7 +12,7 @@ namespace N = Nullity;
 
 void N::sys_Camera::Update()
 {
-    auto view = N::registry.view<Camera, Components::Transform>();
+    auto view = N::registry.view<Components::Camera, Components::Transform>();
 
     for (auto [entity, cam, t] : view.each())
     {
@@ -29,7 +29,7 @@ void N::sys_Camera::Update()
     }
 }
 
-glm::mat4 N::GetCameraViewMatrix(const Camera& cam, const Components::Transform& t)
+glm::mat4 N::GetCameraViewMatrix(const Components::Camera& cam, const Components::Transform& t)
 {
     return glm::lookAt(
         t.position,
@@ -37,21 +37,5 @@ glm::mat4 N::GetCameraViewMatrix(const Camera& cam, const Components::Transform&
         cam.up
     );
 }
-
-// N::Camera::Camera(glm::vec3 _position, glm::vec3 _up, float _yaw, float _pitch)
-// {
-//     front = glm::vec3(0.0f, 0.0f, -1.0f);
-//     sensitivity = def_sensitivity;
-//     fov = def_fov;
-//
-//     position = _position;
-//     worldUp = _up;
-//     yaw = _yaw;
-//     pitch = _pitch;
-//     UpdateCameraVectors();
-// }
-
-
-
 
 
