@@ -17,12 +17,6 @@ int main()
     NE::EditorInit();
 #endif
 
-    // N::Entity camera(N::registry);
-    // camera.Add<DisplayName>("camera")
-    //       .Add<Camera>()
-    //       .Add<Transform>()
-    //       .Add<Camera_Controller>();
-
     N::Entity dirt(N::registry);
     dirt.Add<DisplayName>("dirt")
         .Add<ObjectShader>(N::Data::unlitShader)
